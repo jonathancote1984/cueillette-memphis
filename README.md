@@ -42,6 +42,21 @@ ouvrez dans Chrome → « Ajouter à l'écran d'accueil ».
 | `img/especes/` | Photos des 21 espèces (pré-cachées par le SW, offline) |
 | `scripts/telecharger_photos.py` | Re-télécharge les photos depuis Wikimedia Commons |
 
+## 🧪 Gérer vos variétés + IA
+
+**Onglet Identifier** → bouton rose `＋` :
+- **Ajouter / modifier / supprimer** vos variétés (badge « ⭐ perso » dans le guide). Les
+  21 espèces d'origine peuvent être masquées (bouton ↩️ pour les restaurer).
+- **✨ Détails par IA** : entrez le nom (latin de préférence) → l'IA (Gemini) génère la
+  fiche complète : description, caractéristiques, confusions, saison, habitat,
+  comestibilité. **Clé gratuite** : aistudio.google.com/apikey → section « 🔑 Clé Gemini »
+  dans la feuille d'ajout. La clé reste sur votre téléphone.
+- **🔎 Chercher une photo** : trouve automatiquement une photo libre sur Wikimedia
+  Commons et l'embarque (hors-ligne). **🎨 Illustration IA** : tente une génération
+  d'image (selon les capacités de votre clé).
+
+Vos variétés sont stockées localement (IndexedDB) et incluses dans l'export JSON.
+
 ## 📷 Photos des champignons
 
 Chaque espèce du guide affiche une photo réelle (vignette + grande image dans le détail),
