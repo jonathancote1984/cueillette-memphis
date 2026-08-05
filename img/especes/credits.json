@@ -1,0 +1,149 @@
+{
+  "chanterelle": {
+    "fichier": "img/especes/chanterelle.jpg",
+    "espece": "Cantharellus cibarius",
+    "auteur": "Jebulon",
+    "licence": "CC0",
+    "page": "https://commons.wikimedia.org/wiki/File:Girolles_Viktualienmarkt_Munich.jpg"
+  },
+  "chanterelle-tube": {
+    "fichier": "img/especes/chanterelle-tube.jpg",
+    "espece": "Craterellus tubaeformis",
+    "auteur": "Wkee4ager",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Cortinarius_rubellus_with_Craterellus_tubaeformis.jpg"
+  },
+  "cepe": {
+    "fichier": "img/especes/cepe.jpg",
+    "espece": "Boletus edulis",
+    "auteur": "Achim Lammerts (Syntaxys)",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:2025-10-11_D500-0940_Achim-Lammerts_Boletus-edulis-mit-Laccaria-amethystina.jpg"
+  },
+  "bolet-bai": {
+    "fichier": "img/especes/bolet-bai.jpg",
+    "espece": "Imleria badia",
+    "auteur": "Achim Lammerts (Syntaxys)",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:2025-11-04_D500-1630_Achim-Lammerts_Imleria-badia.jpg"
+  },
+  "pied-mouton": {
+    "fichier": "img/especes/pied-mouton.jpg",
+    "espece": "Hydnum umbilicatum",
+    "auteur": "This image was created by user BlueCanoe at Mushroom Observer, a source for mycological images.You c",
+    "licence": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:2011-11-15_Hydnum_umbilicatum_Peck_182772.jpg"
+  },
+  "morille": {
+    "fichier": "img/especes/morille.jpg",
+    "espece": "Morchella esculenta",
+    "auteur": "Achim Lammerts (Syntaxys)",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:2026-04-04_Z5-3750E_Achim-Lammerts_Morchella-esculenta.jpg"
+  },
+  "pleurote": {
+    "fichier": "img/especes/pleurote.jpg",
+    "espece": "Pleurotus ostreatus",
+    "auteur": "Zinnmann",
+    "licence": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:20210718_Pleurotus_ostreatus_116-138.jpg"
+  },
+  "coprin": {
+    "fichier": "img/especes/coprin.jpg",
+    "espece": "Coprinus comatus",
+    "auteur": "Agnes Monkelbaan",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Geschubde_inktzwam_(Coprinus_comatus)._Locatie,_Paddenstoelenreservaat._11-10-2021._(actm.)_01.jpg"
+  },
+  "lepiote": {
+    "fichier": "img/especes/lepiote.jpg",
+    "espece": "Macrolepiota procera",
+    "auteur": "George Chernilevsky",
+    "licence": "CC BY 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Macrolepiota_procera_2025_G1.jpg"
+  },
+  "amanite-rougissante": {
+    "fichier": "img/especes/amanite-rougissante.jpg",
+    "espece": "Amanita rubescens",
+    "auteur": "Flocci Nivis",
+    "licence": "CC BY 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:20210710_Amanita_rubescens_01.jpg"
+  },
+  "bolet-amer": {
+    "fichier": "img/especes/bolet-amer.jpg",
+    "espece": "Tylopilus felleus",
+    "auteur": "Björn S...",
+    "licence": "CC BY-SA 2.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Tylopilus_felleus_(36878337253)_(2).jpg"
+  },
+  "tue-mouches": {
+    "fichier": "img/especes/tue-mouches.jpg",
+    "espece": "Amanita muscaria",
+    "auteur": "Petar Milošević",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Rde%C4%8Da_mu%C5%A1nica_(Amanita_muscaria).jpg"
+  },
+  "panthere": {
+    "fichier": "img/especes/panthere.jpg",
+    "espece": "Amanita pantherina",
+    "auteur": "Tomasz Sobczak",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Amanita_pantherina_ts1.jpg"
+  },
+  "entolome": {
+    "fichier": "img/especes/entolome.jpg",
+    "espece": "Entoloma sinuatum",
+    "auteur": "Jose Angel Urquia Goitia",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Entoloma_sinuatum_4.jpg"
+  },
+  "paxille": {
+    "fichier": "img/especes/paxille.jpg",
+    "espece": "Paxillus involutus",
+    "auteur": "Florstein (Telegram:WikiPhoto.Space)",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Paxillus_Involutus_LO_(img1).jpg"
+  },
+  "fausse-chanterelle": {
+    "fichier": "img/especes/fausse-chanterelle.jpg",
+    "espece": "Hygrophoropsis aurantiaca",
+    "auteur": "Stephan van Helden",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Falscher_Pfifferling_(Hygrophoropsis_aurantiaca)_nahe_der_Silberquelle_an_der_Stra%C3%9Fe_vom_Silberhaus_nach_Nagel.jpg"
+  },
+  "phalloide": {
+    "fichier": "img/especes/phalloide.jpg",
+    "espece": "Amanita phalloides",
+    "auteur": "George Chernilevsky",
+    "licence": "CC BY 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Amanita_phalloides_2025_G3.jpg"
+  },
+  "vireuse": {
+    "fichier": "img/especes/vireuse.jpg",
+    "espece": "Amanita virosa",
+    "auteur": "Cephas",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Amanita_virosa_UL_01.jpg"
+  },
+  "galerine": {
+    "fichier": "img/especes/galerine.jpg",
+    "espece": "Galerina marginata",
+    "auteur": "Alan Rockefeller",
+    "licence": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Galerina_marginata_Point_Reyes.jpg"
+  },
+  "gyromitre": {
+    "fichier": "img/especes/gyromitre.jpg",
+    "espece": "Gyromitra esculenta",
+    "auteur": "Lukas from London, England",
+    "licence": "CC BY-SA 2.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Gyromitra_esculenta_(40695492465).jpg"
+  },
+  "lepiote-brunatre": {
+    "fichier": "img/especes/lepiote-brunatre.jpg",
+    "espece": "Lepiota brunneoincarnata",
+    "auteur": "jacilluch",
+    "licence": "CC BY-SA 2.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Lepiota_sp._-_tama%C3%B1o_peque%C3%B1o_(15546702520).jpg"
+  }
+}
