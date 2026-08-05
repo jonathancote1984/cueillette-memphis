@@ -14,9 +14,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --creme:#FFF4E0; --noir:#1F1A17; --blanc:#FFFDF5;
-  --rouge:#FF4D6D; --jaune:#FFD166; --bleu:#4CC9F0; --rose:#FF70A6;
-  --vert:#06D6A0; --orange:#FF9F1C; --gris:#B8B0A0;
+  --creme:#F3E8D5; --noir:#241A0F; --blanc:#FDF6E7;
+  --rouge:#B3261E; --jaune:#D9A441; --bleu:#8A5A2B; --rose:#C1502E;
+  --vert:#6F8F3E; --orange:#B45309; --gris:#A89882;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;}
@@ -25,13 +25,13 @@ body{
   background:var(--creme); color:var(--noir);
   padding-bottom:calc(96px + env(safe-area-inset-bottom));
   font-size:16px;
-  background-image:radial-gradient(circle, rgba(31,26,23,.10) 2px, transparent 2.4px);
+  background-image:radial-gradient(circle, rgba(36,26,15,.10) 2px, transparent 2.4px);
   background-size:28px 28px;
 }
 /* ===== Header Memphis ===== */
 header{
   position:sticky; top:0; z-index:50;
-  background:var(--jaune);
+  background:linear-gradient(135deg,#9A4A12,#D9A441);
   border-bottom:3px solid var(--noir);
   padding:12px 14px 0;
   overflow:hidden;
@@ -123,7 +123,7 @@ h2.titre-vue .ico{font-size:20px;}
 .item .vig{
   width:88px; min-height:92px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center; font-size:36px;
-  background:repeating-linear-gradient(45deg, var(--bleu), var(--bleu) 8px, var(--blanc) 8px, var(--blanc) 16px);
+  background:repeating-linear-gradient(45deg, var(--jaune), var(--jaune) 8px, var(--blanc) 8px, var(--blanc) 16px);
   border-right:3px solid var(--noir);
 }
 .item .vig img{width:100%; height:100%; object-fit:cover;}
@@ -198,13 +198,13 @@ h2.titre-vue .ico{font-size:20px;}
   padding:12px 14px; font-size:14px; line-height:1.5; font-weight:500;
   box-shadow:4px 4px 0 var(--noir); margin-bottom:16px; position:relative; overflow:hidden;
 }
-.alerte-rouge{background:#FFE3E8;}
+.alerte-rouge{background:#F6DFD2;}
 .alerte-rouge::after{
   content:''; position:absolute; right:-14px; top:-14px; width:52px; height:52px;
   background:repeating-linear-gradient(45deg, var(--rouge) 0 6px, transparent 6px 12px);
   border:3px solid var(--noir); border-radius:50%;
 }
-.alerte-orange{background:#FFE9CC;}
+.alerte-orange{background:#F4E3C3;}
 .alerte-orange::after{
   content:''; position:absolute; right:-10px; bottom:-10px; width:34px; height:34px;
   background:var(--orange); border:3px solid var(--noir); transform:rotate(14deg);
@@ -305,18 +305,18 @@ h2.titre-vue .ico{font-size:20px;}
 
 <header>
   <div class="formes" aria-hidden="true">
-    <svg class="f-1" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="#1F1A17" stroke-width="5" stroke-dasharray="7 6"/></svg>
-    <svg class="f-2" viewBox="0 0 30 30"><path d="M15 30 A15 15 0 0 1 15 0 Z" fill="#4CC9F0" stroke="#1F1A17" stroke-width="4"/></svg>
-    <svg class="f-3" viewBox="0 0 26 26"><path d="M13 2 L25 24 L1 24 Z" fill="#FF4D6D" stroke="#1F1A17" stroke-width="4"/></svg>
+    <svg class="f-1" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="#241A0F" stroke-width="5" stroke-dasharray="7 6"/></svg>
+    <svg class="f-2" viewBox="0 0 30 30"><path d="M15 30 A15 15 0 0 1 15 0 Z" fill="#8A5A2B" stroke="#241A0F" stroke-width="4"/></svg>
+    <svg class="f-3" viewBox="0 0 26 26"><path d="M13 2 L25 24 L1 24 Z" fill="#B45309" stroke="#241A0F" stroke-width="4"/></svg>
   </div>
   <div class="titre-ligne">
     <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true">
-      <rect x="4" y="4" width="56" height="56" rx="16" fill="#FFD166" stroke="#1F1A17" stroke-width="4"/>
-      <path d="M15 40 Q15 19 32 19 Q49 19 49 40 Z" fill="#FF4D6D" stroke="#1F1A17" stroke-width="3"/>
-      <circle cx="24" cy="27" r="3" fill="#FFF4E0"/>
-      <circle cx="33" cy="22" r="3" fill="#FFF4E0"/>
-      <circle cx="41" cy="29" r="3" fill="#FFF4E0"/>
-      <rect x="27" y="37" width="10" height="16" rx="4" fill="#FFF4E0" stroke="#1F1A17" stroke-width="3"/>
+      <rect x="4" y="4" width="56" height="56" rx="16" fill="#D9A441" stroke="#241A0F" stroke-width="4"/>
+      <path d="M15 40 Q15 19 32 19 Q49 19 49 40 Z" fill="#B3261E" stroke="#241A0F" stroke-width="3"/>
+      <circle cx="24" cy="27" r="3" fill="#FDF6E7"/>
+      <circle cx="33" cy="22" r="3" fill="#FDF6E7"/>
+      <circle cx="41" cy="29" r="3" fill="#FDF6E7"/>
+      <rect x="27" y="37" width="10" height="16" rx="4" fill="#FDF6E7" stroke="#241A0F" stroke-width="3"/>
     </svg>
     <div>
       <h1>Cueillette Québec</h1>
@@ -325,7 +325,7 @@ h2.titre-vue .ico{font-size:20px;}
     <span class="pastille" id="badge" title="Cueillettes enregistrées">0</span>
   </div>
   <svg class="zigzag" viewBox="0 0 1200 14" preserveAspectRatio="none" aria-hidden="true">
-    <polygon points="0,14 30,0 60,14 90,0 120,14 150,0 180,14 210,0 240,14 270,0 300,14 330,0 360,14 390,0 420,14 450,0 480,14 510,0 540,14 570,0 600,14 630,0 660,14 690,0 720,14 750,0 780,14 810,0 840,14 870,0 900,14 930,0 960,14 990,0 1020,14 1050,0 1080,14 1110,0 1140,14 1170,0 1200,14 1200,14 0,14" fill="#1F1A17"/>
+    <polygon points="0,14 30,0 60,14 90,0 120,14 150,0 180,14 210,0 240,14 270,0 300,14 330,0 360,14 390,0 420,14 450,0 480,14 510,0 540,14 570,0 600,14 630,0 660,14 690,0 720,14 750,0 780,14 810,0 840,14 870,0 900,14 930,0 960,14 990,0 1020,14 1050,0 1080,14 1110,0 1140,14 1170,0 1200,14 1200,14 0,14" fill="#241A0F"/>
   </svg>
 </header>
 
@@ -548,6 +548,18 @@ h2.titre-vue .ico{font-size:20px;}
   <div class="grille2">
     <button class="btn btn-vert btn-plein" id="e-save">💾 Enregistrer</button>
     <button class="btn btn-gris btn-plein" id="e-cancel">Annuler</button>
+  </div>
+</section>
+
+<!-- ===== FEUILLE RESTAURATION SÉLECTIVE ===== -->
+<section class="feuille" id="sheet-restaurer">
+  <div class="poignee"></div>
+  <h3>↩️ Restaurer des espèces</h3>
+  <p class="note" style="margin:-4px 0 12px">Cochez les espèces à faire réapparaître dans le guide, puis confirmez.</p>
+  <div id="restaurer-liste"></div>
+  <div class="grille2">
+    <button class="btn btn-vert btn-plein" id="restaurer-ok">✅ Restaurer (0)</button>
+    <button class="btn btn-gris btn-plein" id="restaurer-non">Annuler</button>
   </div>
 </section>
 
@@ -974,7 +986,7 @@ function rendreGuide() {
       '<button class="btn-suppr-item" title="Supprimer ou masquer" onclick="event.stopPropagation();supprimerEspece(\'' + e.id + '\',' + perso + ')">🗑️</button>' +
       '</div>';
   }).join('') + (Etat.cachees.length
-    ? '<button class="btn btn-gris btn-plein" onclick="restaurerGuide()" style="margin-top:2px">↩️ Restaurer les espèces d\'origine (' + Etat.cachees.length + ' masquée' + (Etat.cachees.length > 1 ? 's' : '') + ')</button>'
+    ? '<button class="btn btn-gris btn-plein" onclick="ouvrirSheetRestaurer()" style="margin-top:2px">↩️ Restaurer des espèces (' + Etat.cachees.length + ' masquée' + (Etat.cachees.length > 1 ? 's' : '') + ')</button>'
     : '');
 }
 $('g-recherche').addEventListener('input', e => { Etat.recherche = e.target.value; rendreGuide(); });
@@ -1166,12 +1178,35 @@ async function supprimerEspece(id, perso) {
   }
   await recharger();
 }
-async function restaurerGuide() {
-  if (!await confirmer('Restaurer les espèces d\'origine masquées ? Vos variétés perso restent.', '↩️ Restauration')) return;
-  await Stockage.vider('caches');
-  toast('Guide d\'origine restauré ✅');
-  await recharger();
+
+/* --- Restauration sélective --- */
+function ouvrirSheetRestaurer() {
+  const masquees = ESPECES.filter(e => Etat.cachees.includes(e.id));
+  $('restaurer-liste').innerHTML = masquees.length ? masquees.map(e =>
+    '<label class="item-restaurer" style="display:flex;align-items:center;gap:10px;padding:9px;border:3px solid var(--noir);border-radius:14px 14px 14px 4px;margin-bottom:10px;background:var(--blanc);cursor:pointer">' +
+    '<input type="checkbox" class="chk-restaurer" value="' + e.id + '" checked style="width:22px;height:22px;flex-shrink:0;accent-color:var(--orange)">' +
+    '<span class="vig" style="width:50px;min-height:50px;font-size:22px;border-radius:10px;border:2.5px solid var(--noir);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;background:repeating-linear-gradient(45deg,var(--jaune),var(--jaune) 6px,var(--blanc) 6px,var(--blanc) 12px)">' +
+    (e.img ? '<img src="' + e.img + '" style="width:100%;height:100%;object-fit:cover" alt="">' : '🍄') + '</span>' +
+    '<span style="font-weight:700;font-size:14px">' + esc(e.nom) + '</span>' +
+    '</label>'
+  ).join('') : '<div class="vide-etat" style="padding:10px">Aucune espèce masquée.</div>';
+  majCompteurRestaurer();
+  ouvrirFeuille('sheet-restaurer');
 }
+function majCompteurRestaurer() {
+  const n = document.querySelectorAll('.chk-restaurer:checked').length;
+  $('restaurer-ok').textContent = '✅ Restaurer (' + n + ')';
+  $('restaurer-ok').disabled = n === 0;
+}
+$('restaurer-liste').addEventListener('change', majCompteurRestaurer);
+$('restaurer-non').addEventListener('click', fermerFeuilles);
+$('restaurer-ok').addEventListener('click', async () => {
+  const ids = [...document.querySelectorAll('.chk-restaurer:checked')].map(c => c.value);
+  for (const id of ids) await Stockage.effacer('caches', id);
+  toast(ids.length + ' espèce' + (ids.length > 1 ? 's' : '') + ' restaurée' + (ids.length > 1 ? 's' : '') + ' ✅');
+  fermerFeuilles();
+  await recharger();
+});
 
 /* --- IA : détails Gemini --- */
 async function genererDetailsIA(nom, latin) {
@@ -1310,7 +1345,7 @@ $('e-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { 
 $('e-photo-zone').addEventListener('click', () => { if (photoEspece) { photoEspece = null; afficherPhoto('e-photo-zone', null); toast('Photo retirée'); } });
 
 /* ================= Stats ================= */
-const COULEURS_MOIS = ['#FF4D6D', '#FF9F1C', '#FFD166', '#06D6A0', '#4CC9F0', '#FF70A6', '#FF4D6D', '#FF9F1C', '#FFD166', '#06D6A0', '#4CC9F0', '#FF70A6'];
+const COULEURS_MOIS = ['#B3261E', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#C1502E', '#B3261E', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#C1502E'];
 function rendreStats() {
   const totalKg = Etat.cueillettes.reduce((a, c) => a + (c.poids || 0), 0);
   const dernier = Etat.cueillettes.length ? [...Etat.cueillettes].sort((a, b) => b.date.localeCompare(a.date))[0] : null;
@@ -1345,7 +1380,7 @@ function rendreStats() {
   const maxM = Math.max(...mois, 1);
   $('st-mois').innerHTML = '<div class="mois-grille">' +
     ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'].map((lab, i) =>
-      '<div class="mois-col"><div class="tige" style="height:' + (mois[i] > 0 ? Math.max(6, mois[i] / maxM * 100) : 4) + '%;background:' + (mois[i] > 0 ? COULEURS_MOIS[i] : '#D9CFBC') + '"></div><span class="lab">' + lab + '</span></div>'
+      '<div class="mois-col"><div class="tige" style="height:' + (mois[i] > 0 ? Math.max(6, mois[i] / maxM * 100) : 4) + '%;background:' + (mois[i] > 0 ? COULEURS_MOIS[i] : '#D8C9AC') + '"></div><span class="lab">' + lab + '</span></div>'
     ).join('') + '</div>';
 }
 

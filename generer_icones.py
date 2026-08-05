@@ -4,13 +4,13 @@ rouge à pois crème, contours noirs épais. Usage : python generer_icones.py"""
 import os
 from PIL import Image, ImageDraw
 
-JAUNE = (255, 209, 102)
-ROUGE = (255, 77, 109)
-BLEU = (76, 201, 240)
-ROSE = (255, 112, 166)
-VERT = (6, 214, 160)
-CREME = (255, 244, 224)
-NOIR = (31, 26, 23)
+JAUNE = (217, 164, 65)    # ambre
+ROUGE = (179, 38, 30)     # rouille
+BLEU = (138, 90, 43)      # brun cuir
+ROSE = (193, 80, 46)      # terracotta
+VERT = (111, 143, 62)     # olive
+CREME = (253, 246, 231)   # crème chaud
+NOIR = (36, 26, 15)       # brun-noir
 
 def fond(d, taille):
     d.rectangle([0, 0, taille, taille], fill=JAUNE)
