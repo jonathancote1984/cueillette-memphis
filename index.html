@@ -215,6 +215,22 @@ h2.titre-vue .ico{font-size:20px;}
   opacity:0; pointer-events:none; transition:opacity .25s;
 }
 .voile.visible{opacity:1; pointer-events:auto;}
+/* ===== Confirmation Memphis (remplace window.confirm) ===== */
+.boite-confirm{
+  position:fixed; left:50%; top:45%; z-index:80;
+  transform:translate(-50%,-50%) scale(.88); opacity:0; pointer-events:none;
+  background:var(--blanc); border:3px solid var(--noir); border-radius:20px 20px 20px 6px;
+  box-shadow:6px 6px 0 var(--noir); padding:20px 18px; width:min(92%, 380px);
+  transition:transform .22s cubic-bezier(.2,1.5,.4,1), opacity .2s;
+  text-align:center;
+}
+.boite-confirm.visible{transform:translate(-50%,-50%) scale(1); opacity:1; pointer-events:auto;}
+.boite-confirm h3{
+  margin:0 0 8px; font-size:16.5px; font-weight:700; display:inline-block;
+  background:var(--jaune); border:3px solid var(--noir); border-radius:12px 12px 12px 4px;
+  padding:4px 14px; transform:rotate(-1.5deg); box-shadow:3px 3px 0 var(--noir);
+}
+.boite-confirm p{margin:12px 0 18px; font-size:14.5px; font-weight:500; line-height:1.55;}
 .feuille{
   position:fixed; left:8px; right:8px; bottom:8px; z-index:70;
   max-width:640px; margin:0 auto;
@@ -370,6 +386,17 @@ h2.titre-vue .ico{font-size:20px;}
 </nav>
 
 <div class="voile" id="voile"></div>
+
+<!-- ===== Confirmation Memphis ===== -->
+<div class="voile" id="voile-confirm"></div>
+<div class="boite-confirm" id="boite-confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-titre" aria-describedby="confirm-message">
+  <h3 id="confirm-titre">⚠️ Attention</h3>
+  <p id="confirm-message"></p>
+  <div class="grille2">
+    <button class="btn btn-gris" id="confirm-non">Annuler</button>
+    <button class="btn btn-rouge" id="confirm-oui">Oui, continuer</button>
+  </div>
+</div>
 
 <!-- ===== FEUILLE SPOT ===== -->
 <section class="feuille" id="sheet-spot">
@@ -780,6 +807,26 @@ function ouvrirFeuille(id) {
   $('voile').classList.add('visible');
 }
 
+/* ================= Confirmation Memphis ================= */
+let resolveConfirm = null;
+function confirmer(message, titre) {
+  return new Promise(ok => {
+    $('confirm-titre').textContent = titre || '⚠️ Attention';
+    $('confirm-message').textContent = message;
+    $('boite-confirm').classList.add('visible');
+    $('voile-confirm').classList.add('visible');
+    resolveConfirm = ok;
+    $('confirm-non').focus();
+  });
+}
+function fermerConfirm() {
+  $('boite-confirm').classList.remove('visible');
+  $('voile-confirm').classList.remove('visible');
+}
+$('confirm-oui').addEventListener('click', () => { const ok = resolveConfirm; fermerConfirm(); if (ok) ok(true); });
+$('confirm-non').addEventListener('click', () => { const ok = resolveConfirm; fermerConfirm(); if (ok) ok(false); });
+$('voile-confirm').addEventListener('click', () => { const ok = resolveConfirm; fermerConfirm(); if (ok) ok(false); });
+
 /* ================= Photos ================= */
 function compresser(dataUrl, cb) {
   const img = new Image();
@@ -852,7 +899,7 @@ function editerSpot(id) {
   ouvrirFeuille('sheet-spot');
 }
 async function supprimerSpot(id) {
-  if (!confirm('Supprimer ce spot ? (les cueillettes liées seront conservées)')) return;
+  if (!await confirmer('Supprimer ce spot ? Les cueillettes liées seront conservées.', '🗑️ Suppression')) return;
   await Stockage.effacer('spots', id);
   toast('Spot supprimé');
   await recharger();
@@ -1020,7 +1067,7 @@ function editerCueillette(id) {
   ouvrirFeuille('sheet-cueillette');
 }
 async function supprimerCueillette(id) {
-  if (!confirm('Supprimer cette cueillette ?')) return;
+  if (!await confirmer('Supprimer cette cueillette ?', '🗑️ Suppression')) return;
   await Stockage.effacer('cueillettes', id);
   toast('Cueillette supprimée');
   await recharger();
@@ -1109,18 +1156,18 @@ $('e-save').addEventListener('click', async () => {
 });
 async function supprimerEspece(id, perso) {
   if (perso) {
-    if (!confirm('Supprimer définitivement cette variété ?')) return;
+    if (!await confirmer('Supprimer définitivement cette variété ? Cette action est irréversible.', '🗑️ Suppression')) return;
     await Stockage.effacer('especes', id);
     toast('Variété supprimée');
   } else {
-    if (!confirm('Masquer cette espèce du guide ? (restaurable avec le bouton ↩️)')) return;
+    if (!await confirmer('Masquer cette espèce du guide ? Vous pourrez la restaurer avec le bouton ↩️.', '🙈 Masquer')) return;
     await Stockage.ecrire('caches', { id });
     toast('Espèce masquée');
   }
   await recharger();
 }
 async function restaurerGuide() {
-  if (!confirm('Restaurer les espèces d\'origine masquées ? (vos variétés perso restent)')) return;
+  if (!await confirmer('Restaurer les espèces d\'origine masquées ? Vos variétés perso restent.', '↩️ Restauration')) return;
   await Stockage.vider('caches');
   toast('Guide d\'origine restauré ✅');
   await recharger();
@@ -1133,7 +1180,7 @@ async function genererDetailsIA(nom, latin) {
   const prompt = 'Tu es un mycologue expert du Québec. Rédige une fiche pour le champignon « ' + nom + ' »' +
     (latin ? ' (nom latin : ' + latin + ')' : '') +
     '. Réponds UNIQUEMENT en JSON valide, structure exacte : {"nom":"nom français","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","prudence":true|false,"saison":"période de fructification","habitat":"habitat type","description":"2-3 phrases","caracteristiques":["4 puces concrètes d\'identification : chapeau, lames/pores/aiguillons, pied, odeur/chair"],"confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Respecte les accents et le français du Québec.';
-  const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(cle), {
+  const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' + encodeURIComponent(cle), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -1218,23 +1265,30 @@ $('e-photo-commons').addEventListener('click', async () => {
 });
 
 /* --- Photo : illustration IA (Gemini image, si la clé le permet) --- */
+const MODELES_IMAGE = ['gemini-2.5-flash-image', 'gemini-3.1-flash-image', 'nano-banana-pro-preview'];
 async function genererImageIA(nom, latin) {
   const cle = cleIA();
   if (!cle) throw new Error('PAS_DE_CLE');
   const prompt = 'Illustration photographique réaliste du champignon « ' + nom + ' » (' + (latin || 'espèce indéterminée') + '), vue de côté dans son habitat forestier naturel du Québec, éclairage naturel.';
-  const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=' + encodeURIComponent(cle), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
-    })
-  });
-  if (!rep.ok) throw new Error('API ' + rep.status);
-  const d = await rep.json();
-  const part = (d.candidates?.[0]?.content?.parts || []).find(p => p.inlineData);
-  if (!part) throw new Error('PAS_IMAGE');
-  return 'data:' + part.inlineData.mimeType + ';base64,' + part.inlineData.data;
+  let derniereErreur = null;
+  for (const modele of MODELES_IMAGE) {
+    try {
+      const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + modele + ':generateContent?key=' + encodeURIComponent(cle), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+        })
+      });
+      if (!rep.ok) { derniereErreur = new Error('API ' + rep.status); continue; }
+      const d = await rep.json();
+      const part = (d.candidates?.[0]?.content?.parts || []).find(p => p.inlineData);
+      if (!part) { derniereErreur = new Error('PAS_IMAGE'); continue; }
+      return 'data:' + part.inlineData.mimeType + ';base64,' + part.inlineData.data;
+    } catch (e) { derniereErreur = e; }
+  }
+  throw derniereErreur || new Error('PAS_IMAGE');
 }
 $('e-photo-ia').addEventListener('click', async () => {
   if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (section Clé IA)'); return; }
@@ -1312,7 +1366,7 @@ $('st-import-fichier').addEventListener('change', async e => {
   try {
     const data = JSON.parse(await f.text());
     if (!data || !Array.isArray(data.spots) || !Array.isArray(data.cueillettes)) throw new Error('forme');
-    if (!confirm('Remplacer TOUTES les données actuelles par celles du fichier ?')) return;
+    if (!await confirmer('Remplacer TOUTES les données actuelles par celles du fichier ?', '📥 Import')) return;
     await Stockage.vider('spots'); await Stockage.vider('cueillettes');
     for (const s of data.spots) await Stockage.ecrire('spots', s);
     for (const c of data.cueillettes) await Stockage.ecrire('cueillettes', c);
@@ -1324,8 +1378,8 @@ $('st-import-fichier').addEventListener('change', async e => {
   e.target.value = '';
 });
 $('st-effacer').addEventListener('click', async () => {
-  if (!confirm('Tout effacer ? Cette action est IRRÉVERSIBLE.')) return;
-  if (!confirm('Vraiment sûr ? Exportez d\'abord si nécessaire (bouton Exporter).')) return;
+  if (!await confirmer('Tout effacer ? Cette action est IRRÉVERSIBLE. Exportez d\'abord si nécessaire.', '🗑️ Tout effacer')) return;
+  if (!await confirmer('Vraiment sûr ? Pensez à exporter vos données avant (bouton Exporter).', '⚠️ Dernière vérification')) return;
   await Stockage.vider('spots'); await Stockage.vider('cueillettes');
   toast('Toutes les données ont été effacées');
   await recharger();
