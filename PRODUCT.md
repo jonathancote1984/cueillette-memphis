@@ -42,7 +42,7 @@ Le carnet vit sur le téléphone, sans compte ni serveur : les données ne quitt
 
 - Nom : « Cueillette Québec — édition Memphis » (court : Cueillette).
 - Style Memphis assumé : bordures noires épaisses (3 px), coins cassés, ombres dures sans flou, formes géométriques, titres légèrement inclinés, zigzags/pois.
-- Palette AUTOMNE/TERRE : ambre `#D9A441`, rouille `#B45309`, terracotta `#C1502E`, olive `#6F8F3E`, cuir `#8A5A2B`, crème `#F3E8D5`, blanc `#FDF6E7`, noir `#241A0F`.
+- Palette AUTOMNE/TERRE : ambre `#D9A441`, rouille `#B45309`, terracotta `#B94527`, olive `#6F8F3E`, cuir `#8A5A2B`, crème `#F3E8D5`, blanc `#FDF6E7`, noir `#241A0F`.
 - Typographie : Fredoka (arrondie) avec repli système.
 - Icône : jaune à pois + champignon rouge (générée par `generer_icones.py`).
 - Jamais de boîtes système navigateur (confirm/alert) : modales stylées Memphis.

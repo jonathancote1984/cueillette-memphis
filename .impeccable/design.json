@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-08T17:01:48.028371+00:00",
+  "generatedAt": "2026-08-08T17:47:17.072157+00:00",
   "title": "Design System: Cueillette Québec — édition Memphis",
   "extensions": {
     "colorMeta": {
@@ -37,16 +37,16 @@
       "terracotta": {
         "role": "secondary",
         "displayName": "Terracotta",
-        "canonical": "#C1502E",
+        "canonical": "#B94527",
         "tonalRamp": [
-          "hsl(14 62% 15%)",
-          "hsl(14 62% 26%)",
-          "hsl(14 62% 38%)",
-          "hsl(14 62% 49%)",
-          "hsl(14 62% 61%)",
-          "hsl(14 62% 72%)",
-          "hsl(14 62% 84%)",
-          "hsl(14 62% 95%)"
+          "hsl(12 65% 15%)",
+          "hsl(12 65% 26%)",
+          "hsl(12 65% 38%)",
+          "hsl(12 65% 49%)",
+          "hsl(12 65% 61%)",
+          "hsl(12 65% 72%)",
+          "hsl(12 65% 84%)",
+          "hsl(12 65% 95%)"
         ]
       },
       "olive": {
@@ -187,16 +187,16 @@
       "vert-mesure": {
         "role": "neutral",
         "displayName": "Vert mesure (kg)",
-        "canonical": "#0E8F6B",
+        "canonical": "#0B7A55",
         "tonalRamp": [
-          "hsl(163 82% 15%)",
-          "hsl(163 82% 26%)",
-          "hsl(163 82% 38%)",
-          "hsl(163 82% 49%)",
-          "hsl(163 82% 61%)",
-          "hsl(163 82% 72%)",
-          "hsl(163 82% 84%)",
-          "hsl(163 82% 95%)"
+          "hsl(160 83% 15%)",
+          "hsl(160 83% 26%)",
+          "hsl(160 83% 38%)",
+          "hsl(160 83% 49%)",
+          "hsl(160 83% 61%)",
+          "hsl(160 83% 72%)",
+          "hsl(160 83% 84%)",
+          "hsl(160 83% 95%)"
         ]
       },
       "rose-onglet": {
@@ -217,16 +217,16 @@
       "brun-header": {
         "role": "neutral",
         "displayName": "Brun header (dégradé)",
-        "canonical": "#9A4A12",
+        "canonical": "#B05E20",
         "tonalRamp": [
-          "hsl(25 79% 15%)",
-          "hsl(25 79% 26%)",
-          "hsl(25 79% 38%)",
-          "hsl(25 79% 49%)",
-          "hsl(25 79% 61%)",
-          "hsl(25 79% 72%)",
-          "hsl(25 79% 84%)",
-          "hsl(25 79% 95%)"
+          "hsl(26 69% 15%)",
+          "hsl(26 69% 26%)",
+          "hsl(26 69% 38%)",
+          "hsl(26 69% 49%)",
+          "hsl(26 69% 61%)",
+          "hsl(26 69% 72%)",
+          "hsl(26 69% 84%)",
+          "hsl(26 69% 95%)"
         ]
       },
       "fond-alerte-rouge": {

@@ -15,7 +15,7 @@
 <style>
 :root{
   --creme:#F3E8D5; --noir:#241A0F; --blanc:#FDF6E7;
-  --rouge:#B3261E; --jaune:#D9A441; --bleu:#8A5A2B; --rose:#C1502E;
+  --rouge:#B3261E; --jaune:#D9A441; --bleu:#8A5A2B; --rose:#B94527;
   --vert:#6F8F3E; --orange:#B45309; --gris:#A89882;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -31,7 +31,7 @@ body{
 /* ===== Header Memphis ===== */
 header{
   position:sticky; top:0; z-index:50;
-  background:linear-gradient(135deg,#9A4A12,#D9A441);
+  background:linear-gradient(135deg,#B05E20,#D9A441);
   border-bottom:3px solid var(--noir);
   padding:12px 14px 0;
   overflow:hidden;
@@ -42,7 +42,7 @@ header h1{
   transform:rotate(-1.5deg); display:inline-block;
   text-shadow:2px 2px 0 var(--rose);
 }
-header .sous{margin:2px 0 0; font-size:12.5px; font-weight:600; opacity:.75;}
+header .sous{margin:2px 0 0; font-size:12.5px; font-weight:600; color:var(--blanc); opacity:.85;}
 header .pastille{
   margin-left:auto; background:var(--rouge); color:var(--blanc);
   border:3px solid var(--noir); border-radius:999px; min-width:34px; height:34px;
@@ -76,7 +76,7 @@ nav.tabs button.actif::before{
 }
 nav.tabs button:nth-child(1).actif{color:#0B6E96;}
 nav.tabs button:nth-child(2).actif{color:#B3540B;}
-nav.tabs button:nth-child(3).actif{color:#0E8F6B;}
+nav.tabs button:nth-child(3).actif{color:#0B7A55;}
 nav.tabs button:nth-child(4).actif{color:#C2185B;}
 /* ===== FAB ===== */
 .fab{
@@ -130,7 +130,7 @@ h2.titre-vue .ico{font-size:20px;}
 .item .corps{flex:1; padding:10px 12px; min-width:0;}
 .item .nom{font-weight:700; font-size:15.5px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
 .item .meta{font-size:12.5px; opacity:.75; margin-top:2px; line-height:1.5;}
-.item .mesures{font-size:14px; font-weight:700; color:#0E8F6B; margin-top:3px;}
+.item .mesures{font-size:14px; font-weight:700; color:#0B7A55; margin-top:3px;}
 .item .actions{margin-top:6px; display:flex; gap:8px;}
 /* ===== Boutons ===== */
 .btn{
@@ -142,10 +142,10 @@ h2.titre-vue .ico{font-size:20px;}
 .btn:active{transform:translate(3px,3px); box-shadow:0 0 0 var(--noir);}
 .btn-plein{width:100%; padding:13px; font-size:15.5px;}
 .btn-rouge{background:var(--rouge); color:var(--blanc);}
-.btn-bleu{background:var(--bleu); color:var(--noir);}
+.btn-bleu{background:var(--bleu); color:var(--blanc);}
 .btn-vert{background:var(--vert); color:var(--noir);}
 .btn-jaune{background:var(--jaune); color:var(--noir);}
-.btn-rose{background:var(--rose); color:var(--noir);}
+.btn-rose{background:var(--rose); color:var(--blanc);}
 .btn-gris{background:var(--gris); color:var(--noir);}
 .btn-petit{padding:7px 12px; font-size:13px; box-shadow:2px 2px 0 var(--noir);}
 /* ===== Chips filtres ===== */
@@ -264,9 +264,9 @@ h2.titre-vue .ico{font-size:20px;}
   border:3px solid var(--noir); border-radius:18px 18px 18px 5px; padding:14px 10px; text-align:center;
   box-shadow:5px 5px 0 var(--noir); background:var(--jaune);
 }
-.stat-carte:nth-child(2){background:var(--bleu);}
+.stat-carte:nth-child(2){background:var(--bleu); color:var(--blanc);}
 .stat-carte:nth-child(3){background:var(--vert);}
-.stat-carte:nth-child(4){background:var(--rose);}
+.stat-carte:nth-child(4){background:var(--rose); color:var(--blanc);}
 .stat-carte .valeur{font-size:24px; font-weight:700; margin-top:3px; line-height:1.1;}
 .stat-carte .libelle{font-size:12px; font-weight:700; opacity:.8;}
 .rang{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:3px dashed var(--noir); font-size:14px; font-weight:600;}
@@ -291,7 +291,7 @@ h2.titre-vue .ico{font-size:20px;}
 .detail-kv{font-size:14px; line-height:1.65; font-weight:500;}
 .detail-kv b{background:var(--jaune); padding:0 5px; border-radius:5px;}
 .guide-sujet{font-size:13px; font-weight:700; margin:14px 0 4px; display:inline-block;
-  background:var(--bleu); border:2.5px solid var(--noir); border-radius:8px 8px 8px 3px; padding:2px 9px;}
+  background:var(--bleu); color:var(--blanc); border:2.5px solid var(--noir); border-radius:8px 8px 8px 3px; padding:2px 9px;}
 .carac-list{margin:4px 0 0; padding-left:22px; line-height:1.7; font-size:14.5px;}
 .ligne-latin{font-style:italic; opacity:.65; font-size:13px; margin:2px 0 10px;}
 .detail-img{width:100%; max-height:280px; object-fit:cover; border:3px solid var(--noir); border-radius:16px 16px 16px 5px; box-shadow:4px 4px 0 var(--noir); margin-bottom:14px; display:block; background:var(--creme);}
@@ -374,6 +374,7 @@ h2.titre-vue .ico{font-size:20px;}
     <div class="carte"><h3 style="margin:0 0 6px">📅 Récolte par mois (kg)</h3><div id="st-mois"></div><span class="deco-tri"></span></div>
     <div class="carte">
       <h3 style="margin:0 0 10px">💾 Sauvegarde</h3>
+      <div id="st-export-alerte"></div>
       <div class="grille2">
         <button class="btn btn-bleu" id="st-export">📤 Exporter</button>
         <button class="btn btn-vert" id="st-import">📥 Importer</button>
@@ -844,7 +845,7 @@ function naviguer(vue) {
   const fab = $('fab');
   fab.classList.toggle('cache', vue === 'stats' || vue === 'detail');
   fab.textContent = vue === 'spots' ? '📍' : '＋';
-  if (vue === 'stats') rendreStats();
+  if (vue === 'stats') { rendreAlerteExport(); rendreStats(); }
   if (vue === 'guide') { rendreBandeauCle(); rendreGuide(); }
   window.scrollTo(0, 0);
 }
@@ -1043,7 +1044,7 @@ $('s-carte').addEventListener('click', () => {
 });
 $('s-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { Etat.spot.photo = d; afficherPhoto('s-photo-zone', d); }));
 $('s-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { Etat.spot.photo = d; afficherPhoto('s-photo-zone', d); }));
-$('s-photo-zone').addEventListener('click', () => { if (Etat.spot.photo) { Etat.spot.photo = null; afficherPhoto('s-photo-zone', null); toast('Photo retirée'); } });
+$('s-photo-zone').addEventListener('click', () => { if (Etat.spot.photo) { Etat.spot.photo = null; afficherPhoto('s-photo-zone', null); toast('Photo retirée'); } else ouvrirChoixPhoto(false, d => { Etat.spot.photo = d; afficherPhoto('s-photo-zone', d); }); });
 
 /* ================= Guide ================= */
 function rendreFiltres() {
@@ -1215,7 +1216,7 @@ $('c-save').addEventListener('click', async () => {
 $('c-cancel').addEventListener('click', fermerFeuilles);
 $('c-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }));
 $('c-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }));
-$('c-photo-zone').addEventListener('click', () => { if (Etat.cueillette.photo) { Etat.cueillette.photo = null; afficherPhoto('c-photo-zone', null); toast('Photo retirée'); } });
+$('c-photo-zone').addEventListener('click', () => { if (Etat.cueillette.photo) { Etat.cueillette.photo = null; afficherPhoto('c-photo-zone', null); toast('Photo retirée'); } else ouvrirChoixPhoto(false, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }); });
 
 /* ================= Variétés perso + IA ================= */
 let editEspeceId = null, photoEspece = null;
@@ -1438,7 +1439,7 @@ $('e-photo-ia').addEventListener('click', async () => {
 });
 $('e-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { photoEspece = d; afficherPhoto('e-photo-zone', d); }));
 $('e-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { photoEspece = d; afficherPhoto('e-photo-zone', d); }));
-$('e-photo-zone').addEventListener('click', () => { if (photoEspece) { photoEspece = null; afficherPhoto('e-photo-zone', null); toast('Photo retirée'); } });
+$('e-photo-zone').addEventListener('click', () => { if (photoEspece) { photoEspece = null; afficherPhoto('e-photo-zone', null); toast('Photo retirée'); } else ouvrirChoixPhoto(false, d => { photoEspece = d; afficherPhoto('e-photo-zone', d); }); });
 
 /* ================= Illustrations IA par spécificité ================= */
 let illuEspeceId = null;
@@ -1629,7 +1630,7 @@ async function identifierPhotoIA(dataUrl) {
 }
 
 /* ================= Stats ================= */
-const COULEURS_MOIS = ['#B3261E', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#C1502E', '#B3261E', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#C1502E'];
+const COULEURS_MOIS = ['#B3261E', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#B94527', '#B3261E', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#B94527'];
 function rendreStats() {
   const totalKg = Etat.cueillettes.reduce((a, c) => a + (c.poids || 0), 0);
   const dernier = Etat.cueillettes.length ? [...Etat.cueillettes].sort((a, b) => b.date.localeCompare(a.date))[0] : null;
@@ -1669,6 +1670,15 @@ function rendreStats() {
 }
 
 /* ================= Sauvegarde ================= */
+function rendreAlerteExport() {
+  const zone = $('st-export-alerte'); if (!zone) return;
+  const deja = localStorage.getItem('cqm_exporte');
+  zone.innerHTML = deja
+    ? ''
+    : '<div class="alerte alerte-orange" style="margin:-2px 0 12px;padding:10px 12px;font-size:13px">' +
+      '⚠️ <b>Jamais exporté :</b> vos données vivent uniquement sur ce téléphone. Exportez le carnet pour le protéger.' +
+      '</div>';
+}
 $('st-export').addEventListener('click', () => {
   const donnees = { app: 'cueillette-quebec-memphis', version: 3, exporteLe: new Date().toISOString(), spots: Etat.spots, cueillettes: Etat.cueillettes, especes: Etat.especesCustom, illustrations: Object.values(Etat.illustrations), cachees: Etat.cachees };
   const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
@@ -1677,6 +1687,8 @@ $('st-export').addEventListener('click', () => {
   a.download = 'cueillette-memphis-' + aujourdhui() + '.json';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  localStorage.setItem('cqm_exporte', aujourdhui());
+  rendreAlerteExport();
   toast('Export téléchargé 📤');
 });
 $('st-import').addEventListener('click', () => $('st-import-fichier').click());
@@ -1688,7 +1700,9 @@ $('st-import-fichier').addEventListener('change', async e => {
     if (!Array.isArray(data.especes)) data.especes = [];
     if (!Array.isArray(data.illustrations)) data.illustrations = [];
     if (!Array.isArray(data.cachees)) data.cachees = [];
-    if (!await confirmer('Remplacer TOUTES les données actuelles par celles du fichier ?', '📥 Import')) return;
+    const nCue = data.cueillettes.length, nSpots = data.spots.length, nEsp = data.especes.length;
+    const resume = 'Remplacer TOUTES les données actuelles ? Le fichier contient ' + nCue + ' cueillette' + (nCue > 1 ? 's' : '') + ', ' + nSpots + ' spot' + (nSpots > 1 ? 's' : '') + (nEsp ? ' et ' + nEsp + ' variété' + (nEsp > 1 ? 's' : '') : '') + '. Exportez d\'abord si nécessaire.';
+    if (!await confirmer(resume, '📥 Import')) return;
     await Stockage.vider('spots'); await Stockage.vider('cueillettes'); await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches');
     for (const s of data.spots) await Stockage.ecrire('spots', s);
     for (const c of data.cueillettes) await Stockage.ecrire('cueillettes', c);
@@ -1735,7 +1749,7 @@ async function recharger() {
   remplirDatalist();
   remplirSelectSpot();
   if (Etat.vue === 'guide') rendreGuide();
-  if (Etat.vue === 'stats') rendreStats();
+  if (Etat.vue === 'stats') { rendreAlerteExport(); rendreStats(); }
 }
 
 /* ================= Init ================= */

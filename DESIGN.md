@@ -4,7 +4,7 @@ description: Carnet de cueillette de champignons du Québec, 100 % hors-ligne, s
 colors:
   ambre: "#D9A441"
   rouille: "#B45309"
-  terracotta: "#C1502E"
+  terracotta: "#B94527"
   olive: "#6F8F3E"
   cuir: "#8A5A2B"
   creme: "#F3E8D5"
@@ -14,9 +14,9 @@ colors:
   gris: "#A89882"
   bleu-canard: "#0B6E96"
   rouille-onglet: "#B3540B"
-  vert-mesure: "#0E8F6B"
+  vert-mesure: "#0B7A55"
   rose-onglet: "#C2185B"
-  brun-header: "#9A4A12"
+  brun-header: "#B05E20"
   fond-alerte-rouge: "#F6DFD2"
   fond-alerte-orange: "#F4E3C3"
   barre-vide: "#D8C9AC"
@@ -71,12 +71,12 @@ components:
     padding: "10px 16px"
   btn-bleu:
     backgroundColor: "{colors.cuir}"
-    textColor: "{colors.noir}"
+    textColor: "{colors.blanc}"
     rounded: "999px"
     padding: "10px 16px"
   btn-rose:
     backgroundColor: "{colors.terracotta}"
-    textColor: "{colors.noir}"
+    textColor: "{colors.blanc}"
     rounded: "999px"
     padding: "10px 16px"
   pastille-comestible:
@@ -131,7 +131,7 @@ Palette AUTOMNE/TERRE — la forêt québécoise en septembre. Cinq accents vifs
 - **Rouille** (#B45309) : signal — alertes orange, onglet Identifier actif, illustration active. L'écorce et les feuilles mortes.
 
 ### Secondary
-- **Terracotta** (#C1502E) : l'énergie — FAB, bouton rose, carte « Dernière sortie », onglet Stats actif. Le panier rempli.
+- **Terracotta** (#B94527) : l'énergie — FAB, bouton rose, carte « Dernière sortie », onglet Stats actif. Le panier rempli.
 - **Olive** (#6F8F3E) : la confiance — badges Comestible, boutons d'identification photo, carte « Espèces ». La mousse.
 - **Cuir** (#8A5A2B) : l'action secondaire — boutons Modifier, titres de section guide, carte « Sorties ». Le cuir du carnet.
 
