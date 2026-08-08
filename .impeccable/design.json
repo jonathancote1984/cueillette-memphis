@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-08T17:01:48.028371+00:00",
+  "title": "Design System: Cueillette Québec — édition Memphis",
+  "extensions": {
+    "colorMeta": {
+      "ambre": {
+        "role": "primary",
+        "displayName": "Ambre",
+        "canonical": "#D9A441",
+        "tonalRamp": [
+          "hsl(39 67% 15%)",
+          "hsl(39 67% 26%)",
+          "hsl(39 67% 38%)",
+          "hsl(39 67% 49%)",
+          "hsl(39 67% 61%)",
+          "hsl(39 67% 72%)",
+          "hsl(39 67% 84%)",
+          "hsl(39 67% 95%)"
+        ]
+      },
+      "rouille": {
+        "role": "secondary",
+        "displayName": "Rouille",
+        "canonical": "#B45309",
+        "tonalRamp": [
+          "hsl(26 90% 15%)",
+          "hsl(26 90% 26%)",
+          "hsl(26 90% 38%)",
+          "hsl(26 90% 49%)",
+          "hsl(26 90% 61%)",
+          "hsl(26 90% 72%)",
+          "hsl(26 90% 84%)",
+          "hsl(26 90% 95%)"
+        ]
+      },
+      "terracotta": {
+        "role": "secondary",
+        "displayName": "Terracotta",
+        "canonical": "#C1502E",
+        "tonalRamp": [
+          "hsl(14 62% 15%)",
+          "hsl(14 62% 26%)",
+          "hsl(14 62% 38%)",
+          "hsl(14 62% 49%)",
+          "hsl(14 62% 61%)",
+          "hsl(14 62% 72%)",
+          "hsl(14 62% 84%)",
+          "hsl(14 62% 95%)"
+        ]
+      },
+      "olive": {
+        "role": "secondary",
+        "displayName": "Olive",
+        "canonical": "#6F8F3E",
+        "tonalRamp": [
+          "hsl(84 40% 15%)",
+          "hsl(84 40% 26%)",
+          "hsl(84 40% 38%)",
+          "hsl(84 40% 49%)",
+          "hsl(84 40% 61%)",
+          "hsl(84 40% 72%)",
+          "hsl(84 40% 84%)",
+          "hsl(84 40% 95%)"
+        ]
+      },
+      "cuir": {
+        "role": "secondary",
+        "displayName": "Cuir",
+        "canonical": "#8A5A2B",
+        "tonalRamp": [
+          "hsl(30 52% 15%)",
+          "hsl(30 52% 26%)",
+          "hsl(30 52% 38%)",
+          "hsl(30 52% 49%)",
+          "hsl(30 52% 61%)",
+          "hsl(30 52% 72%)",
+          "hsl(30 52% 84%)",
+          "hsl(30 52% 95%)"
+        ]
+      },
+      "creme": {
+        "role": "neutral",
+        "displayName": "Crème",
+        "canonical": "#F3E8D5",
+        "tonalRamp": [
+          "hsl(38 56% 15%)",
+          "hsl(38 56% 26%)",
+          "hsl(38 56% 38%)",
+          "hsl(38 56% 49%)",
+          "hsl(38 56% 61%)",
+          "hsl(38 56% 72%)",
+          "hsl(38 56% 84%)",
+          "hsl(38 56% 95%)"
+        ]
+      },
+      "blanc": {
+        "role": "neutral",
+        "displayName": "Blanc",
+        "canonical": "#FDF6E7",
+        "tonalRamp": [
+          "hsl(41 85% 15%)",
+          "hsl(41 85% 26%)",
+          "hsl(41 85% 38%)",
+          "hsl(41 85% 49%)",
+          "hsl(41 85% 61%)",
+          "hsl(41 85% 72%)",
+          "hsl(41 85% 84%)",
+          "hsl(41 85% 95%)"
+        ]
+      },
+      "noir": {
+        "role": "neutral",
+        "displayName": "Noir",
+        "canonical": "#241A0F",
+        "tonalRamp": [
+          "hsl(31 41% 15%)",
+          "hsl(31 41% 26%)",
+          "hsl(31 41% 38%)",
+          "hsl(31 41% 49%)",
+          "hsl(31 41% 61%)",
+          "hsl(31 41% 72%)",
+          "hsl(31 41% 84%)",
+          "hsl(31 41% 95%)"
+        ]
+      },
+      "rouge": {
+        "role": "secondary",
+        "displayName": "Rouge",
+        "canonical": "#B3261E",
+        "tonalRamp": [
+          "hsl(3 71% 15%)",
+          "hsl(3 71% 26%)",
+          "hsl(3 71% 38%)",
+          "hsl(3 71% 49%)",
+          "hsl(3 71% 61%)",
+          "hsl(3 71% 72%)",
+          "hsl(3 71% 84%)",
+          "hsl(3 71% 95%)"
+        ]
+      },
+      "gris": {
+        "role": "neutral",
+        "displayName": "Gris",
+        "canonical": "#A89882",
+        "tonalRamp": [
+          "hsl(35 18% 15%)",
+          "hsl(35 18% 26%)",
+          "hsl(35 18% 38%)",
+          "hsl(35 18% 49%)",
+          "hsl(35 18% 61%)",
+          "hsl(35 18% 72%)",
+          "hsl(35 18% 84%)",
+          "hsl(35 18% 95%)"
+        ]
+      },
+      "bleu-canard": {
+        "role": "neutral",
+        "displayName": "Bleu canard (onglet Spots)",
+        "canonical": "#0B6E96",
+        "tonalRamp": [
+          "hsl(197 86% 15%)",
+          "hsl(197 86% 26%)",
+          "hsl(197 86% 38%)",
+          "hsl(197 86% 49%)",
+          "hsl(197 86% 61%)",
+          "hsl(197 86% 72%)",
+          "hsl(197 86% 84%)",
+          "hsl(197 86% 95%)"
+        ]
+      },
+      "rouille-onglet": {
+        "role": "neutral",
+        "displayName": "Rouille (onglet Identifier)",
+        "canonical": "#B3540B",
+        "tonalRamp": [
+          "hsl(26 88% 15%)",
+          "hsl(26 88% 26%)",
+          "hsl(26 88% 38%)",
+          "hsl(26 88% 49%)",
+          "hsl(26 88% 61%)",
+          "hsl(26 88% 72%)",
+          "hsl(26 88% 84%)",
+          "hsl(26 88% 95%)"
+        ]
+      },
+      "vert-mesure": {
+        "role": "neutral",
+        "displayName": "Vert mesure (kg)",
+        "canonical": "#0E8F6B",
+        "tonalRamp": [
+          "hsl(163 82% 15%)",
+          "hsl(163 82% 26%)",
+          "hsl(163 82% 38%)",
+          "hsl(163 82% 49%)",
+          "hsl(163 82% 61%)",
+          "hsl(163 82% 72%)",
+          "hsl(163 82% 84%)",
+          "hsl(163 82% 95%)"
+        ]
+      },
+      "rose-onglet": {
+        "role": "neutral",
+        "displayName": "Rose (onglet Stats)",
+        "canonical": "#C2185B",
+        "tonalRamp": [
+          "hsl(336 78% 15%)",
+          "hsl(336 78% 26%)",
+          "hsl(336 78% 38%)",
+          "hsl(336 78% 49%)",
+          "hsl(336 78% 61%)",
+          "hsl(336 78% 72%)",
+          "hsl(336 78% 84%)",
+          "hsl(336 78% 95%)"
+        ]
+      },
+      "brun-header": {
+        "role": "neutral",
+        "displayName": "Brun header (dégradé)",
+        "canonical": "#9A4A12",
+        "tonalRamp": [
+          "hsl(25 79% 15%)",
+          "hsl(25 79% 26%)",
+          "hsl(25 79% 38%)",
+          "hsl(25 79% 49%)",
+          "hsl(25 79% 61%)",
+          "hsl(25 79% 72%)",
+          "hsl(25 79% 84%)",
+          "hsl(25 79% 95%)"
+        ]
+      },
+      "fond-alerte-rouge": {
+        "role": "neutral",
+        "displayName": "Fond alerte MORTEL",
+        "canonical": "#F6DFD2",
+        "tonalRamp": [
+          "hsl(22 67% 15%)",
+          "hsl(22 67% 26%)",
+          "hsl(22 67% 38%)",
+          "hsl(22 67% 49%)",
+          "hsl(22 67% 61%)",
+          "hsl(22 67% 72%)",
+          "hsl(22 67% 84%)",
+          "hsl(22 67% 95%)"
+        ]
+      },
+      "fond-alerte-orange": {
+        "role": "neutral",
+        "displayName": "Fond alerte prudence",
+        "canonical": "#F4E3C3",
+        "tonalRamp": [
+          "hsl(39 69% 15%)",
+          "hsl(39 69% 26%)",
+          "hsl(39 69% 38%)",
+          "hsl(39 69% 49%)",
+          "hsl(39 69% 61%)",
+          "hsl(39 69% 72%)",
+          "hsl(39 69% 84%)",
+          "hsl(39 69% 95%)"
+        ]
+      },
+      "barre-vide": {
+        "role": "neutral",
+        "displayName": "Barre mois vide",
+        "canonical": "#D8C9AC",
+        "tonalRamp": [
+          "hsl(40 36% 15%)",
+          "hsl(40 36% 26%)",
+          "hsl(40 36% 38%)",
+          "hsl(40 36% 49%)",
+          "hsl(40 36% 61%)",
+          "hsl(40 36% 72%)",
+          "hsl(40 36% 84%)",
+          "hsl(40 36% 95%)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "H1 du header, incliné -1,5°, text-shadow rose."
+      },
+      "titre": {
+        "displayName": "Titre de vue",
+        "purpose": "Pastille blanche cerclée noir, inclinée -1°."
+      },
+      "corps": {
+        "displayName": "Corps",
+        "purpose": "Texte courant, descriptions, fiches."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Libellés de champs et méta."
+      }
+    },
+    "shadows": [
+      {
+        "name": "dure-carte",
+        "value": "5px 5px 0 #241A0F",
+        "purpose": "Ombres dures sans flou sur cartes et items."
+      },
+      {
+        "name": "dure-bouton",
+        "value": "3px 3px 0 #241A0F",
+        "purpose": "Boutons, puces, pastilles."
+      },
+      {
+        "name": "dure-forte",
+        "value": "6px 6px 0 #241A0F",
+        "purpose": "Feuilles, boîtes de confirmation."
+      }
+    ],
+    "motion": [
+      {
+        "name": "pop-vue",
+        "value": "cubic-bezier(0.2, 1.6, 0.4, 1) 0.22s",
+        "purpose": "Apparition des vues (rebond assumé)."
+      },
+      {
+        "name": "feuille",
+        "value": "cubic-bezier(0.2, 1.3, 0.4, 1) 0.3s",
+        "purpose": "Glissement des feuilles bottom-sheet."
+      },
+      {
+        "name": "confirm",
+        "value": "cubic-bezier(0.2, 1.5, 0.4, 1) 0.22s",
+        "purpose": "Boîte de confirmation Memphis."
+      },
+      {
+        "name": "appui",
+        "value": "0.1s linear",
+        "purpose": "Enfoncement des boutons au clic."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "max-width 640px",
+        "purpose": "Colonne unique centrée, le seul layout."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Bouton jaune (défaut)",
+      "kind": "button",
+      "refersTo": "btn-jaune",
+      "description": "Action principale par défaut.",
+      "html": "<button class=\"ds-btn\">🌞 Ensoleillé</button>",
+      "css": ".ds-btn { background:#D9A441; color:#241A0F; border:3px solid #241A0F; border-radius:999px; padding:10px 16px; font-family:'Fredoka','Segoe UI',sans-serif; font-size:14.5px; font-weight:700; box-shadow:3px 3px 0 #241A0F; display:inline-flex; align-items:center; gap:7px; cursor:pointer; transition:transform .1s, box-shadow .1s; } .ds-btn:hover { transform:translate(1px,1px); } .ds-btn:active { transform:translate(3px,3px); box-shadow:0 0 0 #241A0F; } .ds-btn:focus-visible { outline:3px solid #D9A441; outline-offset:2px; }"
+    },
+    {
+      "name": "Bouton rouge (destruction)",
+      "kind": "button",
+      "refersTo": "btn-rouge",
+      "description": "Suppression et danger.",
+      "html": "<button class=\"ds-btn-danger\">🗑️ Supprimer</button>",
+      "css": ".ds-btn-danger { background:#B3261E; color:#FDF6E7; border:3px solid #241A0F; border-radius:999px; padding:10px 16px; font-family:'Fredoka','Segoe UI',sans-serif; font-size:14.5px; font-weight:700; box-shadow:3px 3px 0 #241A0F; cursor:pointer; transition:transform .1s, box-shadow .1s; } .ds-btn-danger:active { transform:translate(3px,3px); box-shadow:0 0 0 #241A0F; } .ds-btn-danger:focus-visible { outline:3px solid #D9A441; outline-offset:2px; }"
+    },
+    {
+      "name": "Champ de saisie",
+      "kind": "input",
+      "refersTo": "saisie",
+      "description": "Champs de formulaires (feuilles).",
+      "html": "<input class=\"ds-input\" placeholder=\"Nom du spot…\">",
+      "css": ".ds-input { width:100%; padding:12px; font-size:16px; font-family:'Fredoka','Segoe UI',sans-serif; border:3px solid #241A0F; border-radius:12px 12px 12px 4px; background:#FDF6E7; color:#241A0F; box-shadow:inset 2px 2px 0 rgba(31,26,23,.08); outline:none; } .ds-input:focus { box-shadow:0 0 0 3px #D9A441, inset 2px 2px 0 rgba(31,26,23,.08); }"
+    },
+    {
+      "name": "Carte",
+      "kind": "card",
+      "refersTo": "carte",
+      "description": "Conteneur de contenu principal.",
+      "html": "<div class=\"ds-card\">Contenu de la carte</div>",
+      "css": ".ds-card { background:#FDF6E7; border:3px solid #241A0F; border-radius:18px 18px 18px 5px; box-shadow:5px 5px 0 #241A0F; padding:14px; margin-bottom:16px; }"
+    },
+    {
+      "name": "Pastille de statut",
+      "kind": "chip",
+      "refersTo": "pastille-comestible",
+      "description": "Badge comestibilité (vert/jaune/gris/orange/rouge).",
+      "html": "<span class=\"ds-chip\">Comestible</span>",
+      "css": ".ds-chip { display:inline-block; padding:3px 11px; border-radius:999px; font-size:11.5px; font-weight:700; font-family:'Fredoka','Segoe UI',sans-serif; border:2.5px solid #241A0F; background:#6F8F3E; color:#241A0F; white-space:nowrap; transform:rotate(-1.5deg); }"
+    },
+    {
+      "name": "Navigation (onglets)",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Barre fixe basse, 4 onglets, indicateur zigzag.",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-nav-btn\"><span>📍</span>Spots</button><button class=\"ds-nav-btn ds-nav-actif\"><span>🍄</span>Identifier</button><button class=\"ds-nav-btn\"><span>🧺</span>Cueillettes</button><button class=\"ds-nav-btn\"><span>📊</span>Stats</button></nav>",
+      "css": ".ds-nav { position:fixed; bottom:0; left:0; right:0; background:#FDF6E7; border-top:3px solid #241A0F; display:flex; font-family:'Fredoka','Segoe UI',sans-serif; } .ds-nav-btn { flex:1; border:0; background:none; padding:9px 0 10px; font-size:11.5px; font-weight:700; color:#241A0F; display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; position:relative; } .ds-nav-btn span { font-size:22px; } .ds-nav-actif { transform:translateY(-4px); color:#B3540B; } .ds-nav-actif::before { content:''; position:absolute; top:-3px; left:50%; transform:translateX(-50%) rotate(2deg); width:44px; height:6px; border:3px solid #241A0F; border-bottom:0; border-radius:8px 8px 0 0; background:#D9A441; }"
+    },
+    {
+      "name": "Feuille bottom-sheet",
+      "kind": "custom",
+      "refersTo": "feuille",
+      "description": "Formulaire glissant depuis le bas.",
+      "html": "<div class=\"ds-sheet\"><div class=\"ds-poignee\"></div><h3 class=\"ds-sheet-titre\">➕ Nouveau spot</h3></div>",
+      "css": ".ds-sheet { position:fixed; left:8px; right:8px; bottom:8px; background:#FDF6E7; border:3px solid #241A0F; border-radius:24px 24px 18px 18px; box-shadow:6px 6px 0 #241A0F; padding:10px 16px 20px; transform:translateY(calc(100% + 24px)); transition:transform .3s cubic-bezier(.2,1.3,.4,1); } .ds-sheet.ouverte { transform:translateY(0); } .ds-poignee { width:52px; height:7px; border-radius:999px; background:#241A0F; margin:2px auto 10px; opacity:.35; } .ds-sheet-titre { display:inline-block; background:#D9A441; border:3px solid #241A0F; border-radius:12px 12px 12px 4px; padding:4px 12px; transform:rotate(-1deg); box-shadow:3px 3px 0 #241A0F; font-family:'Fredoka','Segoe UI',sans-serif; font-size:18px; font-weight:700; margin:0 0 14px; }"
+    },
+    {
+      "name": "Alerte MORTEL",
+      "kind": "custom",
+      "refersTo": "alerte-mortel",
+      "description": "Avertissement de sécurité critique, antipoison obligatoire.",
+      "html": "<div class=\"ds-alerte\"><b>MORTEL — ne jamais consommer.</b> Centre antipoison : 1-800-463-5060</div>",
+      "css": ".ds-alerte { border:3px solid #241A0F; border-radius:16px 16px 16px 5px; padding:12px 14px; font-size:14px; line-height:1.5; font-weight:500; box-shadow:4px 4px 0 #241A0F; margin-bottom:16px; position:relative; overflow:hidden; background:#F6DFD2; color:#241A0F; font-family:'Fredoka','Segoe UI',sans-serif; } .ds-alerte::after { content:''; position:absolute; right:-14px; top:-14px; width:52px; height:52px; background:repeating-linear-gradient(45deg, #B3261E 0 6px, transparent 6px 12px); border:3px solid #241A0F; border-radius:50%; }"
+    },
+    {
+      "name": "Carte statistique",
+      "kind": "card",
+      "refersTo": "stat-carte",
+      "description": "Cartes de stats colorées (jaune/bleu/vert/rose).",
+      "html": "<div class=\"ds-stat\"><div class=\"ds-stat-lib\">Total récolté</div><div class=\"ds-stat-val\">12,5 kg</div></div>",
+      "css": ".ds-stat { border:3px solid #241A0F; border-radius:18px 18px 18px 5px; padding:14px 10px; text-align:center; box-shadow:5px 5px 0 #241A0F; background:#D9A441; font-family:'Fredoka','Segoe UI',sans-serif; } .ds-stat-lib { font-size:12px; font-weight:700; opacity:.8; } .ds-stat-val { font-size:24px; font-weight:700; margin-top:3px; line-height:1.1; color:#241A0F; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La Récolte — l'énergie d'une belle journée de cueillette, panier plein.",
+    "overview": "L'interface est un carnet de chasse chaleureux et tactile, exécuté dans le style Memphis : bordures noires épaisses (3 px), coins cassés, ombres dures sans flou, formes géométriques flottantes, zigzag d'en-tête, pois au fond, titres légèrement inclinés. Le ludisme est assumé jusque dans les micro-interactions — les rebonds élastiques des feuilles et des confirmations font partie du plaisir. La palette est celle de l'automne québécois : ambre, rouille, terracotta, olive, cuir sur crème. Les moments à haut risque (espèces mortelles, identification incertaine) sont marqués par des alertes rouges non négociables avec centre antipoison.",
+    "keyCharacteristics": [
+      "Bordures noires 3 px partout, ombres dures sans flou (décalage 3-6 px)",
+      "Coins cassés : un coin différent des trois autres (18 px vs 5 px)",
+      "Titres légèrement inclinés (-1 à -2°), badges et pastilles aussi",
+      "Zigzag noir sous l'en-tête, pois crème sur le fond, formes SVG flottantes",
+      "Fredoka, arrondie et chaleureuse, sans uppercase forcé",
+      "Élasticité délibérée : cubic-bezier(.2, 1.3-1.6, .4, 1) pour les apparitions"
+    ],
+    "rules": [
+      {
+        "name": "La Règle du Trait Noir",
+        "body": "Toute surface colorée porte une bordure noire de 3 px. Sans le trait, la couleur n'est pas un élément de l'interface.",
+        "section": "colors"
+      },
+      {
+        "name": "La Règle du Rouge Mortel",
+        "body": "Le rouge n'apparaît que pour le danger (MORTEL, suppression, compteur) — jamais pour la décoration.",
+        "section": "colors"
+      },
+      {
+        "name": "La Règle de l'Inclinaison",
+        "body": "Un titre n'est jamais parfaitement droit : -1 à -2°, jamais plus. L'inclinaison est le sourire du carnet.",
+        "section": "typography"
+      },
+      {
+        "name": "La Règle du Décalage Net",
+        "body": "Jamais de box-shadow avec blur. Une ombre = un décalage de 2-6 px, noir pur, sans flou.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Utiliser la bordure noire 3 px sur toute surface colorée (La Règle du Trait Noir).",
+      "Casser un coin sur les cartes, champs et feuilles (inférieur droit, 4-6 px).",
+      "Incliner les titres et pastilles de -1 à -2°.",
+      "Enfoncer les éléments au clic (translate + ombre réduite).",
+      "Réserver le rouge au danger et à la destruction.",
+      "Garder l'élasticité des feuilles et confirmations (le rebond fait partie du plaisir)."
+    ],
+    "donts": [
+      "Utiliser d'ombre douce ou floutée (La Règle du Décalage Net).",
+      "Utiliser de boîte système navigateur (confirm/alert) — toujours les modales Memphis.",
+      "Utiliser d'uppercase forcé ni de graisse inférieure à 400.",
+      "Afficher une alerte MORTEL sans le centre antipoison 1-800-463-5060.",
+      "Introduire de couleur hors palette sans la documenter."
+    ]
+  }
+}

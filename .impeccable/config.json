@@ -1,0 +1,16 @@
+{
+  "detector": {
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "rgba(31,26,23,.08)",
+        "reason": "Ombre interne subtile des champs de saisie (box-shadow inset) — pas une couleur de marque, documenté dans DESIGN.md (Champs de saisie)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(31,26,23,.5)",
+        "reason": "Voile de fond des feuilles bottom-sheet et modales (overlay semi-transparent) — pas une couleur de marque"
+      }
+    ]
+  }
+}
