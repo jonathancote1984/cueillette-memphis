@@ -3,6 +3,7 @@
   "short_name": "Cueillette",
   "description": "Spots, identification et journal de cueillette de champignons — édition Memphis, 100 % hors-ligne.",
   "lang": "fr",
+  "id": "./",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

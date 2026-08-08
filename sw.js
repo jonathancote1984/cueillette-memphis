@@ -1,7 +1,7 @@
 /* Service worker — cache-first PWA (édition Memphis).
    ⚠️ RÈGLE : à CHAQUE mise à jour de l'app, AUGMENTEZ le numéro de CACHE.
    Le bump IS le mécanisme de mise à jour pour les utilisateurs. */
-const CACHE = 'cqm-v8';
+const CACHE = 'cqm-v10';
 const FICHIERS = [
   './',
   './index.html',
@@ -45,6 +45,9 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  // API et requêtes avec clé : jamais de cache (résultats frais, clé jamais stockée)
+  if (url.hostname.endsWith('wikimedia.org') || url.hostname.endsWith('googleapis.com') || url.search.includes('key=')) return;
   e.respondWith(
     caches.match(e.request).then(reponse => reponse || fetch(e.request).then(r => {
       const copie = r.clone();

@@ -192,6 +192,7 @@ h2.titre-vue .ico{font-size:20px;}
 .st-immangeable{background:var(--gris);}
 .st-toxique{background:var(--orange);}
 .st-mortel{background:var(--rouge); color:var(--blanc);}
+.st-inconnu{background:var(--gris);}
 /* ===== Alertes ===== */
 .alerte{
   border:3px solid var(--noir); border-radius:16px 16px 16px 5px;
@@ -212,19 +213,20 @@ h2.titre-vue .ico{font-size:20px;}
 /* ===== Feuilles (bottom sheets) ===== */
 .voile{
   position:fixed; inset:0; background:rgba(31,26,23,.5); z-index:65;
-  opacity:0; pointer-events:none; transition:opacity .25s;
+  opacity:0; pointer-events:none; visibility:hidden;
+  transition:opacity .25s, visibility 0s .25s;
 }
-.voile.visible{opacity:1; pointer-events:auto;}
+.voile.visible{opacity:1; pointer-events:auto; visibility:visible; transition:opacity .25s, visibility 0s;}
 /* ===== Confirmation Memphis (remplace window.confirm) ===== */
 .boite-confirm{
   position:fixed; left:50%; top:45%; z-index:80;
-  transform:translate(-50%,-50%) scale(.88); opacity:0; pointer-events:none;
+  transform:translate(-50%,-50%) scale(.88); opacity:0; pointer-events:none; visibility:hidden;
   background:var(--blanc); border:3px solid var(--noir); border-radius:20px 20px 20px 6px;
   box-shadow:6px 6px 0 var(--noir); padding:20px 18px; width:min(92%, 380px);
-  transition:transform .22s cubic-bezier(.2,1.5,.4,1), opacity .2s;
+  transition:transform .22s cubic-bezier(.2,1.5,.4,1), opacity .2s, visibility 0s .22s;
   text-align:center;
 }
-.boite-confirm.visible{transform:translate(-50%,-50%) scale(1); opacity:1; pointer-events:auto;}
+.boite-confirm.visible{transform:translate(-50%,-50%) scale(1); opacity:1; pointer-events:auto; visibility:visible; transition:transform .22s cubic-bezier(.2,1.5,.4,1), opacity .2s, visibility 0s;}
 .boite-confirm h3{
   margin:0 0 8px; font-size:16.5px; font-weight:700; display:inline-block;
   background:var(--jaune); border:3px solid var(--noir); border-radius:12px 12px 12px 4px;
@@ -246,8 +248,9 @@ h2.titre-vue .ico{font-size:20px;}
   transition:transform .3s cubic-bezier(.2,1.3,.4,1);
   max-height:84vh; overflow-y:auto;
   padding:10px 16px calc(20px + env(safe-area-inset-bottom));
+  visibility:hidden; transition-delay:0s, 0s, .3s;
 }
-.feuille.ouverte{transform:translateY(0);}
+.feuille.ouverte{transform:translateY(0); visibility:visible; transition-delay:0s;}
 .feuille .poignee{
   width:52px; height:7px; border-radius:999px; background:var(--noir);
   margin:2px auto 10px; opacity:.35;
@@ -816,16 +819,18 @@ const Etat = {
 };
 const badgeStatut = (statut, prudence) => {
   const cle = prudence ? 'prudence' : statut;
-  const info = STATUTS[cle] || STATUTS[statut];
+  const info = STATUTS[cle] || STATUTS[statut] || { cls: 'st-inconnu', label: '⚠️ Inconnu' };
   return '<span class="pastille-statut ' + info.cls + '">' + info.label + '</span>';
 };
 const toutesEspeces = () => [
   ...ESPECES.filter(e => !Etat.cachees.includes(e.id)),
   ...Etat.especesCustom
 ];
+const normNom = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 const infoEspece = nom => {
-  const e = toutesEspeces().find(x => x.nom.toLowerCase() === String(nom).trim().toLowerCase());
-  return e ? { id: e.id, statut: e.statut, prudence: !!e.prudence, photo: e.img || e.photo } : { id: null, statut: null, prudence: false, photo: null };
+  const n = normNom(nom);
+  const e = toutesEspeces().find(x => normNom(x.nom) === n || normNom(x.latin) === n);
+  return e ? { id: e.id, statut: e.statut, prudence: !!e.prudence, perso: !!e.perso, photo: e.img || e.photo } : { id: null, statut: null, prudence: false, perso: false, photo: null };
 };
 const nomSpot = id => { const s = Etat.spots.find(x => x.id === id); return s ? s.nom : null; };
 
@@ -939,12 +944,19 @@ function ouvrirChoixPhoto(camera, cb) {
   const inp = document.createElement('input');
   inp.type = 'file'; inp.accept = 'image/*';
   if (camera) inp.setAttribute('capture', 'environment');
+  inp.style.display = 'none';
+  document.body.appendChild(inp);
+  const nettoyer = () => { inp.remove(); };
   inp.onchange = e => {
-    const f = e.target.files[0]; if (!f) return;
-    const rd = new FileReader();
-    rd.onload = () => compresser(rd.result, cb);
-    rd.readAsDataURL(f);
+    const f = e.target.files[0];
+    if (f) {
+      const rd = new FileReader();
+      rd.onload = () => compresser(rd.result, cb);
+      rd.readAsDataURL(f);
+    }
+    nettoyer();
   };
+  inp.oncancel = nettoyer;
   inp.click();
 }
 
@@ -1128,7 +1140,7 @@ function rendreCueillettes() {
   }
   cont.innerHTML = [...Etat.cueillettes].sort((a, b) => b.date.localeCompare(a.date)).map(c => {
     const info = infoEspece(c.espece);
-    let vig = c.photo ? '<img src="' + c.photo + '" alt="">' : (info.photo ? '<img src="' + info.photo + '" alt="' + esc(c.espece) + '">' : (info.id ? '<img src="img/especes/' + info.id + '.jpg" alt="' + esc(c.espece) + '">' : '🍄'));
+    let vig = c.photo ? '<img src="' + c.photo + '" alt="">' : (info.photo ? '<img src="' + info.photo + '" alt="' + esc(c.espece) + '">' : (info.id && !info.perso ? '<img src="img/especes/' + info.id + '.jpg" alt="' + esc(c.espece) + '">' : '🍄'));
     const spotN = nomSpot(c.spotId);
     return '<div class="item"><div class="vig">' + vig + '</div>' +
       '<div class="corps"><div class="nom">' + esc(c.espece) + (info.statut ? ' ' + badgeStatut(info.statut, info.prudence) : '') + '</div>' +
@@ -1182,7 +1194,7 @@ $('c-save').addEventListener('click', async () => {
   if (!date) { toast('Choisissez une date'); return; }
   if (!espece) { toast('Indiquez l\'espèce'); $('c-espece').focus(); return; }
   const info = infoEspece(espece);
-  const poids = parseFloat($('c-poids').value);
+  const poids = parseFloat($('c-poids').value.replace(',', '.'));
   const c = {
     id: Etat.cueillette.edition || uid(),
     date,
@@ -1602,7 +1614,7 @@ function rendreStats() {
     { v: fmtKg(totalKg), l: 'Total récolté' },
     { v: String(Etat.cueillettes.length), l: 'Sorties' },
     { v: String(distinctes), l: 'Espèces' },
-    { v: dernier ? fmtDate(dernier.date).split(' ')[0] : '—', l: 'Dernière sortie' }
+    { v: dernier ? fmtDate(dernier.date).replace(/^\S+\s/, '') : '—', l: 'Dernière sortie' }
   ].map(s => '<div class="stat-carte"><div class="libelle">' + s.l + '</div><div class="valeur">' + s.v + '</div></div>').join('');
   const parEspece = {};
   Etat.cueillettes.forEach(c => { parEspece[c.espece] = (parEspece[c.espece] || 0) + (c.poids || 0); });
@@ -1634,7 +1646,7 @@ function rendreStats() {
 
 /* ================= Sauvegarde ================= */
 $('st-export').addEventListener('click', () => {
-  const donnees = { app: 'cueillette-quebec-memphis', version: 2, exporteLe: new Date().toISOString(), spots: Etat.spots, cueillettes: Etat.cueillettes, especes: Etat.especesCustom, illustrations: Object.values(Etat.illustrations) };
+  const donnees = { app: 'cueillette-quebec-memphis', version: 3, exporteLe: new Date().toISOString(), spots: Etat.spots, cueillettes: Etat.cueillettes, especes: Etat.especesCustom, illustrations: Object.values(Etat.illustrations), cachees: Etat.cachees };
   const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1649,12 +1661,16 @@ $('st-import-fichier').addEventListener('change', async e => {
   try {
     const data = JSON.parse(await f.text());
     if (!data || !Array.isArray(data.spots) || !Array.isArray(data.cueillettes)) throw new Error('forme');
+    if (!Array.isArray(data.especes)) data.especes = [];
+    if (!Array.isArray(data.illustrations)) data.illustrations = [];
+    if (!Array.isArray(data.cachees)) data.cachees = [];
     if (!await confirmer('Remplacer TOUTES les données actuelles par celles du fichier ?', '📥 Import')) return;
-    await Stockage.vider('spots'); await Stockage.vider('cueillettes'); await Stockage.vider('especes'); await Stockage.vider('illustrations');
+    await Stockage.vider('spots'); await Stockage.vider('cueillettes'); await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches');
     for (const s of data.spots) await Stockage.ecrire('spots', s);
     for (const c of data.cueillettes) await Stockage.ecrire('cueillettes', c);
-    for (const e2 of (data.especes || [])) await Stockage.ecrire('especes', e2);
-    for (const i of (data.illustrations || [])) await Stockage.ecrire('illustrations', i);
+    for (const e2 of data.especes) await Stockage.ecrire('especes', e2);
+    for (const i of data.illustrations) await Stockage.ecrire('illustrations', i);
+    for (const id of data.cachees) await Stockage.ecrire('caches', { id });
     toast('Import réussi ✅');
     await recharger();
   } catch (err) {
@@ -1666,6 +1682,7 @@ $('st-effacer').addEventListener('click', async () => {
   if (!await confirmer('Tout effacer ? Cette action est IRRÉVERSIBLE. Exportez d\'abord si nécessaire.', '🗑️ Tout effacer')) return;
   if (!await confirmer('Vraiment sûr ? Pensez à exporter vos données avant (bouton Exporter).', '⚠️ Dernière vérification')) return;
   await Stockage.vider('spots'); await Stockage.vider('cueillettes');
+  await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches');
   toast('Toutes les données ont été effacées');
   await recharger();
 });
@@ -1680,7 +1697,12 @@ async function recharger() {
   const ca = (await Stockage.lire('caches')).map(x => x.id);
   const il = await Stockage.lire('illustrations');
   if (seq !== seqRecharger) return; // un rechargement plus récent est en cours
-  Etat.spots = s; Etat.cueillettes = c; Etat.especesCustom = e; Etat.cachees = ca;
+  const connus = new Set([...ESPECES, ...e].map(x => x.id));
+  const orphelins = ca.filter(id => !connus.has(id));
+  if (orphelins.length) {
+    for (const id of orphelins) await Stockage.effacer('caches', id);
+  }
+  Etat.spots = s; Etat.cueillettes = c; Etat.especesCustom = e; Etat.cachees = ca.filter(id => connus.has(id));
   Etat.illustrations = {};
   il.forEach(x => { Etat.illustrations[x.id] = x; });
   $('badge').textContent = String(Etat.cueillettes.length);
