@@ -434,6 +434,11 @@ h2.titre-vue .ico{font-size:20px;}
         <button class="btn btn-rouge" id="p-cle-effacer">🗑️ Effacer</button>
       </div>
     </div>
+    <div class="carte">
+      <h3 style="margin:0 0 10px">📸 Crédits photos</h3>
+      <p class="note" style="margin-bottom:8px">Les photos du guide et des spécificités viennent de Wikimedia Commons, sous licence libre (CC).</p>
+      <button class="btn btn-bleu btn-plein" id="p-credits">📸 Voir les crédits</button>
+    </div>
   </section>
 </main>
 
@@ -649,6 +654,17 @@ h2.titre-vue .ico{font-size:20px;}
   <button class="btn btn-jaune btn-plein" id="illu-toutes" style="margin-top:8px">✨ Générer les manquantes</button>
   <div class="grille2" style="margin-top:8px">
     <button class="btn btn-gris btn-plein" id="illu-fermer">Fermer</button>
+  </div>
+</section>
+
+<!-- ===== FEUILLE CRÉDITS PHOTOS ===== -->
+<section class="feuille" id="sheet-credits">
+  <div class="poignee"></div>
+  <h3>📸 Crédits photos</h3>
+  <p class="note" style="margin:-4px 0 12px">Photos de Wikimedia Commons (licences libres CC). Merci aux photographes !</p>
+  <div id="credits-liste" style="max-height:52vh;overflow-y:auto"></div>
+  <div class="grille2" style="margin-top:8px">
+    <button class="btn btn-gris btn-plein" id="credits-fermer">Fermer</button>
   </div>
 </section>
 
@@ -2196,6 +2212,42 @@ $('p-cle-effacer').addEventListener('click', () => {
   toast('Clé API effacée');
   rendreBandeauCle();
 });
+/* --- Crédits photos Wikimedia --- */
+let creditsCache = null;
+async function chargerCredits() {
+  if (creditsCache) return creditsCache;
+  const essais = [
+    'img/specs/credits.json',
+    'img/especes/credits.json'
+  ];
+  const tous = {};
+  for (const chemin of essais) {
+    try {
+      const rep = await fetch(chemin);
+      if (!rep.ok) continue;
+      const d = await rep.json();
+      Object.assign(tous, d);
+    } catch (e) { /* fichier absent */ }
+  }
+  creditsCache = tous;
+  return tous;
+}
+function rendreCredits() {
+  const zone = $('credits-liste'); if (!zone) return;
+  chargerCredits().then(tous => {
+    const entrees = Object.values(tous);
+    if (!entrees.length) { zone.innerHTML = '<div class="vide-etat">Aucun crédit disponible.</div>'; return; }
+    zone.innerHTML = entrees.map(c =>
+      '<div style="border:3px solid var(--noir);border-radius:14px 14px 14px 4px;padding:10px;margin-bottom:8px;background:var(--blanc)">' +
+      '<div style="font-weight:700;font-size:13.5px">' + esc(c.espece || c.fichier || '') + '</div>' +
+      '<div style="font-size:12.5px;opacity:.85;margin-top:2px">📷 ' + esc(c.auteur || 'Auteur inconnu') + ' · ' + esc(c.licence || '') + '</div>' +
+      (c.page ? '<a href="' + esc(c.page) + '" target="_blank" rel="noopener" style="font-size:12px;color:var(--cuir);font-weight:700">Voir sur Commons ↗</a>' : '') +
+      '</div>'
+    ).join('');
+  });
+}
+$('p-credits').addEventListener('click', () => { rendreCredits(); ouvrirFeuille('sheet-credits'); });
+$('credits-fermer').addEventListener('click', fermerFeuilles);
 
 /* ================= Chargement ================= */
 let seqRecharger = 0;
