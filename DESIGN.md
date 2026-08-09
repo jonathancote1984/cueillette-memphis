@@ -212,6 +212,13 @@ Forme de base : coins arrondis généreux (12-24 px) avec **un coin cassé** —
 - **MORTEL :** fond saumon #F6DFD2, texte noir, mention du centre antipoison 1-800-463-5060 obligatoire.
 - **Prudence :** fond crème doré #F4E3C3.
 
+### Fiche hybride (checklist terrain)
+- **Structure :** photo réelle (16:9, bordure basse noire 3 px) + corps (case ✓, titre, description) + verdict.
+- **Carte de spécificité :** coins 18 px avec coin cassé 5 px, bordure noire 3 px, ombre dure 3 px, curseur pointer, appui scale(.99).
+- **Case cochée :** fond olive, texte barré (line-through 2 px, opacité .75) — la satisfaction du critère vérifié.
+- **Compteur :** pastille ambre « n/5 » à droite de l'en-tête de section.
+- **Verdicts :** carte pleine largeur, bordure noire 3 px, coin cassé — ✅ vert (tous les critères) / ⚠️ ambre (critères manquants, « En cas de doute : on ne mange pas »).
+
 ## Do's and Don'ts
 
 ### Do :

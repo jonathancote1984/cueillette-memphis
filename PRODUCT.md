@@ -23,19 +23,20 @@ Le carnet vit sur le téléphone, sans compte ni serveur : les données ne quitt
 - Terrain : forêts du Québec, téléphone en main, souvent sans réseau — PWA installable, 100 % hors-ligne dès la première visite.
 - Saisons de cueillette : morilles au printemps, chanterelles/cèpes été-automne.
 - Utilisation : noter un spot (GPS), identifier sur place (photo), journaliser la récolte (poids, météo, spot), consulter les stats.
-- Partage : export/import JSON complet (version 3, inclut espèces masquées et illustrations).
+- Partage : export/import JSON complet (version 4, inclut espèces masquées, supprimées et illustrations).
 
 ## Capabilities and Constraints
 
 - Spots : nom, description, GPS (précision affichée), photo, lien Google Maps.
 - Guide : 21 espèces avec photos Wikimedia embarquées, badges comestible / prudence / immangeable / toxique / MORTEL ☠️, saison, habitat, caractéristiques clés, confusions dangereuses.
+- Fiches hybrides : 5 spécificités d'identification par espèce (chapeau, hyménium, pied, chair, habitat) avec photo réelle embarquée (105 photos Wikimedia dans `img/specs/`), description de ce qu'il faut vérifier, checklist terrain interactive (cases à cocher, compteur, verdict ⚠️/✅) persistée localement.
 - Identification par photo : Gemini vision (appareil ou galerie), avec niveau de confiance et alertes de sécurité.
 - Variétés perso : ajout / modification / suppression, masquage / restauration sélective, fiche générée par IA (Gemini), photo Wikimedia Commons ou illustration IA (par spécificité : chapeau, lames, pied, section, habitat).
 - Cueillettes : date, espèce (suggestions + libre), poids kg (virgule acceptée), spot lié, météo, note, photo.
 - Stats : total récolté, sorties, espèces distinctes, dernière sortie, tops espèces/spots, barres mensuelles.
 - Sauvegarde : export/import JSON, effacement complet avec double confirmation.
-- Contrainte technique : PWA statique mono-fichier (`index.html`, ~110 Ko, zéro framework, pas de build), service worker cache-first avec bump `cqm-vN` (actuellement v15), API Wikimedia/Gemini exclues du cache. Déployée sur GitHub Pages (jonathancote1984.github.io/cueillette-memphis), push main → déploiement auto.
-- Données : IndexedDB (`cqm_bd` v4) avec repli localStorage ; clé Gemini stockée localement, jamais envoyée ailleurs. Paramètres : unités kg/lb (affichage + saisie), clé API. Suppression d'espèces d'origine = store `supprimees` + double confirmation.
+- Contrainte technique : PWA statique mono-fichier (`index.html`, ~140 Ko, zéro framework, pas de build), service worker cache-first avec bump `cqm-vN` (actuellement v20), API Wikimedia/Gemini exclues du cache. Déployée sur GitHub Pages (jonathancote1984.github.io/cueillette-memphis), push main → déploiement auto.
+- Données : IndexedDB (`cqm_bd` v5 : spots, cueillettes, especesCustom, cachees, supprimees, illustrations, checklist) avec repli localStorage ; clé Gemini stockée localement, jamais envoyée ailleurs. Paramètres : unités kg/lb (affichage + saisie), clé API. Suppression d'espèces d'origine = store `supprimees` + double confirmation.
 - Langue : français du Québec.
 
 ## Brand Commitments
@@ -51,6 +52,7 @@ Le carnet vit sur le téléphone, sans compte ni serveur : les données ne quitt
 ## Evidence on Hand
 
 - Photos réelles des 21 espèces dans `img/especes/` avec crédits Wikimedia (`credits.json`).
+- 105 photos de spécificités dans `img/specs/` (21 espèces × 5 critères) avec crédits Wikimedia (`credits.json`).
 - Icônes PWA (`icons/`), scripts de génération (`generer_icones.py`, `scripts/telecharger_photos.py`).
 - README documenté. Aucun témoignage ni donnée utilisateur publique — les données sont privées et locales.
 
