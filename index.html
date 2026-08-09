@@ -460,17 +460,22 @@ h2.titre-vue .ico{font-size:20px;}
     <textarea id="s-desc" placeholder="Type de forêt, accès, points de repère, abondance…"></textarea>
   </label>
   <div class="champ">Position
-    <div class="grille2" style="margin-top:5px">
-      <label class="champ" style="margin-bottom:0">Latitude
-        <input id="s-lat" inputmode="decimal" placeholder="46.8123">
+    <div class="grille2">
+      <label style="margin-bottom:0">Latitude
+        <input id="s-lat" inputmode="decimal" placeholder="46.8139">
       </label>
-      <label class="champ" style="margin-bottom:0">Longitude
+      <label style="margin-bottom:0">Longitude
         <input id="s-lng" inputmode="decimal" placeholder="-71.2145">
       </label>
     </div>
     <button class="btn btn-bleu btn-plein" id="s-gps" style="margin-top:8px">📍 Utiliser ma position</button>
     <div class="info-gps" id="s-gps-info"></div>
     <button class="btn btn-jaune btn-plein" id="s-carte" style="margin-top:6px; display:none">🗺️ Voir sur la carte</button>
+  </div>
+  <div class="champ">Espèces qu'on y trouve (optionnel)
+    <select id="s-especes" multiple size="4" style="margin-top:5px;width:100%;padding:8px;border:3px solid var(--noir);border-radius:12px 12px 12px 4px;background:var(--blanc);color:var(--noir);font-family:inherit;font-size:15px">
+    </select>
+    <p class="note" style="font-size:12px;opacity:.75;margin:4px 2px 0">Maintenez Ctrl (⌘ sur Mac) pour sélectionner plusieurs espèces.</p>
   </div>
   <div class="champ">Photo
     <div class="photo-zone" id="s-photo-zone" title="Cliquez pour retirer la photo">
@@ -500,8 +505,9 @@ h2.titre-vue .ico{font-size:20px;}
     </label>
   </div>
   <label class="champ">Espèce
-    <input id="c-espece" list="liste-especes" placeholder="Chanterelle…" maxlength="80">
-    <datalist id="liste-especes"></datalist>
+    <select id="c-espece" style="margin-top:5px;width:100%;padding:12px;font-size:16px;font-family:inherit;border:3px solid var(--noir);border-radius:12px 12px 12px 4px;background:var(--blanc);color:var(--noir);outline:none">
+      <option value="">— Choisir une espèce —</option>
+    </select>
   </label>
   <div class="grille2">
     <label class="champ">Spot
@@ -1025,6 +1031,7 @@ function rendreSpots() {
     return '<div class="item"><div class="vig">' + vig + '</div>' +
       '<div class="corps"><div class="nom">' + esc(s.nom) + '</div>' +
       '<div class="meta">' + (s.desc ? esc(s.desc) + '<br>' : '') + (s.lat && s.lng ? '📍 ' + esc(s.lat) + ', ' + esc(s.lng) : '📍 Position non notée') + '</div>' +
+      (s.especes && s.especes.length ? '<div class="meta">🍄 ' + s.especes.map(esc).join(' · ') + '</div>' : '') +
       '<div class="actions">' +
       '<button class="btn btn-vert btn-petit" onclick="partagerSpot(\'' + s.id + '\')">📤 Partager</button>' +
       '<button class="btn btn-bleu btn-petit" onclick="editerSpot(\'' + s.id + '\')">✏️ Modifier</button>' +
@@ -1065,8 +1072,15 @@ function ouvrirSheetSpot() {
   $('titre-spot').textContent = '➕ Nouveau spot';
   $('s-nom').value = ''; $('s-desc').value = ''; $('s-lat').value = ''; $('s-lng').value = '';
   $('s-gps-info').textContent = ''; $('s-carte').style.display = 'none';
+  remplirSelectEspecesSpot();
   afficherPhoto('s-photo-zone', null);
   ouvrirFeuille('sheet-spot');
+}
+function remplirSelectEspecesSpot() {
+  const sel = $('s-especes'); if (!sel) return;
+  sel.innerHTML = toutesEspeces().map(e =>
+    '<option value="' + esc(e.nom) + '">' + esc(e.nom) + (e.latin ? ' — ' + esc(e.latin) : '') + '</option>'
+  ).join('');
 }
 function editerSpot(id) {
   const s = Etat.spots.find(x => x.id === id); if (!s) return;
@@ -1076,6 +1090,12 @@ function editerSpot(id) {
   $('s-lat').value = s.lat || ''; $('s-lng').value = s.lng || '';
   $('s-gps-info').textContent = '';
   $('s-carte').style.display = (s.lat && s.lng) ? '' : 'none';
+  remplirSelectEspecesSpot();
+  const sel = $('s-especes');
+  (s.especes || []).forEach(n => {
+    const opt = [...sel.options].find(o => o.value === n);
+    if (opt) opt.selected = true;
+  });
   afficherPhoto('s-photo-zone', Etat.spot.photo);
   ouvrirFeuille('sheet-spot');
 }
@@ -1094,6 +1114,7 @@ $('s-save').addEventListener('click', async () => {
     desc: $('s-desc').value.trim(),
     lat: $('s-lat').value.trim(),
     lng: $('s-lng').value.trim(),
+    especes: [...$('s-especes').selectedOptions].map(o => o.value),
     photo: Etat.spot.photo,
     cree: Etat.spot.edition ? (Etat.spots.find(x => x.id === Etat.spot.edition) || {}).cree : aujourdhui()
   };
@@ -1237,7 +1258,12 @@ function rendreCueillettes() {
   }).join('');
 }
 function remplirDatalist() {
-  $('liste-especes').innerHTML = toutesEspeces().map(e => '<option value="' + esc(e.nom) + '">').join('');
+  // Remplit le select Espèce de la cueillette (remplace l'ancien datalist, plus fiable sur mobile)
+  const sel = $('c-espece'); if (!sel) return;
+  const courante = sel.value;
+  const options = toutesEspeces().map(e => '<option value="' + esc(e.nom) + '">' + esc(e.nom) + (e.latin ? ' — ' + esc(e.latin) : '') + '</option>').join('');
+  sel.innerHTML = '<option value="">— Choisir une espèce —</option>' + options;
+  if (courante && [...sel.options].some(o => o.value === courante)) sel.value = courante;
 }
 function remplirSelectSpot() {
   $('c-spot').innerHTML = '<option value="">— Sans spot —</option>' +
@@ -1258,7 +1284,15 @@ function editerCueillette(id) {
   $('titre-cueillette').textContent = '✏️ Modifier la cueillette';
   $('c-date').value = c.date || aujourdhui();
   $('c-poids').value = c.poids ? (Etat.unite === 'lb' ? +(c.poids * 2.20462).toFixed(1) : c.poids) : '';
-  $('c-espece').value = c.espece || '';
+  // Sélectionne l'espèce ; si elle a été masquée/supprimée du guide, garder une option fantôme pour ne pas perdre la valeur
+  const sel = $('c-espece');
+  const existe = [...sel.options].some(o => o.value === (c.espece || ''));
+  if (c.espece && !existe) {
+    const opt = document.createElement('option');
+    opt.value = c.espece; opt.textContent = c.espece + ' (espèce masquée)';
+    sel.appendChild(opt);
+  }
+  sel.value = c.espece || '';
   $('c-spot').value = c.spotId || '';
   $('c-meteo').value = c.meteo || '🌞 Ensoleillé';
   $('c-note').value = c.note || '';
