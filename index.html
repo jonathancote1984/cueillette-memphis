@@ -243,6 +243,26 @@ h2.titre-vue .ico{font-size:20px;}
 .illu-onglets .illu-actif{background:var(--orange); color:var(--blanc);}
 .illu-img{border:3px solid var(--noir); border-radius:16px 16px 16px 5px; box-shadow:4px 4px 0 var(--noir); overflow:hidden; margin-bottom:4px;}
 .illu-img img{width:100%; display:block;}
+/* ===== Checklist terrain (fiche espèce) ===== */
+.spec-carte{border:3px solid var(--noir);border-radius:18px 18px 18px 5px;overflow:hidden;background:var(--blanc);margin-bottom:12px;cursor:pointer;transition:transform .15s;box-shadow:3px 3px 0 var(--noir);}
+.spec-carte:active{transform:scale(.99)}
+.spec-photo{position:relative}
+.spec-photo img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;border-bottom:3px solid var(--noir)}
+.spec-num{position:absolute;top:8px;left:8px;background:var(--ambre);border:2.5px solid var(--noir);border-radius:9px 9px 9px 3px;font-weight:900;font-size:13px;padding:1px 8px;box-shadow:2px 2px 0 rgba(36,26,15,.4)}
+.spec-zoom{position:absolute;bottom:8px;right:8px;background:rgba(253,246,231,.92);border:2.5px solid var(--noir);border-radius:999px;font-size:11.5px;font-weight:700;padding:2px 9px}
+.spec-corps{display:flex;gap:10px;padding:10px 12px;align-items:flex-start}
+.spec-carre{width:28px;height:28px;min-width:28px;border:3px solid var(--noir);border-radius:9px 9px 9px 3px;background:var(--creme);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:transparent;margin-top:1px}
+.spec-carte.fait .spec-carre{background:var(--olive);color:var(--blanc)}
+.spec-carte.fait .spec-titre{text-decoration:line-through;text-decoration-thickness:2px;opacity:.75}
+.spec-texte{flex:1;font-size:13.5px}
+.spec-texte .spec-titre{font-weight:700;font-size:14.5px}
+.spec-texte .spec-desc{opacity:.85;margin-top:2px;font-size:13px}
+.verdict-carte{margin:14px 0 0;border:3px solid var(--noir);border-radius:14px 14px 14px 4px;padding:11px 13px;font-size:13.5px;display:none}
+.verdict-carte.ouv{display:block}
+.verdict-carte .t{font-weight:700;display:flex;gap:6px;align-items:center;margin-bottom:3px}
+.verdict-ok{background:var(--olive);color:var(--blanc)}
+.verdict-att{background:var(--ambre);color:var(--noir)}
+.spec-compteur{font-size:12.5px;background:var(--noir);color:var(--creme);padding:2px 10px;border-radius:999px;font-weight:700}
 .feuille{
   position:fixed; left:8px; right:8px; bottom:8px; z-index:70;
   max-width:640px; margin:0 auto;
@@ -681,7 +701,7 @@ const Stockage = (() => {
   function ouvrir() {
     return new Promise(ok => {
       try {
-        const rq = indexedDB.open('cqm_bd', 4);
+        const rq = indexedDB.open('cqm_bd', 5);
         rq.onupgradeneeded = () => {
           const b = rq.result;
           if (!b.objectStoreNames.contains('spots')) b.createObjectStore('spots', { keyPath: 'id' });
@@ -690,6 +710,7 @@ const Stockage = (() => {
           if (!b.objectStoreNames.contains('caches')) b.createObjectStore('caches', { keyPath: 'id' });
           if (!b.objectStoreNames.contains('illustrations')) b.createObjectStore('illustrations', { keyPath: 'id' });
           if (!b.objectStoreNames.contains('supprimees')) b.createObjectStore('supprimees', { keyPath: 'id' });
+          if (!b.objectStoreNames.contains('checklist')) b.createObjectStore('checklist', { keyPath: 'id' });
         };
         rq.onsuccess = () => { bd = rq.result; ok(); };
         rq.onerror = () => { repli = true; ok(); };
@@ -854,7 +875,7 @@ const STATUTS = {
 
 /* ================= État ================= */
 const Etat = {
-  spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], illustrations: {},
+  spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], illustrations: {}, checklist: {},
   vue: 'spots', filtre: 'tous', recherche: '', detailId: null,
   unite: localStorage.getItem('cqm_unite') === 'lb' ? 'lb' : 'kg',
   spot: { edition: null, photo: null },
@@ -1193,12 +1214,25 @@ function ouvrirDetail(id, perso) {
         ? '<div class="alerte alerte-orange">⚠️ <b>Prudence requise :</b> cuisson obligatoire et/ou réservé aux cueilleurs expérimentés. En cas de doute, faites vérifier votre récolte.</div>'
         : '';
   const img = e.img || e.photo;
+  // Pré-remplissage : injecter les 5 spécificités standard si aucune n'existe (fiche ouverte sans passer par la feuille IA)
+  if (!Etat.illustrations[e.id] || !Etat.illustrations[e.id].items.length) {
+    Etat.illustrations[e.id] = { id: e.id, items: specsDefautPour(e.id) };
+    Stockage.ecrire('illustrations', Etat.illustrations[e.id]);
+  }
   const illu = Etat.illustrations[e.id] || { items: [] };
+  const faits = Etat.checklist[e.id] || { id: e.id, faits: [] };
+  const nbFaits = illu.items.filter((_, i) => faits.faits[i]).length;
   const galerie = illu.items.length ? (
     '<span class="guide-sujet">🖼️ Spécificités à repérer</span>' +
-    '<div class="illu-onglets">' + illu.items.map((it, i) =>
-      '<button class="btn btn-jaune btn-petit' + (i === 0 ? ' illu-actif' : '') + '" onclick="changerIllu(\'' + e.id + '\',' + i + ')">' + esc(it.spec) + '</button>').join('') + '</div>' +
-    '<div class="illu-img"><img id="illu-grande" src="' + illu.items[0].img + '" alt="' + esc(e.nom) + '" onclick="ouvrirLightbox(this.src)" style="cursor:zoom-in"></div>'
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 10px"><span style="font-size:12.5px;opacity:.85">Vérifiez chaque critère sur le champignon</span><span class="spec-compteur" id="spec-compteur">' + nbFaits + '/' + illu.items.length + '</span></div>' +
+    illu.items.map((it, i) =>
+      '<div class="spec-carte' + (faits.faits[i] ? ' fait' : '') + '" id="spec-carte-' + i + '" onclick="basculerSpec(' + i + ')">' +
+      (it.img ? '<div class="spec-photo"><img src="' + it.img + '" alt="' + esc(it.spec) + '" onclick="event.stopPropagation();ouvrirLightbox(this.src)"><span class="spec-num">' + (i + 1) + '</span><span class="spec-zoom">🔍 Agrandir</span></div>' : '') +
+      '<div class="spec-corps"><div class="spec-carre">✓</div><div class="spec-texte"><div class="spec-titre">' + esc(it.spec) + '</div>' + (it.desc ? '<div class="spec-desc">' + esc(it.desc) + '</div>' : '') + '</div></div>' +
+      '</div>'
+    ).join('') +
+    '<div class="verdict-carte verdict-ok' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">✅ Tous les critères correspondent</div>' + esc(e.nom) + ' confirmé' + (e.statut === 'comestible' ? ' — récolte possible.' : ' — restez prudent.') + '</div>' +
+    '<div class="verdict-carte verdict-att' + (nbFaits > 0 && nbFaits < illu.items.length ? ' ouv' : '') + '" id="spec-verdict-att"><div class="t">⚠️ Critères manquants</div>Ne consommez pas tant que tout n\'est pas vérifié. En cas de doute : on ne mange pas.</div>'
   ) : '';
   const boutons = '<button class="btn btn-jaune" onclick="ouvrirSheetIllu(\'' + e.id + '\')">🎨 Illustrations IA</button>' +
     (perso
@@ -1225,10 +1259,20 @@ function ouvrirDetail(id, perso) {
   naviguer('detail');
 }
 function fermerDetail() { naviguer('guide'); }
-function changerIllu(id, i) {
-  const items = (Etat.illustrations[id] || { items: [] }).items;
-  const img = $('illu-grande'); if (img && items[i]) img.src = items[i].img;
-  document.querySelectorAll('.illu-onglets .btn').forEach((b, j) => b.classList.toggle('illu-actif', j === i));
+async function basculerSpec(i) {
+  const id = Etat.detailId; if (!id) return;
+  const illu = Etat.illustrations[id] || { items: [] };
+  if (!illu.items[i]) return;
+  const ent = Etat.checklist[id] || { id, faits: [] };
+  ent.faits[i] = !ent.faits[i];
+  Etat.checklist[id] = ent;
+  await Stockage.ecrire('checklist', ent);
+  const carte = $('spec-carte-' + i); if (carte) carte.classList.toggle('fait', !!ent.faits[i]);
+  const nb = illu.items.filter((_, j) => ent.faits[j]).length;
+  const cmp = $('spec-compteur'); if (cmp) cmp.textContent = nb + '/' + illu.items.length;
+  const ok = $('spec-verdict-ok'), att = $('spec-verdict-att');
+  if (ok) ok.classList.toggle('ouv', nb === illu.items.length);
+  if (att) att.classList.toggle('ouv', nb > 0 && nb < illu.items.length);
 }
 
 /* ================= Cueillettes ================= */
@@ -1506,11 +1550,11 @@ $('e-photo-commons').addEventListener('click', async () => {
 
 /* --- Photo : illustration IA (Gemini image, si la clé le permet) --- */
 const MODELES_IMAGE = ['gemini-2.5-flash-image', 'gemini-3.1-flash-image', 'nano-banana-pro-preview'];
-async function genererImageIA(nom, latin, spec) {
+async function genererImageIA(nom, latin, spec, desc) {
   const cle = cleIA();
   if (!cle) throw new Error('PAS_DE_CLE');
   const detail = spec
-    ? ' — ' + spec + ' — plan rapproché mettant en évidence cette caractéristique d\'identification'
+    ? ' — ' + spec + (desc ? ' — ' + desc : '') + ' — plan rapproché mettant en évidence cette caractéristique d\'identification'
     : ', vue de côté dans son habitat forestier naturel';
   const prompt = 'Illustration photographique réaliste du champignon « ' + nom + ' » (' + (latin || 'espèce indéterminée') + ')' + detail + ', éclairage naturel, Québec.';
   let derniereErreur = null;
@@ -1555,31 +1599,165 @@ $('e-photo-zone').addEventListener('click', () => { if (photoEspece) { confirmer
 /* ================= Illustrations IA par spécificité ================= */
 let illuEspeceId = null;
 // Pré-remplissage : 5 spécificités standard d'identification par espèce (générées par IA en 1 clic)
+// Chaque entrée : { spec: libellé court, desc: ce qu'il faut VÉRIFIER sur le champignon, img: photo réelle (optionnel) }
 const SPECS_DEFAUT = {
-  chanterelle: ['Chapeau (entonnoir orangé)', 'Hyménium (veines, pas de lames)', 'Pied (concolore, sans anneau)', 'Chair (ferme, odeur d\'abricot)', 'Habitat (feuillus, mousse)'],
-  'chanterelle-tube': ['Chapeau (brun, creux)', 'Hyménium (veines grisâtres)', 'Pied (creux, jaunâtre)', 'Chair (fine, parfumée)', 'Habitat (conifères humides)'],
-  cepe: ['Chapeau (brun, massif)', 'Hyménium (tubes blancs → olive)', 'Pied (massue, réseau blanc)', 'Chair (blanche, noisette)', 'Habitat (bouleaux, chênes)'],
-  'bolet-bai': ['Chapeau (brun châtain velouté)', 'Hyménium (tubes bleuissants)', 'Pied (brun, sans réseau)', 'Chair (bleuit à la coupe)', 'Habitat (conifères, sols acides)'],
-  'pied-mouton': ['Chapeau (orangé, ombiliqué)', 'Hyménium (AIGUILLONS)', 'Pied (concolore, creux)', 'Chair (blanche, croquante)', 'Habitat (conifères, mousse)'],
-  morille: ['Chapeau (alvéoles nid d\'abeille)', 'Coupe (creuse de haut en bas)', 'Pied (crème, attaché)', 'Chair (fine, fragile)', 'Habitat (frênaies, zones de feu)'],
-  pleurote: ['Chapeau (coquille d\'huître)', 'Hyménium (lames blanches décurrentes)', 'Pied (court, latéral)', 'Chair (blanche, tendre)', 'Habitat (troncs de feuillus)'],
-  coprin: ['Chapeau (cylindrique, écailleux)', 'Hyménium (lames → roses → noires)', 'Pied (anneau coulissant)', 'Chair (deliquescence en encre)', 'Habitat (bords de chemins)'],
-  lepiote: ['Chapeau (écailleux, mamelon)', 'Hyménium (lames blanches libres)', 'Pied (zébré, anneau COULISSANT)', 'Chair (blanche, épaisse)', 'Habitat (clairières, pâturages)'],
-  'amanite-rougissante': ['Chapeau (brun-rosé, verrues grises)', 'Hyménium (lames blanches)', 'Pied (bulbeux, anneau strié)', 'Chair (ROUGIT à la coupe)', 'Habitat (feuillus, conifères)'],
-  'bolet-amer': ['Chapeau (brun, convexe)', 'Hyménium (tubes ROSÂTRES)', 'Pied (réseau brun foncé)', 'Chair (très amère)', 'Habitat (souches, conifères)'],
-  'tue-mouches': ['Chapeau (rouge vif, verrues blanches)', 'Hyménium (lames blanches)', 'Pied (anneau blanc, volve)', 'Chair (blanche sous la cuticule)', 'Habitat (bouleaux, conifères)'],
-  panthere: ['Chapeau (brun, verrues régulières)', 'Hyménium (lames blanches)', 'Pied (anneau LISSE, volve en bourrelet)', 'Chair (ne rougit PAS)', 'Habitat (feuillus, conifères)'],
-  entolome: ['Chapeau (blanc-gris, charnu)', 'Hyménium (lames jaunes → ROSES)', 'Pied (blanc, sans anneau)', 'Chair (odeur de farine)', 'Habitat (feuillus, parcs)'],
-  paxille: ['Chapeau (brun, marge ENROULÉE)', 'Hyménium (lames brunâtres tachantes)', 'Pied (court, brun)', 'Chair (molle, brunâtre)', 'Habitat (sous les bouleaux)'],
-  'fausse-chanterelle': ['Chapeau (orange terne, plat)', 'Hyménium (VRAIES lames fines)', 'Pied (grêle, courbé)', 'Chair (molle, orangée)', 'Habitat (aiguilles de conifères)'],
-  phalloide: ['Chapeau (jaune-vert pâle)', 'Hyménium (lames blanches)', 'Pied (anneau, VOLVE en sac)', 'Chair (blanche, odeur faible)', 'Habitat (sous les chênes)'],
-  vireuse: ['Chapeau (entièrement blanc, soyeux)', 'Hyménium (lames blanches)', 'Pied (anneau blanc, volve)', 'Chair (blanche, ne rougit pas)', 'Habitat (mousses, forêts fraîches)'],
-  galerine: ['Chapeau (petit, brun 2-5 cm)', 'Hyménium (lames brunâtres)', 'Pied (anneau fragile)', 'Chair (brunâtre, fine)', 'Habitat (SUR BOIS mort)'],
-  'lepiote-brunatre': ['Chapeau (petit, brun-rosé)', 'Hyménium (lames blanches)', 'Pied (anneau FIXE)', 'Chair (blanche, fine)', 'Habitat (forêts, litière)'],
-  gyromitre: ['Chapeau (cérébriforme, circonvolutions)', 'Coupe (chambre creuse, lobes)', 'Pied (court, friable)', 'Chair (fragile, céracée)', 'Habitat (sous les pins)']
+  chanterelle: [
+    { spec: 'Chapeau — entonnoir orangé', desc: 'Ondulé, 3–10 cm, jaune vif, marge enroulée quand jeune. Vérifiez la forme en entonnoir et la couleur.', img: 'img/specs/chanterelle-1.jpg' },
+    { spec: 'Dessous — VEINES, pas de lames', desc: 'Critère décisif : veines épaisses et ramifiées descendant sur le pied. Une vraie chanterelle n\'a JAMAIS de lames fines et serrées.', img: 'img/specs/chanterelle-2.jpg' },
+    { spec: 'Pied — plein, sans anneau', desc: 'Concolore au chapeau, plein (pas creux), sans anneau ni volve à la base.', img: 'img/specs/chanterelle-3.jpg' },
+    { spec: 'Odeur — d\'abricot', desc: 'Chair ferme, blanche à jaunâtre, odeur fruitée d\'abricot. Sentez le pied fraîchement coupé.', img: 'img/specs/chanterelle-4.jpg' },
+    { spec: 'Habitat — feuillus, mousse', desc: 'Sous érables et bouleaux, dans la mousse, souvent en groupes. Juillet à octobre.', img: 'img/specs/chanterelle-5.jpg' }
+  ],
+  'chanterelle-tube': [
+    { spec: 'Chapeau (brun, creux)', desc: 'Petit chapeau brunâtre à centre creux, forme en entonnoir.' },
+    { spec: 'Hyménium (veines grisâtres)', desc: 'Veines grisâtres décurrentes, jamais de lames.' },
+    { spec: 'Pied (creux, jaunâtre)', desc: 'Pied creux jusqu\'au bout, jaunâtre.' },
+    { spec: 'Chair (fine, parfumée)', desc: 'Chair mince, odeur agréable et parfumée, idéale séchée.' },
+    { spec: 'Habitat (conifères humides)', desc: 'Mousses et aiguilles en forêt de conifères humide.' }
+  ],
+  cepe: [
+    { spec: 'Chapeau (brun, massif)', desc: 'Chapeau brun 5–25 cm, lisse, convexe.' },
+    { spec: 'Hyménium (tubes blancs → olive)', desc: 'Tubes blancs puis jaune-olive, JAMAIS rouges.' },
+    { spec: 'Pied (massue, réseau blanc)', desc: 'Pied en massue couvert d\'un fin réseau blanc.' },
+    { spec: 'Chair (blanche, noisette)', desc: 'Chair ferme et blanche, ne bleuit pas, odeur de noisette.' },
+    { spec: 'Habitat (bouleaux, chênes)', desc: 'Forêts de feuillus et conifères matures.' }
+  ],
+  'bolet-bai': [
+    { spec: 'Chapeau (brun châtain velouté)', desc: 'Brun châtain, velouté, 6–15 cm.' },
+    { spec: 'Hyménium (tubes bleuissants)', desc: 'Tubes jaune-vert qui bleuissent fortement au toucher.' },
+    { spec: 'Pied (brun, sans réseau)', desc: 'Pied brun sans réseau (contrairement au cèpe).' },
+    { spec: 'Chair (bleuit à la coupe)', desc: 'Chair blanchâtre qui bleuit à la coupe — normal ici.' },
+    { spec: 'Habitat (conifères, sols acides)', desc: 'Sous conifères, parfois feuillus, sols acides.' }
+  ],
+  'pied-mouton': [
+    { spec: 'Chapeau (orangé, ombiliqué)', desc: 'Orange pâle à brun, souvent creusé au centre (ombiliqué).' },
+    { spec: 'Hyménium (AIGUILLONS)', desc: 'AIGUILLONS sous le chapeau, jamais de lames — signe distinctif.' },
+    { spec: 'Pied (concolore, creux)', desc: 'Pied de la même couleur, parfois creux.' },
+    { spec: 'Chair (blanche, croquante)', desc: 'Chair blanche et ferme, goût doux.' },
+    { spec: 'Habitat (conifères, mousse)', desc: 'Forêts de conifères, dans les mousses.' }
+  ],
+  morille: [
+    { spec: 'Chapeau (alvéoles nid d\'abeille)', desc: 'Alvéoles régulières en nid d\'abeille, brun, 5–15 cm.' },
+    { spec: 'Coupe (creuse de haut en bas)', desc: 'Chapeau ET pied CREUX — coupez en deux pour vérifier.' },
+    { spec: 'Pied (crème, attaché)', desc: 'Pied crème, attaché au chapeau (pas de séparation nette).' },
+    { spec: 'Chair (fine, fragile)', desc: 'Chair mince et fragile, creuse.' },
+    { spec: 'Habitat (frênaies, zones de feu)', desc: 'Sols perturbés, frênaies, pommiers morts, zones de feu. Printemps.' }
+  ],
+  pleurote: [
+    { spec: 'Chapeau (coquille d\'huître)', desc: 'Gris-brun en forme de coquille d\'huître, 5–20 cm.' },
+    { spec: 'Hyménium (lames blanches décurrentes)', desc: 'Lames blanches descendant sur le pied.' },
+    { spec: 'Pied (court, latéral)', desc: 'Pied court et excentré (sur le côté).' },
+    { spec: 'Chair (blanche, tendre)', desc: 'Chair blanche et tendre.' },
+    { spec: 'Habitat (troncs de feuillus)', desc: 'En étagères sur troncs et souches de feuillus.' }
+  ],
+  coprin: [
+    { spec: 'Chapeau (cylindrique, écailleux)', desc: 'Cylindrique, blanc couvert d\'écailles brunes.' },
+    { spec: 'Hyménium (lames → roses → noires)', desc: 'Lames blanches qui deviennent roses puis noires.' },
+    { spec: 'Pied (anneau coulissant)', desc: 'Anneau coulissant sur le pied.' },
+    { spec: 'Chair (deliquescence en encre)', desc: 'Se liquéfie rapidement en encre noire — cueillir JEUNE.' },
+    { spec: 'Habitat (bords de chemins)', desc: 'Bords de chemins, terrains vagues, sols riches.' }
+  ],
+  lepiote: [
+    { spec: 'Chapeau (écailleux, mamelon)', desc: 'Grand chapeau 15–30 cm, écailles brunes, mamelon central.' },
+    { spec: 'Hyménium (lames blanches libres)', desc: 'Lames blanches, libres (n\'atteignent pas le pied).' },
+    { spec: 'Pied (zébré, anneau COULISSANT)', desc: 'Pied élancé zébré, anneau COULISSANT — vérifiez qu\'il glisse.' },
+    { spec: 'Chair (blanche, épaisse)', desc: 'Chair blanche, épaisse au chapeau.' },
+    { spec: 'Habitat (clairières, pâturages)', desc: 'Clairières, pâturages, bords de routes, sols secs.' }
+  ],
+  'amanite-rougissante': [
+    { spec: 'Chapeau (brun-rosé, verrues grises)', desc: 'Brun-rosé couvert de verrues grisâtres.' },
+    { spec: 'Hyménium (lames blanches)', desc: 'Lames blanches, libres.' },
+    { spec: 'Pied (bulbeux, anneau strié)', desc: 'Pied à base bulbeuse, anneau STRIÉ au-dessus.' },
+    { spec: 'Chair (ROUGIT à la coupe)', desc: 'Chair qui rougit rose saumon à la coupe et avec l\'âge — indice clé.' },
+    { spec: 'Habitat (feuillus, conifères)', desc: 'Forêts de feuillus et de conifères.' }
+  ],
+  'bolet-amer': [
+    { spec: 'Chapeau (brun, convexe)', desc: 'Brun, convexe, 5–15 cm.' },
+    { spec: 'Hyménium (tubes ROSÂTRES)', desc: 'Tubes blancs devenant ROSÂTRES avec l\'âge — contrairement au cèpe.' },
+    { spec: 'Pied (réseau brun foncé)', desc: 'Réseau BRUN FONCÉ sur le pied (le cèpe a un réseau blanc).' },
+    { spec: 'Chair (très amère)', desc: 'Saveur très amère — goûter une miette et cracher.' },
+    { spec: 'Habitat (souches, conifères)', desc: 'Conifères et feuillus, souvent au pied des souches.' }
+  ],
+  'tue-mouches': [
+    { spec: 'Chapeau (rouge vif, verrues blanches)', desc: 'Rouge vif à verrues blanches (parfois orange/jaune).' },
+    { spec: 'Hyménium (lames blanches)', desc: 'Lames blanches, libres.' },
+    { spec: 'Pied (anneau blanc, volve)', desc: 'Anneau blanc, volve blanche à la base.' },
+    { spec: 'Chair (blanche sous la cuticule)', desc: 'Chair blanche, jaune pâle sous la cuticule du chapeau.' },
+    { spec: 'Habitat (bouleaux, conifères)', desc: 'Sous bouleaux et conifères.' }
+  ],
+  panthere: [
+    { spec: 'Chapeau (brun, verrues régulières)', desc: 'Brun avec verrues blanches régulières.' },
+    { spec: 'Hyménium (lames blanches)', desc: 'Lames blanches.' },
+    { spec: 'Pied (anneau LISSE, volve en bourrelet)', desc: 'Anneau LISSE (non strié), volve en bourrelet au pied.' },
+    { spec: 'Chair (ne rougit PAS)', desc: 'Chair qui NE rougit PAS — contrairement à l\'amanite rougissante.' },
+    { spec: 'Habitat (feuillus, conifères)', desc: 'Feuillus et conifères.' }
+  ],
+  entolome: [
+    { spec: 'Chapeau (blanc-gris, charnu)', desc: 'Blanc-grisâtre, charnu, 5–15 cm.' },
+    { spec: 'Hyménium (lames jaunes → ROSES)', desc: 'Lames jaunâtres devenant ROSES avec la sporée — signe d\'entolome.' },
+    { spec: 'Pied (blanc, sans anneau)', desc: 'Pied blanc, sans anneau.' },
+    { spec: 'Chair (odeur de farine)', desc: 'Odeur caractéristique de farine fraîche.' },
+    { spec: 'Habitat (feuillus, parcs)', desc: 'Forêts de feuillus, parcs.' }
+  ],
+  paxille: [
+    { spec: 'Chapeau (brun, marge ENROULÉE)', desc: 'Brun velouté, marge fortement ENROULÉE.' },
+    { spec: 'Hyménium (lames brunâtres tachantes)', desc: 'Lames brunâtres qui se tachent au frottement.' },
+    { spec: 'Pied (court, brun)', desc: 'Pied court, brun.' },
+    { spec: 'Chair (molle, brunâtre)', desc: 'Chair molle, brunâtre.' },
+    { spec: 'Habitat (sous les bouleaux)', desc: 'Pousse sous les bouleaux.' }
+  ],
+  'fausse-chanterelle': [
+    { spec: 'Chapeau (orange terne, plat)', desc: 'Orange plus terne, plat à légèrement déprimé.' },
+    { spec: 'Hyménium (VRAIES lames fines)', desc: 'VRAIES lames fines et serrées — indice décisif face à la chanterelle.' },
+    { spec: 'Pied (grêle, courbé)', desc: 'Pied grêle et courbé.' },
+    { spec: 'Chair (molle, orangée)', desc: 'Chair molle, orangée.' },
+    { spec: 'Habitat (aiguilles de conifères)', desc: 'Litière d\'aiguilles sous conifères.' }
+  ],
+  phalloide: [
+    { spec: 'Chapeau (jaune-vert pâle)', desc: 'Jaune-vert pâle, parfois blanc, 5–15 cm.' },
+    { spec: 'Hyménium (lames blanches)', desc: 'Lames blanches, serrées.' },
+    { spec: 'Pied (anneau, VOLVE en sac)', desc: 'Anneau membraneux et VOLVE en sac à la base — indice CLÉ des amanites mortelles.' },
+    { spec: 'Chair (blanche, odeur faible)', desc: 'Chair blanche, odeur faible.' },
+    { spec: 'Habitat (sous les chênes)', desc: 'Feuillus, souvent sous les chênes. Août à octobre.' }
+  ],
+  vireuse: [
+    { spec: 'Chapeau (entièrement blanc, soyeux)', desc: 'Entièrement blanche, chapeau soyeux parfois visqueux.' },
+    { spec: 'Hyménium (lames blanches)', desc: 'Lames blanches.' },
+    { spec: 'Pied (anneau blanc, volve)', desc: 'Anneau blanc et VOLVE en sac au pied.' },
+    { spec: 'Chair (blanche, ne rougit pas)', desc: 'Chair blanche qui ne rougit pas.' },
+    { spec: 'Habitat (mousses, forêts fraîches)', desc: 'Forêts de conifères et de feuillus, mousses.' }
+  ],
+  galerine: [
+    { spec: 'Chapeau (petit, brun 2-5 cm)', desc: 'Petit chapeau brun, 2–5 cm, marge striée quand humide.' },
+    { spec: 'Hyménium (lames brunâtres)', desc: 'Lames brunâtres.' },
+    { spec: 'Pied (anneau fragile)', desc: 'Anneau fragile, parfois absent.' },
+    { spec: 'Chair (brunâtre, fine)', desc: 'Chair brunâtre et fine.' },
+    { spec: 'Habitat (SUR BOIS mort)', desc: 'SUR BOIS : souches, troncs, copeaux. Règle d\'or : jamais de petits bruns sur le bois.' }
+  ],
+  'lepiote-brunatre': [
+    { spec: 'Chapeau (petit, brun-rosé)', desc: 'Petit (5–8 cm), brun-rosé avec petites écailles.' },
+    { spec: 'Hyménium (lames blanches)', desc: 'Lames blanches.' },
+    { spec: 'Pied (anneau FIXE)', desc: 'Anneau FIXE (non coulissant) — contrairement à la lépiote élevée.' },
+    { spec: 'Chair (blanche, fine)', desc: 'Chair blanche, fine.' },
+    { spec: 'Habitat (forêts, litière)', desc: 'Forêts, litière, bords de chemins.' }
+  ],
+  gyromitre: [
+    { spec: 'Chapeau (cérébriforme)', desc: 'Circonvolutions irrégulières en cervelle, brun rougeâtre — PAS d\'alvéoles.' },
+    { spec: 'Coupe (chambre creuse, lobes)', desc: 'Coupe en chambre creuse avec lobes, pas de chapeau/pied distincts.' },
+    { spec: 'Pied (court, friable)', desc: 'Pied court, blanchâtre, friable.' },
+    { spec: 'Chair (fragile, céracée)', desc: 'Chair fragile, cireuse.' },
+    { spec: 'Habitat (sous les pins)', desc: 'Sous les pins, printemps — MÊME saison que la morille.' }
+  ]
 };
 function specsDefautPour(id) {
-  return (SPECS_DEFAUT[id] || ['Chapeau', 'Hyménium (lames/tubes/aiguillons)', 'Pied', 'Chair', 'Habitat']).map(spec => ({ spec, img: null }));
+  const defauts = SPECS_DEFAUT[id] || [
+    { spec: 'Chapeau', desc: 'Forme, couleur, taille.' },
+    { spec: 'Hyménium (lames/tubes/aiguillons)', desc: 'Dessous du chapeau : lames, tubes ou aiguillons.' },
+    { spec: 'Pied', desc: 'Forme, couleur, anneau, volve.' },
+    { spec: 'Chair', desc: 'Couleur, fermeté, odeur.' },
+    { spec: 'Habitat', desc: 'Où il pousse, saison.' }
+  ];
+  return defauts.map(s => ({ spec: s.spec, desc: s.desc || '', img: s.img || null }));
 }
 function ouvrirSheetIllu(id) {
   const e = toutesEspeces().find(x => x.id === id); if (!e) return;
@@ -1591,6 +1769,22 @@ function ouvrirSheetIllu(id) {
     ent.items = specsDefautPour(id);
     Etat.illustrations[id] = ent;
     Stockage.ecrire('illustrations', ent);
+  } else {
+    // Migration : enrichir les items existants (ancienne version sans desc/img) avec les données standard
+    const defauts = specsDefautPour(id);
+    let modifie = false;
+    ent.items.forEach((it, i) => {
+      const d = defauts[i];
+      if (d && (!it.desc || (!it.img && d.img))) {
+        if (!it.desc) it.desc = d.desc;
+        if (!it.img && d.img) it.img = d.img;
+        modifie = true;
+      }
+    });
+    if (modifie) {
+      Etat.illustrations[id] = ent;
+      Stockage.ecrire('illustrations', ent);
+    }
   }
   rendreListeIllu();
   ouvrirFeuille('sheet-illu');
@@ -1604,6 +1798,7 @@ function rendreListeIllu() {
     '<button class="btn btn-rouge btn-petit" onclick="retirerIllu(' + i + ')">✖️</button>' +
     '<button class="btn btn-jaune btn-petit" onclick="genererIllu(' + i + ')">' + (it.img ? '🔄 Refaire' : '🎨 Générer') + '</button>' +
     '</div>' +
+    (it.desc ? '<div style="padding:0 10px 8px;font-size:12.5px;opacity:.85;line-height:1.5">' + esc(it.desc) + '</div>' : '') +
     (it.img ? '<img src="' + it.img + '" style="width:100%;display:block;border-top:3px solid var(--noir)" alt="' + esc(it.spec) + '">' : '') +
     '</div>'
   ).join('') : '<div class="vide-etat" style="padding:10px">Aucune spécificité — ajoutez-en une ci-dessous ou générez les 5 classiques.</div>';
@@ -1614,7 +1809,7 @@ $('illu-ajouter').addEventListener('click', async () => {
   if (!spec) { toast('Entrez le nom de la spécificité'); return; }
   const ent = Etat.illustrations[illuEspeceId] || { id: illuEspeceId, items: [] };
   if (ent.items.some(x => x.spec === spec)) { toast('Cette spécificité est déjà là'); return; }
-  ent.items.push({ spec, img: null });
+  ent.items.push({ spec, img: null, desc: '' });
   await Stockage.ecrire('illustrations', ent);
   Etat.illustrations[illuEspeceId] = ent;
   $('illu-nouvelle').value = '';
@@ -1628,7 +1823,7 @@ async function genererIllu(i) {
   const it = ent.items[i]; if (!it) return;
   toast('🎨 Génération de « ' + it.spec + ' »… (10-20 s)');
   try {
-    it.img = await genererImageIA(e.nom, e.latin, it.spec);
+    it.img = await genererImageIA(e.nom, e.latin, it.spec, it.desc);
     await Stockage.ecrire('illustrations', ent);
     Etat.illustrations[illuEspeceId] = ent;
     rendreListeIllu();
@@ -1659,7 +1854,7 @@ $('illu-toutes').addEventListener('click', async () => {
     if (ent.items[i].img) continue;
     toast('🎨 Génération ' + (i + 1) + '/' + ent.items.length + ' : ' + ent.items[i].spec + '…');
     try {
-      ent.items[i].img = await genererImageIA(e.nom, e.latin, ent.items[i].spec);
+      ent.items[i].img = await genererImageIA(e.nom, e.latin, ent.items[i].spec, ent.items[i].desc);
       await Stockage.ecrire('illustrations', ent);
       Etat.illustrations[illuEspeceId] = ent;
       rendreListeIllu();
@@ -1945,6 +2140,7 @@ async function recharger() {
   const ca = (await Stockage.lire('caches')).map(x => x.id);
   const il = await Stockage.lire('illustrations');
   const su = (await Stockage.lire('supprimees')).map(x => x.id);
+  const cl = await Stockage.lire('checklist');
   if (seq !== seqRecharger) return; // un rechargement plus récent est en cours
   const connus = new Set([...ESPECES, ...e].map(x => x.id));
   const orphelins = ca.filter(id => !connus.has(id));
@@ -1954,6 +2150,8 @@ async function recharger() {
   Etat.spots = s; Etat.cueillettes = c; Etat.especesCustom = e; Etat.cachees = ca.filter(id => connus.has(id)); Etat.supprimees = su;
   Etat.illustrations = {};
   il.forEach(x => { Etat.illustrations[x.id] = x; });
+  Etat.checklist = {};
+  cl.forEach(x => { Etat.checklist[x.id] = x; });
   $('badge').textContent = String(Etat.cueillettes.length);
   rendreSpots();
   rendreCueillettes();
