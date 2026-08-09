@@ -34,8 +34,8 @@ Le carnet vit sur le téléphone, sans compte ni serveur : les données ne quitt
 - Cueillettes : date, espèce (suggestions + libre), poids kg (virgule acceptée), spot lié, météo, note, photo.
 - Stats : total récolté, sorties, espèces distinctes, dernière sortie, tops espèces/spots, barres mensuelles.
 - Sauvegarde : export/import JSON, effacement complet avec double confirmation.
-- Contrainte technique : PWA statique mono-fichier (`index.html`, ~100 Ko, zéro framework, pas de build), service worker cache-first avec bump `cqm-vN` (actuellement v10), API Wikimedia/Gemini exclues du cache. Déployée sur GitHub Pages (jonathancote1984.github.io/cueillette-memphis), push main → déploiement auto.
-- Données : IndexedDB (`cqm_bd` v3) avec repli localStorage ; clé Gemini stockée localement, jamais envoyée ailleurs.
+- Contrainte technique : PWA statique mono-fichier (`index.html`, ~110 Ko, zéro framework, pas de build), service worker cache-first avec bump `cqm-vN` (actuellement v15), API Wikimedia/Gemini exclues du cache. Déployée sur GitHub Pages (jonathancote1984.github.io/cueillette-memphis), push main → déploiement auto.
+- Données : IndexedDB (`cqm_bd` v4) avec repli localStorage ; clé Gemini stockée localement, jamais envoyée ailleurs. Paramètres : unités kg/lb (affichage + saisie), clé API. Suppression d'espèces d'origine = store `supprimees` + double confirmation.
 - Langue : français du Québec.
 
 ## Brand Commitments

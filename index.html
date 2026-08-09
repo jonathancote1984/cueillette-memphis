@@ -407,7 +407,7 @@ h2.titre-vue .ico{font-size:20px;}
     </div>
     <div class="carte">
       <h3 style="margin:0 0 10px">🔑 Clé API Gemini</h3>
-      <input class="saisie" id="p-cle" placeholder="Collez votre clé API Gemini…" style="margin-bottom:8px">
+      <input class="saisie" id="p-cle" type="password" placeholder="Collez votre clé API Gemini…" style="margin-bottom:8px">
       <p class="note">Clé gratuite sur <b>aistudio.google.com/apikey</b>. Stockée uniquement sur votre téléphone, jamais envoyée ailleurs que chez Google. Nécessaire pour l'identification par photo et les fiches par IA.</p>
       <div class="grille2">
         <button class="btn btn-jaune" id="p-cle-save">💾 Enregistrer</button>
@@ -539,7 +539,7 @@ h2.titre-vue .ico{font-size:20px;}
 <section class="feuille" id="sheet-espece">
   <div class="poignee"></div>
   <h3 id="titre-espece">➕ Nouvelle variété</h3>
-  <div class="alerte alerte-orange" style="font-size:12.5px;padding:9px 12px;margin-bottom:12px">✨ Entrez le nom, puis « Détails par IA » pour générer la fiche automatiquement (clé Gemini, section 🔑 ci-dessous).</div>
+  <div class="alerte alerte-orange" style="font-size:12.5px;padding:9px 12px;margin-bottom:12px">✨ Entrez le nom, puis « Détails par IA » pour générer la fiche automatiquement (clé Gemini dans ⚙️ Paramètres).</div>
   <div class="grille2">
     <label class="champ">Nom français
       <input id="e-nom" placeholder="Ex. : Lactaire délicieux" maxlength="80">
@@ -1219,10 +1219,14 @@ function rendreCueillettes() {
   }
   cont.innerHTML = [...Etat.cueillettes].sort((a, b) => b.date.localeCompare(a.date)).map(c => {
     const info = infoEspece(c.espece);
+    // P1-2 : badge de sécurité même si l'espèce a été supprimée ou masquée (especeId archivé)
+    const infoArchivee = c.especeId ? ESPECES.find(x => x.id === c.especeId) || null : null;
+    const statutEff = info.statut || (infoArchivee ? infoArchivee.statut : null);
+    const prudenceEff = info.prudence || (infoArchivee ? !!infoArchivee.prudence : false);
     let vig = c.photo ? '<img src="' + c.photo + '" alt="">' : (info.photo ? '<img src="' + info.photo + '" alt="' + esc(c.espece) + '">' : (info.id && !info.perso ? '<img src="img/especes/' + info.id + '.jpg" alt="' + esc(c.espece) + '">' : '🍄'));
     const spotN = nomSpot(c.spotId);
     return '<div class="item"><div class="vig">' + vig + '</div>' +
-      '<div class="corps"><div class="nom">' + esc(c.espece) + (info.statut ? ' ' + badgeStatut(info.statut, info.prudence) : '') + '</div>' +
+      '<div class="corps"><div class="nom">' + esc(c.espece) + (statutEff ? ' ' + badgeStatut(statutEff, prudenceEff) : '') + '</div>' +
       '<div class="meta">' + fmtDate(c.date) + (c.meteo ? ' · ' + esc(c.meteo) : '') + '<br>📍 ' + esc(spotN || 'Sans spot') + '</div>' +
       '<div class="mesures">' + fmtKg(c.poids) + '</div>' +
       (c.note ? '<div class="meta">' + esc(c.note) + '</div>' : '') +
@@ -1496,7 +1500,7 @@ async function genererImageIA(nom, latin, spec) {
   throw derniereErreur || new Error('PAS_IMAGE');
 }
 $('e-photo-ia').addEventListener('click', async () => {
-  if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (section Clé IA)'); return; }
+  if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (Paramètres ⚙️)'); return; }
   const nom = $('e-nom').value.trim(), latin = $('e-latin').value.trim();
   if (!nom) { toast('Entrez d\'abord le nom'); $('e-nom').focus(); return; }
   $('e-photo-info').textContent = '🎨 Génération de l\'illustration…';
@@ -1550,7 +1554,7 @@ $('illu-ajouter').addEventListener('click', async () => {
   toast('Spécificité ajoutée — cliquez 🎨 pour générer l\'image');
 });
 async function genererIllu(i) {
-  if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (section Clé IA)'); return; }
+  if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (Paramètres ⚙️)'); return; }
   const e = toutesEspeces().find(x => x.id === illuEspeceId); if (!e) return;
   const ent = Etat.illustrations[illuEspeceId] || { id: illuEspeceId, items: [] };
   const it = ent.items[i]; if (!it) return;
@@ -1897,6 +1901,11 @@ async function recharger() {
   rendreFiltres();
   await recharger();
   rendreBandeauCle();
+  // P3 : appliquer les labels d'unité dès le premier rendu
+  const lbel = $('c-poids-label'); if (lbel) lbel.textContent = Etat.unite;
+  const l1 = $('st-label-kg1'), l2 = $('st-label-kg2');
+  if (l1) l1.textContent = '(' + Etat.unite + ')';
+  if (l2) l2.textContent = '(' + Etat.unite + ')';
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }

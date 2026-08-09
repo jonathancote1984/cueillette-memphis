@@ -166,7 +166,7 @@ Palette AUTOMNE/TERRE — la forêt québécoise en septembre. Cinq accents vifs
 
 ## Layout
 
-Colonne unique centrée, max-width 640 px. Header sticky avec zigzag ; navigation en barre fixe en bas (4 onglets : Spots, Identifier, Cueillettes, Stats), avec indicateur d'onglet actif en zigzag ambre et icône relevée de 4 px. FAB circulaire en bas à droite (au-dessus de la barre), icône contextuelle (📍 en Spots, ＋ ailleurs), masqué en Stats/détail. Espacement : rythme 4/8/12/16/24 px, cartes espacées de 16 px. Formulaires en feuilles bottom-sheet (max 84 vh, coins hauts arrondis 24 px), poignée de fermeture en haut. Grille 2 colonnes pour les paires de boutons et les cartes stats.
+Colonne unique centrée, max-width 640 px. Header sticky avec zigzag ; navigation en barre fixe en bas (5 onglets : Spots, Identifier, Cueillettes, Stats, Paramètres), avec indicateur d'onglet actif en zigzag ambre et icône relevée de 4 px. FAB circulaire en bas à droite (au-dessus de la barre), icône contextuelle (📍 en Spots, ＋ ailleurs), masqué en Stats/détail/Paramètres. Espacement : rythme 4/8/12/16/24 px, cartes espacées de 16 px. Formulaires en feuilles bottom-sheet (max 84 vh, coins hauts arrondis 24 px), poignée de fermeture en haut. Grille 2 colonnes pour les paires de boutons et les cartes stats.
 
 ## Elevation & Depth
 
