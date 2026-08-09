@@ -1520,10 +1520,44 @@ $('e-photo-zone').addEventListener('click', () => { if (photoEspece) { confirmer
 
 /* ================= Illustrations IA par spécificité ================= */
 let illuEspeceId = null;
+// Pré-remplissage : 5 spécificités standard d'identification par espèce (générées par IA en 1 clic)
+const SPECS_DEFAUT = {
+  chanterelle: ['Chapeau (entonnoir orangé)', 'Hyménium (veines, pas de lames)', 'Pied (concolore, sans anneau)', 'Chair (ferme, odeur d\'abricot)', 'Habitat (feuillus, mousse)'],
+  'chanterelle-tube': ['Chapeau (brun, creux)', 'Hyménium (veines grisâtres)', 'Pied (creux, jaunâtre)', 'Chair (fine, parfumée)', 'Habitat (conifères humides)'],
+  cepe: ['Chapeau (brun, massif)', 'Hyménium (tubes blancs → olive)', 'Pied (massue, réseau blanc)', 'Chair (blanche, noisette)', 'Habitat (bouleaux, chênes)'],
+  'bolet-bai': ['Chapeau (brun châtain velouté)', 'Hyménium (tubes bleuissants)', 'Pied (brun, sans réseau)', 'Chair (bleuit à la coupe)', 'Habitat (conifères, sols acides)'],
+  'pied-mouton': ['Chapeau (orangé, ombiliqué)', 'Hyménium (AIGUILLONS)', 'Pied (concolore, creux)', 'Chair (blanche, croquante)', 'Habitat (conifères, mousse)'],
+  morille: ['Chapeau (alvéoles nid d\'abeille)', 'Coupe (creuse de haut en bas)', 'Pied (crème, attaché)', 'Chair (fine, fragile)', 'Habitat (frênaies, zones de feu)'],
+  pleurote: ['Chapeau (coquille d\'huître)', 'Hyménium (lames blanches décurrentes)', 'Pied (court, latéral)', 'Chair (blanche, tendre)', 'Habitat (troncs de feuillus)'],
+  coprin: ['Chapeau (cylindrique, écailleux)', 'Hyménium (lames → roses → noires)', 'Pied (anneau coulissant)', 'Chair (deliquescence en encre)', 'Habitat (bords de chemins)'],
+  lepiote: ['Chapeau (écailleux, mamelon)', 'Hyménium (lames blanches libres)', 'Pied (zébré, anneau COULISSANT)', 'Chair (blanche, épaisse)', 'Habitat (clairières, pâturages)'],
+  'amanite-rougissante': ['Chapeau (brun-rosé, verrues grises)', 'Hyménium (lames blanches)', 'Pied (bulbeux, anneau strié)', 'Chair (ROUGIT à la coupe)', 'Habitat (feuillus, conifères)'],
+  'bolet-amer': ['Chapeau (brun, convexe)', 'Hyménium (tubes ROSÂTRES)', 'Pied (réseau brun foncé)', 'Chair (très amère)', 'Habitat (souches, conifères)'],
+  'tue-mouches': ['Chapeau (rouge vif, verrues blanches)', 'Hyménium (lames blanches)', 'Pied (anneau blanc, volve)', 'Chair (blanche sous la cuticule)', 'Habitat (bouleaux, conifères)'],
+  panthere: ['Chapeau (brun, verrues régulières)', 'Hyménium (lames blanches)', 'Pied (anneau LISSE, volve en bourrelet)', 'Chair (ne rougit PAS)', 'Habitat (feuillus, conifères)'],
+  entolome: ['Chapeau (blanc-gris, charnu)', 'Hyménium (lames jaunes → ROSES)', 'Pied (blanc, sans anneau)', 'Chair (odeur de farine)', 'Habitat (feuillus, parcs)'],
+  paxille: ['Chapeau (brun, marge ENROULÉE)', 'Hyménium (lames brunâtres tachantes)', 'Pied (court, brun)', 'Chair (molle, brunâtre)', 'Habitat (sous les bouleaux)'],
+  'fausse-chanterelle': ['Chapeau (orange terne, plat)', 'Hyménium (VRAIES lames fines)', 'Pied (grêle, courbé)', 'Chair (molle, orangée)', 'Habitat (aiguilles de conifères)'],
+  phalloide: ['Chapeau (jaune-vert pâle)', 'Hyménium (lames blanches)', 'Pied (anneau, VOLVE en sac)', 'Chair (blanche, odeur faible)', 'Habitat (sous les chênes)'],
+  vireuse: ['Chapeau (entièrement blanc, soyeux)', 'Hyménium (lames blanches)', 'Pied (anneau blanc, volve)', 'Chair (blanche, ne rougit pas)', 'Habitat (mousses, forêts fraîches)'],
+  galerine: ['Chapeau (petit, brun 2-5 cm)', 'Hyménium (lames brunâtres)', 'Pied (anneau fragile)', 'Chair (brunâtre, fine)', 'Habitat (SUR BOIS mort)'],
+  'lepiote-brunatre': ['Chapeau (petit, brun-rosé)', 'Hyménium (lames blanches)', 'Pied (anneau FIXE)', 'Chair (blanche, fine)', 'Habitat (forêts, litière)'],
+  gyromitre: ['Chapeau (cérébriforme, circonvolutions)', 'Coupe (chambre creuse, lobes)', 'Pied (court, friable)', 'Chair (fragile, céracée)', 'Habitat (sous les pins)']
+};
+function specsDefautPour(id) {
+  return (SPECS_DEFAUT[id] || ['Chapeau', 'Hyménium (lames/tubes/aiguillons)', 'Pied', 'Chair', 'Habitat']).map(spec => ({ spec, img: null }));
+}
 function ouvrirSheetIllu(id) {
   const e = toutesEspeces().find(x => x.id === id); if (!e) return;
   illuEspeceId = id;
   $('illu-espece-nom').textContent = e.nom;
+  // Pré-remplissage : si aucune spécificité n'existe encore, injecter les 5 standard
+  const ent = Etat.illustrations[id] || { id, items: [] };
+  if (!ent.items.length) {
+    ent.items = specsDefautPour(id);
+    Etat.illustrations[id] = ent;
+    Stockage.ecrire('illustrations', ent);
+  }
   rendreListeIllu();
   ouvrirFeuille('sheet-illu');
 }
