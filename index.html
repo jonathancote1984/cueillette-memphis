@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#D9A441">
 <meta name="description" content="Spots, identification et journal de cueillette de champignons du Québec — édition Memphis, 100 % hors-ligne.">
 <title>Cueillette Québec — édition Memphis</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cueillette">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -31,7 +34,7 @@ body{
 /* ===== Header Memphis ===== */
 header{
   position:sticky; top:0; z-index:50;
-  background:linear-gradient(135deg,#B05E20,#D9A441);
+  background:linear-gradient(135deg,#C87224,#D9A441);
   border-bottom:3px solid var(--noir);
   padding:12px 14px 0;
   overflow:hidden;
@@ -42,7 +45,7 @@ header h1{
   transform:rotate(-1.5deg); display:inline-block;
   text-shadow:2px 2px 0 var(--rose);
 }
-header .sous{margin:2px 0 0; font-size:12.5px; font-weight:600; color:var(--blanc); opacity:.85;}
+header .sous{margin:2px 0 0; font-size:12.5px; font-weight:600; color:var(--noir); opacity:.75;}
 header .pastille{
   margin-left:auto; background:var(--rouge); color:var(--blanc);
   border:3px solid var(--noir); border-radius:999px; min-width:34px; height:34px;
@@ -159,7 +162,7 @@ h2.titre-vue .ico{font-size:20px;}
 .puce.actif{transform:rotate(-2deg);}
 .puce.actif[data-f="tous"]{background:var(--gris);}
 .puce.actif[data-f="comestible"]{background:var(--vert);}
-.puce.actif[data-f="toxique"]{background:var(--orange);}
+.puce.actif[data-f="toxique"]{background:var(--orange); color:var(--blanc);}
 .puce.actif[data-f="mortel"]{background:var(--rouge); color:var(--blanc);}
 /* ===== Saisie ===== */
 .champ{display:block; margin-bottom:14px; font-size:13px; font-weight:700;}
@@ -169,7 +172,7 @@ h2.titre-vue .ico{font-size:20px;}
   background:var(--blanc); color:var(--noir); outline:none;
   box-shadow:inset 2px 2px 0 rgba(31,26,23,.08);
 }
-.champ input:focus, .champ select:focus, .champ textarea:focus, .saisie:focus{box-shadow:0 0 0 3px var(--jaune), inset 2px 2px 0 rgba(31,26,23,.08);}
+.champ input:focus, .champ select:focus, .champ textarea:focus, .saisie:focus{box-shadow:0 0 0 3px var(--noir), inset 2px 2px 0 rgba(31,26,23,.08);}
 .champ textarea{resize:vertical; min-height:64px;}
 .grille2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
 /* ===== Photo ===== */
@@ -190,7 +193,7 @@ h2.titre-vue .ico{font-size:20px;}
 .st-comestible{background:var(--vert);}
 .st-prudence{background:var(--jaune);}
 .st-immangeable{background:var(--gris);}
-.st-toxique{background:var(--orange);}
+.st-toxique{background:var(--orange); color:var(--blanc);}
 .st-mortel{background:var(--rouge); color:var(--blanc);}
 .st-inconnu{background:var(--gris);}
 /* ===== Alertes ===== */
@@ -276,9 +279,9 @@ h2.titre-vue .ico{font-size:20px;}
   font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
   box-shadow:2px 2px 0 var(--noir);
 }
-.rang:nth-child(4n+2) .pos{background:var(--bleu);}
+.rang:nth-child(4n+2) .pos{background:var(--bleu); color:var(--blanc);}
 .rang:nth-child(4n+3) .pos{background:var(--vert);}
-.rang:nth-child(4n+4) .pos{background:var(--rose);}
+.rang:nth-child(4n+4) .pos{background:var(--rose); color:var(--blanc);}
 .rang .nom-rang{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .rang .valeur-rang{font-weight:700;}
 .barre-fond{background:var(--creme); border:2.5px solid var(--noir); border-radius:999px; height:12px; margin-top:6px; overflow:hidden;}
@@ -860,6 +863,8 @@ $('fab').addEventListener('click', () => {
 function fermerFeuilles() {
   document.querySelectorAll('.feuille').forEach(f => f.classList.remove('ouverte'));
   $('voile').classList.remove('visible');
+  // P1-3 : persister la clé Gemini tapée, même si la feuille est fermée sans Enregistrer
+  if (cleIA && $('e-cle')) { const v = $('e-cle').value.trim(); if (v) localStorage.setItem('cqm_cle_ia', v); }
 }
 $('voile').addEventListener('click', fermerFeuilles);
 document.querySelectorAll('.feuille .poignee').forEach(p => p.addEventListener('click', fermerFeuilles));
@@ -958,7 +963,6 @@ function ouvrirChoixPhoto(camera, cb) {
     }
     nettoyer();
   };
-  inp.oncancel = nettoyer;
   inp.click();
 }
 
@@ -1073,7 +1077,7 @@ $('s-carte').addEventListener('click', () => {
 });
 $('s-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { Etat.spot.photo = d; afficherPhoto('s-photo-zone', d); }));
 $('s-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { Etat.spot.photo = d; afficherPhoto('s-photo-zone', d); }));
-$('s-photo-zone').addEventListener('click', () => { if (Etat.spot.photo) { Etat.spot.photo = null; afficherPhoto('s-photo-zone', null); toast('Photo retirée'); } else ouvrirChoixPhoto(false, d => { Etat.spot.photo = d; afficherPhoto('s-photo-zone', d); }); });
+$('s-photo-zone').addEventListener('click', () => { if (Etat.spot.photo) { confirmer('Retirer cette photo du spot ?', '📷 Photo').then(ok => { if (ok) { Etat.spot.photo = null; afficherPhoto('s-photo-zone', null); toast('Photo retirée'); } }); } else ouvrirChoixPhoto(false, d => { Etat.spot.photo = d; afficherPhoto('s-photo-zone', d); }); });
 
 /* ================= Guide ================= */
 function rendreFiltres() {
@@ -1084,10 +1088,10 @@ function rendreFiltres() {
 }
 function filtrerGuide(f) { Etat.filtre = f; rendreFiltres(); rendreGuide(); }
 function rendreGuide() {
-  const q = Etat.recherche.trim().toLowerCase();
+  const q = normNom(Etat.recherche.trim());
   const list = toutesEspeces().filter(e => {
     const okF = Etat.filtre === 'tous' || e.statut === Etat.filtre;
-    const okT = !q || (e.nom + ' ' + (e.latin || '')).toLowerCase().includes(q);
+    const okT = !q || normNom(e.nom + ' ' + (e.latin || '')).includes(q);
     return okF && okT;
   });
   if (!list.length) {
@@ -1129,7 +1133,7 @@ function ouvrirDetail(id, perso) {
     '<span class="guide-sujet">🖼️ Spécificités à repérer</span>' +
     '<div class="illu-onglets">' + illu.items.map((it, i) =>
       '<button class="btn btn-jaune btn-petit' + (i === 0 ? ' illu-actif' : '') + '" onclick="changerIllu(\'' + e.id + '\',' + i + ')">' + esc(it.spec) + '</button>').join('') + '</div>' +
-    '<div class="illu-img"><img id="illu-grande" src="' + illu.items[0].img + '" alt="' + esc(e.nom) + '"></div>'
+    '<div class="illu-img"><img id="illu-grande" src="' + illu.items[0].img + '" alt="' + esc(e.nom) + '" onclick="ouvrirLightbox(this.src)" style="cursor:zoom-in"></div>'
   ) : '';
   const boutons = '<button class="btn btn-jaune" onclick="ouvrirSheetIllu(\'' + e.id + '\')">🎨 Illustrations IA</button>' +
     (perso
@@ -1140,7 +1144,7 @@ function ouvrirDetail(id, perso) {
         '<button class="btn btn-gris" onclick="fermerDetail()">← Retour</button>');
   $('detail-contenu').innerHTML =
     '<div class="carte">' +
-    (img ? '<img class="detail-img" src="' + img + '" alt="' + esc(e.nom) + '">' : '') +
+    (img ? '<img class="detail-img" src="' + img + '" alt="' + esc(e.nom) + '" onclick="ouvrirLightbox(this.src)" style="cursor:zoom-in">' : '') +
     '<div class="nom" style="font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">🍄 ' + esc(e.nom) + ' ' + badgeStatut(e.statut, e.prudence) +
     (perso ? ' <span class="pastille-statut st-immangeable" style="background:var(--noir);color:var(--creme)">⭐ perso</span>' : '') + '</div>' +
     '<div class="ligne-latin">' + esc(e.latin || '') + '</div>' +
@@ -1245,15 +1249,15 @@ $('c-save').addEventListener('click', async () => {
 $('c-cancel').addEventListener('click', fermerFeuilles);
 $('c-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }));
 $('c-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }));
-$('c-photo-zone').addEventListener('click', () => { if (Etat.cueillette.photo) { Etat.cueillette.photo = null; afficherPhoto('c-photo-zone', null); toast('Photo retirée'); } else ouvrirChoixPhoto(false, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }); });
+$('c-photo-zone').addEventListener('click', () => { if (Etat.cueillette.photo) { confirmer('Retirer cette photo de la cueillette ?', '📷 Photo').then(ok => { if (ok) { Etat.cueillette.photo = null; afficherPhoto('c-photo-zone', null); toast('Photo retirée'); } }); } else ouvrirChoixPhoto(false, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }); });
 
 /* ================= Variétés perso + IA ================= */
 let editEspeceId = null, photoEspece = null;
 const cleIA = () => (localStorage.getItem('cqm_cle_ia') || '').trim();
 
-function ouvrirSheetEspece() {
+function ouvrirSheetEspece(pourCle) {
   editEspeceId = null; photoEspece = null;
-  $('titre-espece').textContent = '➕ Nouvelle variété';
+  $('titre-espece').textContent = pourCle ? '🔑 Clé Gemini' : '➕ Nouvelle variété';
   ['e-nom', 'e-latin', 'e-saison', 'e-habitat', 'e-desc', 'e-carac', 'e-confusions'].forEach(i => { $(i).value = ''; });
   $('e-statut').value = 'comestible'; $('e-prudence').checked = false;
   $('e-photo-info').textContent = '';
@@ -1468,7 +1472,7 @@ $('e-photo-ia').addEventListener('click', async () => {
 });
 $('e-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { photoEspece = d; afficherPhoto('e-photo-zone', d); }));
 $('e-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { photoEspece = d; afficherPhoto('e-photo-zone', d); }));
-$('e-photo-zone').addEventListener('click', () => { if (photoEspece) { photoEspece = null; afficherPhoto('e-photo-zone', null); toast('Photo retirée'); } else ouvrirChoixPhoto(false, d => { photoEspece = d; afficherPhoto('e-photo-zone', d); }); });
+$('e-photo-zone').addEventListener('click', () => { if (photoEspece) { confirmer('Retirer cette photo de la variété ?', '📷 Photo').then(ok => { if (ok) { photoEspece = null; afficherPhoto('e-photo-zone', null); toast('Photo retirée'); } }); } else ouvrirChoixPhoto(false, d => { photoEspece = d; afficherPhoto('e-photo-zone', d); }); });
 
 /* ================= Illustrations IA par spécificité ================= */
 let illuEspeceId = null;
@@ -1555,6 +1559,16 @@ $('illu-toutes').addEventListener('click', async () => {
   toast('Génération terminée ✨');
 });
 
+/* ================= Lightbox photo ================= */
+function ouvrirLightbox(src) {
+  const anc = document.createElement('div');
+  anc.id = 'lightbox';
+  anc.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(20,14,8,.92);display:flex;align-items:center;justify-content:center;cursor:zoom-out';
+  anc.innerHTML = '<img src="' + src + '" alt="Agrandissement" style="max-width:94%;max-height:92%;border:3px solid var(--noir);border-radius:14px;box-shadow:0 0 0 6px var(--creme)">';
+  anc.addEventListener('click', () => anc.remove());
+  document.body.appendChild(anc);
+}
+
 /* ================= Identification par photo (Gemini vision) ================= */
 let dernierResultatId = null;
 function rendreBandeauCle() {
@@ -1562,11 +1576,11 @@ function rendreBandeauCle() {
   if (cleIA()) { zone.innerHTML = ''; return; }
   zone.innerHTML = '<div class="alerte alerte-orange" style="margin:-6px 0 12px">' +
     '🔑 <b>Identification par photo :</b> ajoutez votre clé Gemini gratuite pour activer l\'IA. ' +
-    '<button class="btn btn-jaune btn-petit" style="margin-top:8px" onclick="ouvrirFeuille(\'sheet-espece\');var d=$(\'e-cle-details\');if(d)d.open=true;setTimeout(function(){$(\'e-cle\').focus();},350)">Configurer la clé →</button>' +
+    '<button class="btn btn-jaune btn-petit" style="margin-top:8px" onclick="ouvrirSheetEspece(true);var d=$(\'e-cle-details\');if(d)d.open=true;setTimeout(function(){$(\'e-cle\').focus();},350)">Configurer la clé →</button>' +
     '</div>';
 }
 function identifierParPhoto(estAppareil) {
-  if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini pour l\'identification IA (aistudio.google.com/apikey)'); return; }
+  if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini — bouton « Configurer la clé » ci-dessus'); return; }
   ouvrirChoixPhoto(estAppareil, d => analyserPhoto(d));
 }
 async function analyserPhoto(dataUrl) {
@@ -1585,34 +1599,46 @@ async function analyserPhoto(dataUrl) {
       return;
     }
     dernierResultatId = r;
+    r._dataUrl = dataUrl;
     const mortel = r.statut === 'mortel';
+    const toxique = r.statut === 'toxique' || r.statut === 'immangeable';
+    // P1-5 : statut hors vocabulaire = inconnu côté sécurité (fail-safe : toute ambiguïté penche vers la prudence)
+    const statutValide = ['comestible', 'immangeable', 'toxique', 'mortel'].includes(r.statut);
+    if (!statutValide) r.statut = 'inconnu';
     const confiance = typeof r.confiance === 'number' ? r.confiance : null;
     const fiable = confiance !== null && confiance >= 90;
-    const aVerifier = confiance !== null && confiance >= 60 && confiance < 90;
+    const aVerifier = (confiance !== null && confiance >= 60 && confiance < 90) || !statutValide;
     const inconnue = !r.espece || r.espece === 'inconnu' || (confiance !== null && confiance < 60);
-    if (inconnue) {
+    // P1-4 : une espèce du guide connue pour demander prudence ne peut pas être badgée Comestible sans réserve
+    const connue = toutesEspeces().find(x => x.nom.toLowerCase() === String(r.espece).trim().toLowerCase());
+    // P1-4 : utiliser la prudence renvoyée par l'IA (si l'espèce n'est pas dans le guide)
+    const prudente = (!!connue && !!connue.prudence) || (!!r.prudence && !connue);
+    const afficheComestible = fiable && !prudente;
+    if (inconnue || (!statutValide && !r.espece)) {
       $('idphoto-contenu').innerHTML =
         '<img src="' + dataUrl + '" alt="Photo à identifier" style="width:100%;border:3px solid var(--noir);border-radius:16px;box-shadow:4px 4px 0 var(--noir);margin-bottom:12px">' +
         '<div class="vide-etat" style="padding:16px"><span class="ico">😕</span>Impossible d\'identifier ce champignon avec certitude' +
         (confiance !== null ? ' (confiance ' + Math.round(confiance) + ' %)' : '') + '.<br><small>Comparez avec le guide (filtres, recherche) ou ajoutez-le comme variété.</small></div>' +
         '<div class="alerte alerte-rouge" style="margin-top:10px">⚠️ <b>En cas de doute, on ne mange pas.</b> Faites vérifier votre récolte par un expert avant toute consommation.</div>' +
-        '<button class="btn btn-gris btn-plein" style="margin-top:10px" onclick="fermerFeuilles()">Fermer</button>';
+        '<div class="grille2" style="margin-top:10px"><button class="btn btn-vert btn-plein" onclick="identifierParPhoto(false)">📷 Réessayer</button>' +
+        '<button class="btn btn-gris btn-plein" onclick="fermerFeuilles()">Fermer</button></div>';
       return;
     }
-    const connue = toutesEspeces().find(x => x.nom.toLowerCase() === String(r.espece).trim().toLowerCase());
     $('idphoto-contenu').innerHTML =
       '<img src="' + dataUrl + '" alt="Photo à identifier" style="width:100%;border:3px solid var(--noir);border-radius:16px;box-shadow:4px 4px 0 var(--noir);margin-bottom:12px">' +
       '<div class="carte">' +
-      '<div class="nom" style="font-weight:700;font-size:16.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">🍄 ' + esc(r.espece) + ' ' + (fiable ? badgeStatut(r.statut, false) : '<span class="pastille-statut st-inconnu">⚠️ À vérifier</span>') + '</div>' +
+      '<div class="nom" style="font-weight:700;font-size:16.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">🍄 ' + esc(r.espece) + ' ' + (afficheComestible ? badgeStatut(r.statut, false) : (fiable && prudente ? badgeStatut('prudence', false) : '<span class="pastille-statut st-inconnu">⚠️ À vérifier</span>')) + '</div>' +
       (r.latin ? '<div class="ligne-latin">' + esc(r.latin) + '</div>' : '') +
-      (confiance !== null ? '<div class="meta" style="margin:2px 0 8px">Confiance : <b>' + Math.round(confiance) + ' %</b>' + (aVerifier ? ' — <b style="color:var(--orange)">vérifiez avec le guide</b>' : '') + '</div>' : '') +
+      (confiance !== null ? '<div class="meta" style="margin:2px 0 8px">Confiance : <b>' + Math.round(confiance) + ' %</b>' + (aVerifier || (fiable && prudente) ? ' — <b style="color:var(--orange)">vérifiez avec le guide</b>' : '') + '</div>' : '') +
       (mortel
         ? '<div class="alerte alerte-rouge">☠️ <b>MORTEL — ne jamais consommer.</b> Toxines potentiellement fatales. En cas d\'ingestion : centre antipoison <b>1-800-463-5060</b> (Québec).</div>'
-        : (r.statut === 'toxique' || r.statut === 'immangeable')
+        : (toxique)
           ? '<div class="alerte alerte-orange">⚠️ <b>Ne pas consommer.</b> Peut provoquer des intoxications sérieuses.</div>'
-          : (aVerifier
-            ? '<div class="alerte alerte-orange">⚠️ <b>Vérifiez avec le guide avant de consommer :</b> la confiance est insuffisante pour une identification formelle. En cas de doute, on ne mange pas.</div>'
-            : '')) +
+          : (prudente && fiable)
+            ? '<div class="alerte alerte-orange">⚠️ <b>Prudence :</b> cette espèce exige une préparation particulière (ex. cuisson obligatoire) avant consommation. Consultez la fiche du guide.</div>'
+            : (aVerifier)
+              ? '<div class="alerte alerte-orange">⚠️ <b>Vérifiez avec le guide avant de consommer :</b> la confiance est insuffisante pour une identification formelle. En cas de doute, on ne mange pas.</div>'
+              : '') +
       (r.description ? '<span class="guide-sujet">📖 Description</span><p style="margin:4px 0 0;font-size:14px;line-height:1.6">' + esc(r.description) + '</p>' : '') +
       (r.confusions ? '<span class="guide-sujet">⚠️ Confusions possibles</span><p style="margin:4px 0 0;font-size:13.5px;line-height:1.6">' + esc(r.confusions) + '</p>' : '') +
       (connue
@@ -1629,6 +1655,7 @@ async function analyserPhoto(dataUrl) {
 }
 function preparerVarieteDepuisResultat() {
   const r = dernierResultatId; if (!r) return;
+  const photoResultat = r._dataUrl || null;
   fermerFeuilles();
   ouvrirSheetEspece();
   $('e-nom').value = r.espece || '';
@@ -1636,13 +1663,15 @@ function preparerVarieteDepuisResultat() {
   if (['comestible', 'immangeable', 'toxique', 'mortel'].includes(r.statut)) $('e-statut').value = r.statut;
   $('e-desc').value = r.description || '';
   $('e-confusions').value = r.confusions || '';
+  // P2-11 : transférer la photo déjà prise vers la fiche variété
+  if (photoResultat) { photoEspece = photoResultat; afficherPhoto('e-photo-zone', photoResultat); }
   toast('Fiche pré-remplie — complétez puis enregistrez ✨');
 }
 async function identifierPhotoIA(dataUrl) {
   const cle = cleIA(); if (!cle) throw new Error('PAS_DE_CLE');
   const mime = (dataUrl.split(';')[0] || 'data:image/jpeg').replace('data:', '') || 'image/jpeg';
   const base64 = dataUrl.split(',')[1] || '';
-  const prompt = 'Tu es un mycologue expert du Québec. Identifie le champignon sur cette photo. Réponds UNIQUEMENT en JSON valide, structure exacte : {"espece":"nom français le plus probable","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","confiance":0-100,"description":"2-3 phrases","confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Si la photo ne permet pas une identification fiable, mets "espece":"inconnu" et confiance basse. Respecte les accents.';
+  const prompt = 'Tu es un mycologue expert du Québec. Identifie le champignon sur cette photo. Réponds UNIQUEMENT en JSON valide, structure exacte : {"espece":"nom français le plus probable","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","confiance":0-100,"prudence":true si la consommation exige une préparation particulière (ex. cuisson obligatoire) ou si une confusion dangereuse est possible même à haute confiance, sinon false,"description":"2-3 phrases","confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Si la photo ne permet pas une identification fiable, mets "espece":"inconnu" et confiance basse. Respecte les accents. Ne réponds JAMAIS "comestible" sans prudence si l\'espèce exige une cuisson obligatoire (morille, amanite rougissante, etc.).';
   const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' + encodeURIComponent(cle), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1659,7 +1688,7 @@ async function identifierPhotoIA(dataUrl) {
 }
 
 /* ================= Stats ================= */
-const COULEURS_MOIS = ['#B3261E', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#B94527', '#B3261E', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#B94527'];
+const COULEURS_MOIS = ['#B45309', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#B94527', '#B45309', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#B94527'];
 function rendreStats() {
   const totalKg = Etat.cueillettes.reduce((a, c) => a + (c.poids || 0), 0);
   const dernier = Etat.cueillettes.length ? [...Etat.cueillettes].sort((a, b) => b.date.localeCompare(a.date))[0] : null;
@@ -1679,7 +1708,7 @@ function rendreStats() {
     '<div class="barre-fond"><div class="barre" style="width:' + Math.max(4, e[1] / maxE * 100) + '%"></div></div>'
   ).join('') : '<div class="vide-etat" style="padding:8px">Ajoutez des cueillettes pour voir vos tops !</div>';
   const parSpot = {};
-  Etat.cueillettes.forEach(c => { if (c.spotId) { const n = nomSpot(c.spotId) || 'Spot supprimé'; parSpot[n] = (parSpot[n] || 0) + (c.poids || 0); } });
+  Etat.cueillettes.forEach(c => { if (c.spotId) { const n = nomSpot(c.spotId) || 'Sans spot'; parSpot[n] = (parSpot[n] || 0) + (c.poids || 0); } });
   const topS = Object.entries(parSpot).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const maxS = topS.length ? topS[0][1] : 1;
   $('st-spots').innerHTML = topS.length ? topS.map((s, i) =>
@@ -1777,7 +1806,7 @@ async function recharger() {
   rendreCueillettes();
   remplirDatalist();
   remplirSelectSpot();
-  if (Etat.vue === 'guide') rendreGuide();
+  if (Etat.vue === 'guide') { rendreBandeauCle(); rendreGuide(); }
   if (Etat.vue === 'stats') { rendreAlerteExport(); rendreStats(); }
 }
 

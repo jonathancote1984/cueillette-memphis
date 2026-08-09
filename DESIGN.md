@@ -16,7 +16,7 @@ colors:
   rouille-onglet: "#B3540B"
   vert-mesure: "#0B7A55"
   rose-onglet: "#C2185B"
-  brun-header: "#B05E20"
+  brun-header: "#C87224"
   fond-alerte-rouge: "#F6DFD2"
   fond-alerte-orange: "#F4E3C3"
   barre-vide: "#D8C9AC"

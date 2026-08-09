@@ -217,7 +217,7 @@
       "brun-header": {
         "role": "neutral",
         "displayName": "Brun header (dégradé)",
-        "canonical": "#B05E20",
+        "canonical": "#C87224",
         "tonalRamp": [
           "hsl(26 69% 15%)",
           "hsl(26 69% 26%)",
