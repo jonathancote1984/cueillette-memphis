@@ -1527,6 +1527,55 @@ async function imageEnBase64(url) {
     rd.readAsDataURL(blob);
   });
 }
+/* --- Illustration de spécificité : Wikimedia d'abord, IA en repli --- */
+const MOTS_SPEC_WIKI = [
+  { cle: ['chapeau', 'cap'], mots: ['cap'] },
+  { cle: ['hyménium', 'hymen', 'lames', 'tubes', 'aiguillons', 'pores', 'dessous'], mots: ['gills', 'pores', 'underside', 'spines'] },
+  { cle: ['pied', 'stipe'], mots: ['stem', 'stipe'] },
+  { cle: ['chair', 'coupe', 'section'], mots: ['cut', 'cross section'] },
+  { cle: ['habitat', 'forêt', 'foret', 'bois'], mots: ['forest', 'moss', 'trunk', 'tree'] }
+];
+function motsWikiPour(spec) {
+  const s = (spec || '').toLowerCase();
+  for (const g of MOTS_SPEC_WIKI) {
+    if (g.cle.some(c => s.includes(c))) return g.mots;
+  }
+  return [];
+}
+async function chercherPhotoSpec(terme, limit) {
+  const url = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search' +
+    '&gsrsearch=' + encodeURIComponent(terme) + '&gsrnamespace=6&gsrlimit=' + (limit || 8) +
+    '&prop=imageinfo&iiprop=url|size|mime&iiurlwidth=960';
+  const rep = await fetch(url);
+  const d = await rep.json();
+  const pages = (d.query || {}).pages || {};
+  return Object.values(pages)
+    .map(p => (p.imageinfo || [{}])[0])
+    .filter(ii => ii.mime === 'image/jpeg' && ii.width >= 600 &&
+      !/map|diagram|chart|stamp|coin|poster|flora|illust|drawing|painting|tab\.|pl\./i.test(ii.descriptionurl || ''))
+    .sort((a, b) => b.width - a.width)[0] || null;
+}
+async function illustrerSpec(e, it) {
+  const base = (e.latin || '').trim() || (e.nom || '').trim();
+  const mots = motsWikiPour(it.spec);
+  if (base) {
+    const termes = mots.length ? mots.map(m => base + ' ' + m) : [base];
+    for (const terme of termes) {
+      try {
+        const ii = await chercherPhotoSpec(terme);
+        if (ii) {
+          const url = ii.thumburl || ii.url;
+          try {
+            return { src: await imageEnBase64(url), source: 'wikimedia' };
+          } catch (e) {
+            return { src: url, source: 'wikimedia' };
+          }
+        }
+      } catch (e) { /* essaie le terme suivant */ }
+    }
+  }
+  return { src: await genererImageIA(e.nom, e.latin, it.spec, it.desc), source: 'ia' };
+}
 $('e-photo-commons').addEventListener('click', async () => {
   const terme = $('e-latin').value.trim() || $('e-nom').value.trim();
   if (!terme) { toast('Entrez le nom (latin de préférence)'); return; }
@@ -1823,11 +1872,12 @@ async function genererIllu(i) {
   const it = ent.items[i]; if (!it) return;
   toast('🎨 Génération de « ' + it.spec + ' »… (10-20 s)');
   try {
-    it.img = await genererImageIA(e.nom, e.latin, it.spec, it.desc);
+    const res = await illustrerSpec(e, it);
+    it.img = res.src;
     await Stockage.ecrire('illustrations', ent);
     Etat.illustrations[illuEspeceId] = ent;
     rendreListeIllu();
-    toast('Illustration « ' + it.spec + ' » générée ✅');
+    toast(res.source === 'wikimedia' ? 'Photo Wikimedia trouvée 📷' : 'Illustration « ' + it.spec + ' » générée ✅');
   } catch (err) {
     toast(err.message === 'PAS_DE_CLE' ? '🔑 Clé manquante' : '⚠️ Génération impossible : ' + (err.message || 'erreur'));
   }
@@ -1854,10 +1904,12 @@ $('illu-toutes').addEventListener('click', async () => {
     if (ent.items[i].img) continue;
     toast('🎨 Génération ' + (i + 1) + '/' + ent.items.length + ' : ' + ent.items[i].spec + '…');
     try {
-      ent.items[i].img = await genererImageIA(e.nom, e.latin, ent.items[i].spec, ent.items[i].desc);
+      const res = await illustrerSpec(e, ent.items[i]);
+      ent.items[i].img = res.src;
       await Stockage.ecrire('illustrations', ent);
       Etat.illustrations[illuEspeceId] = ent;
       rendreListeIllu();
+      if (res.source === 'wikimedia') toast('Photo Wikimedia trouvée 📷 (' + (i + 1) + '/' + ent.items.length + ')');
     } catch (err) {
       toast('⚠️ Échec sur « ' + ent.items[i].spec + ' » : ' + (err.message || 'erreur') + ' — série interrompue');
       return;
