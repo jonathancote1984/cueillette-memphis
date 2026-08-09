@@ -876,7 +876,7 @@ const STATUTS = {
 /* ================= État ================= */
 const Etat = {
   spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], illustrations: {}, checklist: {},
-  vue: 'spots', filtre: 'tous', recherche: '', detailId: null,
+  vue: 'spots', filtre: 'tous', filtreSaison: 'toutes', recherche: '', detailId: null,
   unite: localStorage.getItem('cqm_unite') === 'lb' ? 'lb' : 'kg',
   spot: { edition: null, photo: null },
   cueillette: { edition: null, photo: null }
@@ -1168,17 +1168,32 @@ $('s-photo-zone').addEventListener('click', () => { if (Etat.spot.photo) { confi
 /* ================= Guide ================= */
 function rendreFiltres() {
   const options = [['tous', 'Tous'], ['comestible', '✅ Comestibles'], ['toxique', '⚠️ Toxiques'], ['mortel', '☠️ Mortels']];
-  $('g-filtres').innerHTML = options.map(o =>
-    '<span class="puce' + (Etat.filtre === o[0] ? ' actif' : '') + '" data-f="' + o[0] + '" onclick="filtrerGuide(\'' + o[0] + '\')">' + o[1] + '</span>'
-  ).join('');
+  const saisons = [['toutes', '🗓️ Toutes'], ['printemps', '🌸 Printemps'], ['ete', '☀️ Été'], ['automne', '🍂 Automne'], ['hiver', '❄️ Hiver']];
+  $('g-filtres').innerHTML =
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">' + options.map(o =>
+      `<span class="puce${Etat.filtre === o[0] ? ' actif' : ''}" data-f="${o[0]}" onclick="filtrerGuide('${o[0]}')">${o[1]}</span>`
+    ).join('') + '</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px">' + saisons.map(s =>
+      `<span class="puce puce-saison${Etat.filtreSaison === s[0] ? ' actif' : ''}" data-fs="${s[0]}" onclick="filtrerSaison('${s[0]}')">${s[1]}</span>`
+    ).join('') + '</div>';
 }
 function filtrerGuide(f) { Etat.filtre = f; rendreFiltres(); rendreGuide(); }
+function filtrerSaison(fs) { Etat.filtreSaison = fs; rendreFiltres(); rendreGuide(); }
+function saisonDe(e) {
+  const s = (e.saison || '').toLowerCase();
+  if (s.includes('printemps') || s.includes('mai') || s.includes('avril')) return 'printemps';
+  if (s.includes('hiver') || s.includes('décembre') || s.includes('déc')) return 'hiver';
+  if (s.includes('septembre') || s.includes('octobre') || s.includes('novembre') || s.includes('automne')) return 'automne';
+  if (s.includes('juin') || s.includes('juillet') || s.includes('août') || s.includes('été')) return 'ete';
+  return 'toutes';
+}
 function rendreGuide() {
   const q = normNom(Etat.recherche.trim());
   const list = toutesEspeces().filter(e => {
     const okF = Etat.filtre === 'tous' || e.statut === Etat.filtre;
+    const okS = Etat.filtreSaison === 'toutes' || saisonDe(e) === Etat.filtreSaison;
     const okT = !q || normNom(e.nom + ' ' + (e.latin || '')).includes(q);
-    return okF && okT;
+    return okF && okS && okT;
   });
   if (!list.length) {
     $('liste-guide').innerHTML = '<div class="vide-etat"><span class="ico">🔎</span>Aucun champignon trouvé.</div>';
