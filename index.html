@@ -118,7 +118,7 @@ h2.titre-vue .ico{font-size:20px;}
 .btn-suppr-item{
   position:absolute; top:8px; right:8px; z-index:3;
   border:2.5px solid var(--noir); background:var(--blanc); border-radius:999px;
-  width:34px; height:34px; font-size:15px; cursor:pointer;
+  width:44px; height:44px; font-size:16px; cursor:pointer;
   box-shadow:2px 2px 0 var(--noir); display:flex; align-items:center; justify-content:center;
 }
 .btn-suppr-item:active{transform:translate(2px,2px); box-shadow:none;}
@@ -150,11 +150,12 @@ h2.titre-vue .ico{font-size:20px;}
 .btn-jaune{background:var(--jaune); color:var(--noir);}
 .btn-rose{background:var(--rose); color:var(--blanc);}
 .btn-gris{background:var(--gris); color:var(--noir);}
-.btn-petit{padding:7px 12px; font-size:13px; box-shadow:2px 2px 0 var(--noir);}
+.btn-petit{padding:10px 14px; font-size:13px; box-shadow:2px 2px 0 var(--noir); min-height:44px; display:inline-flex; align-items:center; justify-content:center;}
 .btn.actif{outline:3px solid var(--noir); outline-offset:2px; transform:rotate(-1deg);}
 /* ===== Chips filtres ===== */
 .puce{
-  display:inline-block; padding:7px 13px; border-radius:999px; font-size:13px; font-weight:700;
+  display:inline-flex; align-items:center; justify-content:center; min-height:44px;
+  padding:8px 14px; border-radius:999px; font-size:13px; font-weight:700;
   border:3px solid var(--noir); background:var(--blanc); color:var(--noir);
   cursor:pointer; margin:0 7px 10px 0; box-shadow:3px 3px 0 var(--noir);
   user-select:none; transition:transform .1s;
@@ -173,7 +174,7 @@ h2.titre-vue .ico{font-size:20px;}
   background:var(--blanc); color:var(--noir); outline:none;
   box-shadow:inset 2px 2px 0 rgba(31,26,23,.08);
 }
-.champ input:focus, .champ select:focus, .champ textarea:focus, .saisie:focus{box-shadow:0 0 0 3px var(--noir), inset 2px 2px 0 rgba(31,26,23,.08);}
+.champ input:focus, .champ select:focus, .champ textarea:focus, .saisie:focus{box-shadow:0 0 0 3px var(--jaune), inset 2px 2px 0 rgba(31,26,23,.08);}
 .champ textarea{resize:vertical; min-height:64px;}
 .grille2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
 /* ===== Photo ===== */
@@ -498,9 +499,8 @@ h2.titre-vue .ico{font-size:20px;}
     <button class="btn btn-jaune btn-plein" id="s-carte" style="margin-top:6px; display:none">🗺️ Voir sur la carte</button>
   </div>
   <div class="champ">Espèces qu'on y trouve (optionnel)
-    <select id="s-especes" multiple size="4" style="margin-top:5px;width:100%;padding:8px;border:3px solid var(--noir);border-radius:12px 12px 12px 4px;background:var(--blanc);color:var(--noir);font-family:inherit;font-size:15px">
-    </select>
-    <p class="note" style="font-size:12px;opacity:.75;margin:4px 2px 0">Maintenez Ctrl (⌘ sur Mac) pour sélectionner plusieurs espèces.</p>
+    <div id="s-especes" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px"></div>
+    <p class="note" style="font-size:12px;opacity:.75;margin:4px 2px 0">Touchez une espèce pour l'ajouter ou la retirer.</p>
   </div>
   <div class="champ">Photo
     <div class="photo-zone" id="s-photo-zone" title="Cliquez pour retirer la photo">
@@ -894,7 +894,7 @@ const Etat = {
   spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], illustrations: {}, checklist: {},
   vue: 'spots', filtre: 'tous', filtreSaison: 'toutes', recherche: '', detailId: null,
   unite: localStorage.getItem('cqm_unite') === 'lb' ? 'lb' : 'kg',
-  spot: { edition: null, photo: null },
+  spot: { edition: null, photo: null, especes: [] },
   cueillette: { edition: null, photo: null }
 };
 const badgeStatut = (statut, prudence) => {
@@ -940,7 +940,12 @@ function fermerFeuilles() {
   document.querySelectorAll('.feuille').forEach(f => f.classList.remove('ouverte'));
   $('voile').classList.remove('visible');
 }
-$('voile').addEventListener('click', fermerFeuilles);
+$('voile').addEventListener('click', () => {
+  const especeOuverte = document.getElementById('sheet-espece').classList.contains('ouverte');
+  if (especeOuverte && formulaireEspeceSale()) {
+    confirmer('Quitter sans enregistrer ? Les champs remplis seront perdus.', '✏️ Variété non enregistrée').then(ok => { if (ok) fermerFeuilles(); });
+  } else fermerFeuilles();
+});
 document.querySelectorAll('.feuille .poignee').forEach(p => p.addEventListener('click', fermerFeuilles));
 function ouvrirFeuille(id) {
   fermerFeuilles();
@@ -1105,7 +1110,7 @@ async function partagerSpot(id) {
   }
 }
 function ouvrirSheetSpot() {
-  Etat.spot.edition = null; Etat.spot.photo = null;
+  Etat.spot.edition = null; Etat.spot.photo = null; Etat.spot.especes = [];
   $('titre-spot').textContent = '➕ Nouveau spot';
   $('s-nom').value = ''; $('s-desc').value = ''; $('s-lat').value = ''; $('s-lng').value = '';
   $('s-gps-info').textContent = ''; $('s-carte').style.display = 'none';
@@ -1114,25 +1119,28 @@ function ouvrirSheetSpot() {
   ouvrirFeuille('sheet-spot');
 }
 function remplirSelectEspecesSpot() {
-  const sel = $('s-especes'); if (!sel) return;
-  sel.innerHTML = toutesEspeces().map(e =>
-    '<option value="' + esc(e.nom) + '">' + esc(e.nom) + (e.latin ? ' — ' + esc(e.latin) : '') + '</option>'
+  const zone = $('s-especes'); if (!zone) return;
+  const selection = new Set(Etat.spot.especes || []);
+  zone.innerHTML = toutesEspeces().map(e =>
+    '<span class="puce' + (selection.has(e.nom) ? ' actif' : '') + '" data-nom="' + esc(e.nom) + '" onclick="basculerEspeceSpot(this)">' + esc(e.nom) + '</span>'
   ).join('');
+}
+function basculerEspeceSpot(el) {
+  const nom = el.dataset.nom; if (!nom) return;
+  const sel = new Set(Etat.spot.especes || []);
+  if (sel.has(nom)) sel.delete(nom); else sel.add(nom);
+  Etat.spot.especes = [...sel];
+  el.classList.toggle('actif', sel.has(nom));
 }
 function editerSpot(id) {
   const s = Etat.spots.find(x => x.id === id); if (!s) return;
-  Etat.spot.edition = id; Etat.spot.photo = s.photo || null;
+  Etat.spot.edition = id; Etat.spot.photo = s.photo || null; Etat.spot.especes = s.especes || [];
   $('titre-spot').textContent = '✏️ Modifier le spot';
   $('s-nom').value = s.nom || ''; $('s-desc').value = s.desc || '';
   $('s-lat').value = s.lat || ''; $('s-lng').value = s.lng || '';
   $('s-gps-info').textContent = '';
   $('s-carte').style.display = (s.lat && s.lng) ? '' : 'none';
   remplirSelectEspecesSpot();
-  const sel = $('s-especes');
-  (s.especes || []).forEach(n => {
-    const opt = [...sel.options].find(o => o.value === n);
-    if (opt) opt.selected = true;
-  });
   afficherPhoto('s-photo-zone', Etat.spot.photo);
   ouvrirFeuille('sheet-spot');
 }
@@ -1151,7 +1159,7 @@ $('s-save').addEventListener('click', async () => {
     desc: $('s-desc').value.trim(),
     lat: $('s-lat').value.trim(),
     lng: $('s-lng').value.trim(),
-    especes: [...$('s-especes').selectedOptions].map(o => o.value),
+    especes: Etat.spot.especes || [],
     photo: Etat.spot.photo,
     cree: Etat.spot.edition ? (Etat.spots.find(x => x.id === Etat.spot.edition) || {}).cree : aujourdhui()
   };
@@ -1263,14 +1271,14 @@ function ouvrirDetail(id, perso) {
       '</div>'
     ).join('') +
     '<div class="verdict-carte verdict-ok' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">✅ Tous les critères correspondent</div>' + esc(e.nom) + ' confirmé' + (e.statut === 'comestible' ? ' — récolte possible.' : ' — restez prudent.') + '</div>' +
-    '<div class="verdict-carte verdict-att' + (nbFaits > 0 && nbFaits < illu.items.length ? ' ouv' : '') + '" id="spec-verdict-att"><div class="t">⚠️ Critères manquants</div>Ne consommez pas tant que tout n\'est pas vérifié. En cas de doute : on ne mange pas.</div>'
+    '<div class="verdict-carte verdict-att' + (nbFaits < illu.items.length ? ' ouv' : '') + '" id="spec-verdict-att"><div class="t">⚠️ ' + (nbFaits === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants') + '</div>' + (nbFaits === 0 ? 'Cochez chaque critère sur le champignon avant de consommer. En cas de doute : on ne mange pas.' : 'Ne consommez pas tant que tout n\'est pas vérifié. En cas de doute : on ne mange pas.') + '</div>'
   ) : '';
   const boutons = '<button class="btn btn-jaune" onclick="ouvrirSheetIllu(\'' + e.id + '\')">🎨 Illustrations IA</button>' +
     (perso
       ? '<button class="btn btn-bleu" onclick="editerEspece(\'' + e.id + '\')">✏️ Modifier</button>' +
         '<button class="btn btn-rouge" onclick="ouvrirChoixEspece(\'' + e.id + '\',true)">🗑️ Supprimer</button>' +
         '<button class="btn btn-gris" onclick="fermerDetail()">← Retour</button>'
-      : '<button class="btn btn-rouge" onclick="ouvrirChoixEspece(\'' + e.id + '\',false)">🗑️ Masquer</button>' +
+      : '<button class="btn btn-gris" onclick="ouvrirChoixEspece(\'' + e.id + '\',false)">🗑️ Masquer</button>' +
         '<button class="btn btn-gris" onclick="fermerDetail()">← Retour</button>');
   $('detail-contenu').innerHTML =
     '<div class="carte">' +
@@ -1435,7 +1443,15 @@ function editerEspece(id) {
   afficherPhoto('e-photo-zone', photoEspece);
   ouvrirFeuille('sheet-espece');
 }
-$('e-cancel').addEventListener('click', fermerFeuilles);
+$('e-cancel').addEventListener('click', () => {
+  if (formulaireEspeceSale()) {
+    confirmer('Quitter sans enregistrer ? Les champs remplis seront perdus.', '✏️ Variété non enregistrée').then(ok => { if (ok) fermerFeuilles(); });
+  } else fermerFeuilles();
+});
+function formulaireEspeceSale() {
+  return ['e-nom', 'e-latin', 'e-saison', 'e-habitat', 'e-desc', 'e-carac', 'e-confusions']
+    .some(i => $(i).value.trim() !== '') || photoEspece !== null;
+}
 $('e-save').addEventListener('click', async () => {
   const nom = $('e-nom').value.trim();
   if (!nom) { toast('Donnez un nom à la variété'); $('e-nom').focus(); return; }
