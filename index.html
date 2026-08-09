@@ -978,10 +978,39 @@ function rendreSpots() {
       '<div class="corps"><div class="nom">' + esc(s.nom) + '</div>' +
       '<div class="meta">' + (s.desc ? esc(s.desc) + '<br>' : '') + (s.lat && s.lng ? '📍 ' + esc(s.lat) + ', ' + esc(s.lng) : '📍 Position non notée') + '</div>' +
       '<div class="actions">' +
+      '<button class="btn btn-vert btn-petit" onclick="partagerSpot(\'' + s.id + '\')">📤 Partager</button>' +
       '<button class="btn btn-bleu btn-petit" onclick="editerSpot(\'' + s.id + '\')">✏️ Modifier</button>' +
       '<button class="btn btn-rouge btn-petit" onclick="supprimerSpot(\'' + s.id + '\')">🗑️</button>' + carte +
       '</div></div></div>';
   }).join('');
+}
+async function partagerSpot(id) {
+  const s = Etat.spots.find(x => x.id === id); if (!s) return;
+  const carte = (s.lat && s.lng) ? 'https://www.google.com/maps?q=' + encodeURIComponent(s.lat + ',' + s.lng) : '';
+  const texte = '🍄 ' + s.nom + ' — spot de cueillette de champignons' +
+    (s.desc ? '\n' + s.desc : '') +
+    (carte ? '\n📍 ' + s.lat + ', ' + s.lng : '') +
+    (carte ? '\n🗺️ ' + carte : '');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: s.nom, text: texte, url: carte || undefined });
+      return;
+    } catch (err) {
+      if (err && err.name === 'AbortError') return; // partage annulé par l'utilisateur
+      // autre erreur → repli copie
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(texte);
+    toast('Spot copié 📋 — collez-le où vous voulez');
+  } catch (err2) {
+    const ta = document.createElement('textarea');
+    ta.value = texte; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('Spot copié 📋 — collez-le où vous voulez'); }
+    catch (e3) { toast('⚠️ Partage indisponible sur cet appareil'); }
+    ta.remove();
+  }
 }
 function ouvrirSheetSpot() {
   Etat.spot.edition = null; Etat.spot.photo = null;
