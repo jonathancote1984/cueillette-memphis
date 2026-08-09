@@ -81,7 +81,7 @@ nav.tabs button:nth-child(1).actif{color:#0B6E96;}
 nav.tabs button:nth-child(2).actif{color:#B3540B;}
 nav.tabs button:nth-child(3).actif{color:#0B7A55;}
 nav.tabs button:nth-child(4).actif{color:#C2185B;}
-/* ===== FAB ===== */
+nav.tabs button:nth-child(5).actif{color:#7A5C2E;}
 .fab{
   position:fixed; right:18px; bottom:calc(84px + env(safe-area-inset-bottom)); z-index:55;
   width:60px; height:60px; border-radius:999px;
@@ -151,6 +151,7 @@ h2.titre-vue .ico{font-size:20px;}
 .btn-rose{background:var(--rose); color:var(--blanc);}
 .btn-gris{background:var(--gris); color:var(--noir);}
 .btn-petit{padding:7px 12px; font-size:13px; box-shadow:2px 2px 0 var(--noir);}
+.btn.actif{outline:3px solid var(--noir); outline-offset:2px; transform:rotate(-1deg);}
 /* ===== Chips filtres ===== */
 .puce{
   display:inline-block; padding:7px 13px; border-radius:999px; font-size:13px; font-weight:700;
@@ -372,9 +373,9 @@ h2.titre-vue .ico{font-size:20px;}
   <section class="vue" id="vue-stats">
     <h2 class="titre-vue"><span class="ico">📊</span> Statistiques</h2>
     <div class="stat-grille" id="st-cartes"></div>
-    <div class="carte"><h3 style="margin:0 0 6px">🏆 Top espèces (kg)</h3><div id="st-especes"></div><span class="deco-tri"></span></div>
+    <div class="carte"><h3 style="margin:0 0 6px">🏆 Top espèces <span id="st-label-kg1">(kg)</span></h3><div id="st-especes"></div><span class="deco-tri"></span></div>
     <div class="carte"><h3 style="margin:0 0 6px">🗺️ Top spots</h3><div id="st-spots"></div><span class="deco-tri"></span></div>
-    <div class="carte"><h3 style="margin:0 0 6px">📅 Récolte par mois (kg)</h3><div id="st-mois"></div><span class="deco-tri"></span></div>
+    <div class="carte"><h3 style="margin:0 0 6px">📅 Récolte par mois <span id="st-label-kg2">(kg)</span></h3><div id="st-mois"></div><span class="deco-tri"></span></div>
     <div class="carte">
       <h3 style="margin:0 0 10px">💾 Sauvegarde</h3>
       <div id="st-export-alerte"></div>
@@ -392,6 +393,28 @@ h2.titre-vue .ico{font-size:20px;}
   <section class="vue" id="vue-detail">
     <div id="detail-contenu"></div>
   </section>
+
+  <!-- ===== PARAMÈTRES ===== -->
+  <section class="vue" id="vue-parametres">
+    <h2 class="titre-vue"><span class="ico">⚙️</span> Paramètres</h2>
+    <div class="carte">
+      <h3 style="margin:0 0 10px">⚖️ Unités de poids</h3>
+      <div class="grille2">
+        <button class="btn btn-vert" id="p-unite-kg">kg (métrique)</button>
+        <button class="btn btn-bleu" id="p-unite-lb">lb (impérial)</button>
+      </div>
+      <p class="note" style="margin-top:8px">Les poids enregistrés restent stockés en kg dans le carnet ; l'affichage et la saisie utilisent l'unité choisie.</p>
+    </div>
+    <div class="carte">
+      <h3 style="margin:0 0 10px">🔑 Clé API Gemini</h3>
+      <input class="saisie" id="p-cle" placeholder="Collez votre clé API Gemini…" style="margin-bottom:8px">
+      <p class="note">Clé gratuite sur <b>aistudio.google.com/apikey</b>. Stockée uniquement sur votre téléphone, jamais envoyée ailleurs que chez Google. Nécessaire pour l'identification par photo et les fiches par IA.</p>
+      <div class="grille2">
+        <button class="btn btn-jaune" id="p-cle-save">💾 Enregistrer</button>
+        <button class="btn btn-rouge" id="p-cle-effacer">🗑️ Effacer</button>
+      </div>
+    </div>
+  </section>
 </main>
 
 <button class="fab" id="fab" aria-label="Ajouter">＋</button>
@@ -401,6 +424,7 @@ h2.titre-vue .ico{font-size:20px;}
   <button data-vue="guide"><span class="ico">🍄</span>Identifier</button>
   <button data-vue="cueillettes"><span class="ico">🧺</span>Cueillettes</button>
   <button data-vue="stats"><span class="ico">📊</span>Stats</button>
+  <button data-vue="parametres"><span class="ico">⚙️</span>Paramètres</button>
 </nav>
 
 <div class="voile" id="voile"></div>
@@ -471,7 +495,7 @@ h2.titre-vue .ico{font-size:20px;}
     <label class="champ">Date
       <input type="date" id="c-date">
     </label>
-    <label class="champ">Poids (kg)
+    <label class="champ">Poids (<span id="c-poids-label">kg</span>)
       <input type="number" id="c-poids" min="0" step="0.1" placeholder="0.0">
     </label>
   </div>
@@ -567,11 +591,7 @@ h2.titre-vue .ico{font-size:20px;}
     </div>
     <div class="info-gps" id="e-photo-info"></div>
   </div>
-  <details id="e-cle-details" style="margin:10px 0 14px">
-    <summary style="font-weight:700;font-size:13.5px;cursor:pointer;border:3px solid var(--noir);border-radius:999px;padding:9px 14px;background:var(--creme)">🔑 Clé Gemini (pour l'IA)</summary>
-    <input class="saisie" id="e-cle" placeholder="Collez votre clé API Gemini…" style="margin-top:8px">
-    <p class="note">Clé gratuite sur <b>aistudio.google.com/apikey</b>. Stockée uniquement sur votre téléphone, jamais envoyée ailleurs que chez Google.</p>
-  </details>
+  <div class="alerte alerte-orange" style="font-size:12.5px;padding:9px 12px;margin-bottom:12px">🔑 La clé Gemini se configure dans <b>Paramètres</b> (onglet ⚙️ en bas).</div>
   <div class="grille2">
     <button class="btn btn-vert btn-plein" id="e-save">💾 Enregistrer</button>
     <button class="btn btn-gris btn-plein" id="e-cancel">Annuler</button>
@@ -629,7 +649,17 @@ const fmtDate = iso => {
   const [a, m, j] = iso.split('-').map(Number);
   return new Date(a, m - 1, j).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 };
-const fmtKg = v => new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 1 }).format(v || 0) + ' kg';
+const fmtKg = v => {
+  const kg = v || 0;
+  const u = Etat.unite;
+  const val = u === 'lb' ? kg * 2.20462 : kg;
+  return new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 1 }).format(val) + ' ' + u;
+};
+const kgDepuisSaisie = v => {
+  const n = parseFloat(String(v).replace(',', '.'));
+  if (isNaN(n) || n < 0) return 0;
+  return Etat.unite === 'lb' ? +(n / 2.20462).toFixed(3) : n;
+};
 let minuteurToast = null;
 function toast(msg) {
   const t = $('toast');
@@ -645,7 +675,7 @@ const Stockage = (() => {
   function ouvrir() {
     return new Promise(ok => {
       try {
-        const rq = indexedDB.open('cqm_bd', 3);
+        const rq = indexedDB.open('cqm_bd', 4);
         rq.onupgradeneeded = () => {
           const b = rq.result;
           if (!b.objectStoreNames.contains('spots')) b.createObjectStore('spots', { keyPath: 'id' });
@@ -653,6 +683,7 @@ const Stockage = (() => {
           if (!b.objectStoreNames.contains('especes')) b.createObjectStore('especes', { keyPath: 'id' });
           if (!b.objectStoreNames.contains('caches')) b.createObjectStore('caches', { keyPath: 'id' });
           if (!b.objectStoreNames.contains('illustrations')) b.createObjectStore('illustrations', { keyPath: 'id' });
+          if (!b.objectStoreNames.contains('supprimees')) b.createObjectStore('supprimees', { keyPath: 'id' });
         };
         rq.onsuccess = () => { bd = rq.result; ok(); };
         rq.onerror = () => { repli = true; ok(); };
@@ -817,8 +848,9 @@ const STATUTS = {
 
 /* ================= État ================= */
 const Etat = {
-  spots: [], cueillettes: [], especesCustom: [], cachees: [], illustrations: {},
+  spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], illustrations: {},
   vue: 'spots', filtre: 'tous', recherche: '', detailId: null,
+  unite: localStorage.getItem('cqm_unite') === 'lb' ? 'lb' : 'kg',
   spot: { edition: null, photo: null },
   cueillette: { edition: null, photo: null }
 };
@@ -828,7 +860,7 @@ const badgeStatut = (statut, prudence) => {
   return '<span class="pastille-statut ' + info.cls + '">' + info.label + '</span>';
 };
 const toutesEspeces = () => [
-  ...ESPECES.filter(e => !Etat.cachees.includes(e.id)),
+  ...ESPECES.filter(e => !Etat.cachees.includes(e.id) && !Etat.supprimees.includes(e.id)),
   ...Etat.especesCustom
 ];
 const normNom = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
@@ -846,10 +878,11 @@ function naviguer(vue) {
   $('vue-' + vue).classList.add('visible');
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('actif', b.dataset.vue === vue));
   const fab = $('fab');
-  fab.classList.toggle('cache', vue === 'stats' || vue === 'detail');
+  fab.classList.toggle('cache', vue === 'stats' || vue === 'detail' || vue === 'parametres');
   fab.textContent = vue === 'spots' ? '📍' : '＋';
   if (vue === 'stats') { rendreAlerteExport(); rendreStats(); }
   if (vue === 'guide') { rendreBandeauCle(); rendreGuide(); }
+  if (vue === 'parametres') rendreParametres();
   window.scrollTo(0, 0);
 }
 document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click', () => naviguer(b.dataset.vue)));
@@ -863,8 +896,6 @@ $('fab').addEventListener('click', () => {
 function fermerFeuilles() {
   document.querySelectorAll('.feuille').forEach(f => f.classList.remove('ouverte'));
   $('voile').classList.remove('visible');
-  // P1-3 : persister la clé Gemini tapée, même si la feuille est fermée sans Enregistrer
-  if (cleIA && $('e-cle')) { const v = $('e-cle').value.trim(); if (v) localStorage.setItem('cqm_cle_ia', v); }
 }
 $('voile').addEventListener('click', fermerFeuilles);
 document.querySelectorAll('.feuille .poignee').forEach(p => p.addEventListener('click', fermerFeuilles));
@@ -901,8 +932,8 @@ function ouvrirChoixEspece(id, perso) {
   choixEspeceId = id; choixEspecePerso = perso;
   $('choix-message').textContent = perso
     ? '« ' + e.nom + ' » (variété perso) : masquez-la temporairement ou supprimez-la définitivement.'
-    : '« ' + e.nom + ' » : masquez-la du guide (restaurable avec ↩️). Les espèces d\'origine ne peuvent pas être supprimées définitivement.';
-  $('choix-supprimer').style.display = perso ? '' : 'none';
+    : '« ' + e.nom + ' » : masquez-la du guide (restaurable avec ↩️) ou supprimez-la définitivement (irréversible).';
+  $('choix-supprimer').style.display = '';
   $('boite-choix').classList.add('visible');
   $('voile-confirm').classList.add('visible');
 }
@@ -923,9 +954,22 @@ $('choix-masquer').addEventListener('click', async () => {
 $('choix-supprimer').addEventListener('click', async () => {
   if (!choixEspeceId) return;
   const id = choixEspeceId; fermerChoix();
+  if (choixEspecePerso) {
+    // variété perso : suppression directe
+    await Stockage.effacer('especes', id);
+    await Stockage.effacer('illustrations', id);
+    toast('Variété supprimée définitivement 🗑️');
+    await recharger();
+    return;
+  }
+  // espèce d'origine : double confirmation (irréversible)
+  if (!await confirmer('Supprimer définitivement « ' + (ESPECES.find(x => x.id === id)?.nom || '') + ' » du guide ? Cette action est IRRÉVERSIBLE.', '🗑️ Suppression définitive')) return;
+  if (!await confirmer('Vraiment sûr ? L\'espèce ne pourra plus être restaurée. Exportez d\'abord si nécessaire.', '⚠️ Dernière vérification')) return;
+  await Stockage.effacer('caches', id);
+  await Stockage.ecrire('supprimees', { id });
   await Stockage.effacer('especes', id);
   await Stockage.effacer('illustrations', id);
-  toast('Variété supprimée définitivement 🗑️');
+  toast('Espèce supprimée définitivement 🗑️');
   await recharger();
 });
 
@@ -1209,7 +1253,7 @@ function editerCueillette(id) {
   Etat.cueillette.edition = id; Etat.cueillette.photo = c.photo || null;
   $('titre-cueillette').textContent = '✏️ Modifier la cueillette';
   $('c-date').value = c.date || aujourdhui();
-  $('c-poids').value = c.poids || '';
+  $('c-poids').value = c.poids ? (Etat.unite === 'lb' ? +(c.poids * 2.20462).toFixed(1) : c.poids) : '';
   $('c-espece').value = c.espece || '';
   $('c-spot').value = c.spotId || '';
   $('c-meteo').value = c.meteo || '🌞 Ensoleillé';
@@ -1229,7 +1273,7 @@ $('c-save').addEventListener('click', async () => {
   if (!date) { toast('Choisissez une date'); return; }
   if (!espece) { toast('Indiquez l\'espèce'); $('c-espece').focus(); return; }
   const info = infoEspece(espece);
-  const poids = parseFloat($('c-poids').value.replace(',', '.'));
+  const poids = kgDepuisSaisie($('c-poids').value);
   const c = {
     id: Etat.cueillette.edition || uid(),
     date,
@@ -1255,14 +1299,13 @@ $('c-photo-zone').addEventListener('click', () => { if (Etat.cueillette.photo) {
 let editEspeceId = null, photoEspece = null;
 const cleIA = () => (localStorage.getItem('cqm_cle_ia') || '').trim();
 
-function ouvrirSheetEspece(pourCle) {
+function ouvrirSheetEspece() {
   editEspeceId = null; photoEspece = null;
-  $('titre-espece').textContent = pourCle ? '🔑 Clé Gemini' : '➕ Nouvelle variété';
+  $('titre-espece').textContent = '➕ Nouvelle variété';
   ['e-nom', 'e-latin', 'e-saison', 'e-habitat', 'e-desc', 'e-carac', 'e-confusions'].forEach(i => { $(i).value = ''; });
   $('e-statut').value = 'comestible'; $('e-prudence').checked = false;
   $('e-photo-info').textContent = '';
   afficherPhoto('e-photo-zone', null);
-  $('e-cle').value = cleIA();
   ouvrirFeuille('sheet-espece');
 }
 function editerEspece(id) {
@@ -1277,14 +1320,12 @@ function editerEspece(id) {
   $('e-confusions').value = e.confusions || '';
   $('e-photo-info').textContent = '';
   afficherPhoto('e-photo-zone', photoEspece);
-  $('e-cle').value = cleIA();
   ouvrirFeuille('sheet-espece');
 }
 $('e-cancel').addEventListener('click', fermerFeuilles);
 $('e-save').addEventListener('click', async () => {
   const nom = $('e-nom').value.trim();
   if (!nom) { toast('Donnez un nom à la variété'); $('e-nom').focus(); return; }
-  localStorage.setItem('cqm_cle_ia', $('e-cle').value.trim());
   const esp = {
     id: editEspeceId || uid(),
     nom,
@@ -1308,7 +1349,7 @@ $('e-save').addEventListener('click', async () => {
 
 /* --- Restauration sélective --- */
 function ouvrirSheetRestaurer() {
-  const masquees = [...ESPECES, ...Etat.especesCustom].filter(e => Etat.cachees.includes(e.id));
+  const masquees = [...ESPECES, ...Etat.especesCustom].filter(e => Etat.cachees.includes(e.id) && !Etat.supprimees.includes(e.id));
   $('restaurer-liste').innerHTML = masquees.length ? masquees.map(e =>
     '<label class="item-restaurer" style="display:flex;align-items:center;gap:10px;padding:9px;border:3px solid var(--noir);border-radius:14px 14px 14px 4px;margin-bottom:10px;background:var(--blanc);cursor:pointer">' +
     '<input type="checkbox" class="chk-restaurer" value="' + e.id + '" checked style="width:22px;height:22px;flex-shrink:0;accent-color:var(--orange)">' +
@@ -1359,8 +1400,7 @@ async function genererDetailsIA(nom, latin) {
 $('e-generer').addEventListener('click', async () => {
   const nom = $('e-nom').value.trim();
   if (!nom) { toast('Entrez d\'abord le nom du champignon'); $('e-nom').focus(); return; }
-  localStorage.setItem('cqm_cle_ia', $('e-cle').value.trim());
-  if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (section Clé IA)'); return; }
+  if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (Paramètres ⚙️)'); return; }
   const latin = $('e-latin').value.trim();
   const btn = $('e-generer');
   btn.disabled = true; btn.textContent = '✨ Génération en cours…';
@@ -1576,7 +1616,7 @@ function rendreBandeauCle() {
   if (cleIA()) { zone.innerHTML = ''; return; }
   zone.innerHTML = '<div class="alerte alerte-orange" style="margin:-6px 0 12px">' +
     '🔑 <b>Identification par photo :</b> ajoutez votre clé Gemini gratuite pour activer l\'IA. ' +
-    '<button class="btn btn-jaune btn-petit" style="margin-top:8px" onclick="ouvrirSheetEspece(true);var d=$(\'e-cle-details\');if(d)d.open=true;setTimeout(function(){$(\'e-cle\').focus();},350)">Configurer la clé →</button>' +
+    '<button class="btn btn-jaune btn-petit" style="margin-top:8px" onclick="naviguer(\'parametres\');document.getElementById(\'p-cle\').focus()">Configurer la clé →</button>' +
     '</div>';
 }
 function identifierParPhoto(estAppareil) {
@@ -1738,7 +1778,7 @@ function rendreAlerteExport() {
       '</div>';
 }
 $('st-export').addEventListener('click', () => {
-  const donnees = { app: 'cueillette-quebec-memphis', version: 3, exporteLe: new Date().toISOString(), spots: Etat.spots, cueillettes: Etat.cueillettes, especes: Etat.especesCustom, illustrations: Object.values(Etat.illustrations), cachees: Etat.cachees };
+  const donnees = { app: 'cueillette-quebec-memphis', version: 4, exporteLe: new Date().toISOString(), spots: Etat.spots, cueillettes: Etat.cueillettes, especes: Etat.especesCustom, illustrations: Object.values(Etat.illustrations), cachees: Etat.cachees, supprimees: Etat.supprimees };
   const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1758,15 +1798,17 @@ $('st-import-fichier').addEventListener('change', async e => {
     if (!Array.isArray(data.especes)) data.especes = [];
     if (!Array.isArray(data.illustrations)) data.illustrations = [];
     if (!Array.isArray(data.cachees)) data.cachees = [];
+    if (!Array.isArray(data.supprimees)) data.supprimees = [];
     const nCue = data.cueillettes.length, nSpots = data.spots.length, nEsp = data.especes.length;
     const resume = 'Remplacer TOUTES les données actuelles ? Le fichier contient ' + nCue + ' cueillette' + (nCue > 1 ? 's' : '') + ', ' + nSpots + ' spot' + (nSpots > 1 ? 's' : '') + (nEsp ? ' et ' + nEsp + ' variété' + (nEsp > 1 ? 's' : '') : '') + '. Exportez d\'abord si nécessaire.';
     if (!await confirmer(resume, '📥 Import')) return;
-    await Stockage.vider('spots'); await Stockage.vider('cueillettes'); await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches');
+    await Stockage.vider('spots'); await Stockage.vider('cueillettes'); await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches'); await Stockage.vider('supprimees');
     for (const s of data.spots) await Stockage.ecrire('spots', s);
     for (const c of data.cueillettes) await Stockage.ecrire('cueillettes', c);
     for (const e2 of data.especes) await Stockage.ecrire('especes', e2);
     for (const i of data.illustrations) await Stockage.ecrire('illustrations', i);
     for (const id of data.cachees) await Stockage.ecrire('caches', { id });
+    for (const id of data.supprimees) await Stockage.ecrire('supprimees', { id });
     toast('Import réussi ✅');
     await recharger();
   } catch (err) {
@@ -1778,9 +1820,47 @@ $('st-effacer').addEventListener('click', async () => {
   if (!await confirmer('Tout effacer ? Cette action est IRRÉVERSIBLE. Exportez d\'abord si nécessaire.', '🗑️ Tout effacer')) return;
   if (!await confirmer('Vraiment sûr ? Pensez à exporter vos données avant (bouton Exporter).', '⚠️ Dernière vérification')) return;
   await Stockage.vider('spots'); await Stockage.vider('cueillettes');
-  await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches');
+  await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches'); await Stockage.vider('supprimees');
   toast('Toutes les données ont été effacées');
   await recharger();
+});
+
+/* ================= Paramètres ================= */
+function rendreParametres() {
+  const lb = Etat.unite === 'lb';
+  $('p-unite-kg').classList.toggle('actif', !lb);
+  $('p-unite-lb').classList.toggle('actif', lb);
+  $('p-cle').value = cleIA();
+  const lbel = $('c-poids-label'); if (lbel) lbel.textContent = Etat.unite;
+  const l1 = $('st-label-kg1'), l2 = $('st-label-kg2');
+  if (l1) l1.textContent = '(' + Etat.unite + ')';
+  if (l2) l2.textContent = '(' + Etat.unite + ')';
+}
+function setUnite(u) {
+  Etat.unite = u;
+  localStorage.setItem('cqm_unite', u);
+  rendreParametres();
+  const lbl = $('c-poids-label'); if (lbl) lbl.textContent = u;
+  const l1 = $('st-label-kg1'), l2 = $('st-label-kg2');
+  if (l1) l1.textContent = '(' + u + ')';
+  if (l2) l2.textContent = '(' + u + ')';
+  if (Etat.vue === 'stats') rendreStats();
+  if (Etat.vue === 'cueillettes') rendreCueillettes();
+  if (Etat.vue === 'spots') rendreSpots();
+  toast('Unités : ' + u + ' ⚖️');
+}
+$('p-unite-kg').addEventListener('click', () => setUnite('kg'));
+$('p-unite-lb').addEventListener('click', () => setUnite('lb'));
+$('p-cle-save').addEventListener('click', () => {
+  localStorage.setItem('cqm_cle_ia', $('p-cle').value.trim());
+  toast('Clé API enregistrée 🔑');
+  rendreBandeauCle();
+});
+$('p-cle-effacer').addEventListener('click', () => {
+  localStorage.removeItem('cqm_cle_ia');
+  $('p-cle').value = '';
+  toast('Clé API effacée');
+  rendreBandeauCle();
 });
 
 /* ================= Chargement ================= */
@@ -1792,13 +1872,14 @@ async function recharger() {
   const e = await Stockage.lire('especes');
   const ca = (await Stockage.lire('caches')).map(x => x.id);
   const il = await Stockage.lire('illustrations');
+  const su = (await Stockage.lire('supprimees')).map(x => x.id);
   if (seq !== seqRecharger) return; // un rechargement plus récent est en cours
   const connus = new Set([...ESPECES, ...e].map(x => x.id));
   const orphelins = ca.filter(id => !connus.has(id));
   if (orphelins.length) {
     for (const id of orphelins) await Stockage.effacer('caches', id);
   }
-  Etat.spots = s; Etat.cueillettes = c; Etat.especesCustom = e; Etat.cachees = ca.filter(id => connus.has(id));
+  Etat.spots = s; Etat.cueillettes = c; Etat.especesCustom = e; Etat.cachees = ca.filter(id => connus.has(id)); Etat.supprimees = su;
   Etat.illustrations = {};
   il.forEach(x => { Etat.illustrations[x.id] = x; });
   $('badge').textContent = String(Etat.cueillettes.length);
