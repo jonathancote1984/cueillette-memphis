@@ -1,7 +1,7 @@
 /* Service worker — cache-first PWA (édition Memphis).
    ⚠️ RÈGLE : à CHAQUE mise à jour de l'app, AUGMENTEZ le numéro de CACHE.
    Le bump IS le mécanisme de mise à jour pour les utilisateurs. */
-const CACHE = 'cqm-v25';
+const CACHE = 'cqm-v26';
 const FICHIERS = [
   './',
   './index.html',

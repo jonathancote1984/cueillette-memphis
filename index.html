@@ -165,6 +165,8 @@ h2.titre-vue .ico{font-size:20px;}
 .puce.actif{transform:rotate(-2deg);}
 .puce.actif[data-f="tous"]{background:var(--gris);}
 .puce.actif[data-f="comestible"]{background:var(--vert);}
+.puce.actif[data-f="prudence"]{background:var(--jaune);}
+.puce.actif[data-f="npas"]{background:var(--orange); color:var(--blanc);}
 .puce.actif[data-f="toxique"]{background:var(--orange); color:var(--blanc);}
 .puce.actif[data-f="mortel"]{background:var(--rouge); color:var(--blanc);}
 /* ===== Saisie ===== */
@@ -295,6 +297,7 @@ h2.titre-vue .ico{font-size:20px;}
 .stat-carte:nth-child(4){background:var(--rose); color:var(--blanc);}
 .stat-carte .valeur{font-size:24px; font-weight:700; margin-top:3px; line-height:1.1;}
 .stat-carte .libelle{font-size:12px; font-weight:700; opacity:.8;}
+.stat-carte:nth-child(2) .libelle, .stat-carte:nth-child(4) .libelle{opacity:1;}
 .rang{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:3px dashed var(--noir); font-size:14px; font-weight:600;}
 .rang:last-child{border-bottom:0;}
 .rang .pos{
@@ -1201,7 +1204,7 @@ $('s-photo-zone').addEventListener('click', () => { if (Etat.spot.photo) { confi
 
 /* ================= Guide ================= */
 function rendreFiltres() {
-  const options = [['tous', 'Tous'], ['comestible', '✅ Comestibles'], ['toxique', '⚠️ Toxiques'], ['mortel', '☠️ Mortels']];
+  const options = [['tous', 'Tous'], ['comestible', '✅ Comestibles'], ['prudence', '⚠️ Prudence'], ['npas', '☠️ Ne pas manger'], ['mortel', '💀 Mortels']];
   const saisons = [['toutes', '🗓️ Toutes'], ['printemps', '🌸 Printemps'], ['ete', '☀️ Été'], ['automne', '🍂 Automne'], ['hiver', '❄️ Hiver']];
   $('g-filtres').innerHTML =
     '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">' + options.map(o =>
@@ -1224,7 +1227,11 @@ function saisonDe(e) {
 function rendreGuide() {
   const q = normNom(Etat.recherche.trim());
   const list = toutesEspeces().filter(e => {
-    const okF = Etat.filtre === 'tous' || e.statut === Etat.filtre;
+    let okF = Etat.filtre === 'tous';
+    if (Etat.filtre === 'comestible') okF = e.statut === 'comestible' && !e.prudence;
+    else if (Etat.filtre === 'prudence') okF = !!e.prudence;
+    else if (Etat.filtre === 'npas') okF = e.statut === 'toxique' || e.statut === 'immangeable';
+    else if (Etat.filtre === 'mortel') okF = e.statut === 'mortel';
     const okS = Etat.filtreSaison === 'toutes' || saisonDe(e) === Etat.filtreSaison;
     const okT = !q || normNom(e.nom + ' ' + (e.latin || '')).includes(q);
     return okF && okS && okT;
@@ -1437,6 +1444,17 @@ $('c-photo-zone').addEventListener('click', () => { if (Etat.cueillette.photo) {
 /* ================= Variétés perso + IA ================= */
 let editEspeceId = null, photoEspece = null;
 const cleIA = () => (localStorage.getItem('cqm_cle_ia') || '').trim();
+function messageErreurIA(err) {
+  if (!err) return 'Une erreur est survenue. Réessayez.';
+  const m = String(err.message || err).toLowerCase();
+  if (err.message === 'PAS_DE_CLE' || m.includes('p_de_cle')) return '🔑 Clé Gemini manquante — ajoutez-la dans ⚙️ Paramètres.';
+  if (m.includes('fetch') || m.includes('network') || m.includes('failed') || m.includes('internet')) return '⚠️ Connexion impossible — vérifiez votre réseau puis réessayez.';
+  if (m.includes('400') || m.includes('invalid') || m.includes('api key') || m.includes('key')) return '⚠️ Clé Gemini invalide — vérifiez-la dans ⚙️ Paramètres.';
+  if (m.includes('429') || m.includes('quota') || m.includes('rate') || m.includes('resource exhausted')) return '⚠️ Limite de requêtes atteinte — patientez quelques instants puis réessayez.';
+  if (m.includes('500') || m.includes('503') || m.includes('unavailable') || m.includes('overloaded')) return '⚠️ Service IA momentanément indisponible — réessayez dans quelques instants.';
+  if (m.includes('404')) return '⚠️ Modèle IA introuvable — réessayez plus tard.';
+  return '⚠️ Erreur IA : ' + (err.message || 'inconnue') + ' — réessayez.';
+}
 
 function ouvrirSheetEspece() {
   editEspeceId = null; photoEspece = null;
@@ -1564,7 +1582,7 @@ $('e-generer').addEventListener('click', async () => {
     $('e-confusions').value = fiche.confusions || '';
     toast('Fiche générée ✨ — vérifiez puis enregistrez');
   } catch (err) {
-    toast(err.message === 'PAS_DE_CLE' ? '🔑 Clé Gemini manquante' : '⚠️ IA indisponible (' + (err.message || 'erreur') + ')');
+    toast(messageErreurIA(err));
   }
   btn.disabled = false; btn.textContent = '✨ Détails par IA';
 });
@@ -1944,12 +1962,18 @@ async function genererIllu(i) {
     rendreListeIllu();
     toast(res.source === 'wikimedia' ? 'Photo Wikimedia trouvée 📷' : 'Illustration « ' + it.spec + ' » générée ✅');
   } catch (err) {
-    toast(err.message === 'PAS_DE_CLE' ? '🔑 Clé manquante' : '⚠️ Génération impossible : ' + (err.message || 'erreur'));
+    toast(messageErreurIA(err));
   }
 }
 async function retirerIllu(i) {
   const ent = Etat.illustrations[illuEspeceId]; if (!ent) return;
   ent.items.splice(i, 1);
+  // Réindexe les coches de la checklist : retirer le critère i décale les suivantes d'un cran
+  const cl = Etat.checklist[illuEspeceId];
+  if (cl && Array.isArray(cl.faits)) {
+    cl.faits.splice(i, 1);
+    await Stockage.ecrire('checklist', cl);
+  }
   if (ent.items.length) {
     await Stockage.ecrire('illustrations', ent);
     Etat.illustrations[illuEspeceId] = ent;
@@ -1976,7 +2000,7 @@ $('illu-toutes').addEventListener('click', async () => {
       rendreListeIllu();
       if (res.source === 'wikimedia') toast('Photo Wikimedia trouvée 📷 (' + (i + 1) + '/' + ent.items.length + ')');
     } catch (err) {
-      toast('⚠️ Échec sur « ' + ent.items[i].spec + ' » : ' + (err.message || 'erreur') + ' — série interrompue');
+      toast(messageErreurIA(err) + ' — série interrompue');
       return;
     }
   }
@@ -2162,7 +2186,7 @@ function rendreAlerteExport() {
       '</div>';
 }
 $('st-export').addEventListener('click', () => {
-  const donnees = { app: 'cueillette-quebec-memphis', version: 4, exporteLe: new Date().toISOString(), spots: Etat.spots, cueillettes: Etat.cueillettes, especes: Etat.especesCustom, illustrations: Object.values(Etat.illustrations), cachees: Etat.cachees, supprimees: Etat.supprimees };
+  const donnees = { app: 'cueillette-quebec-memphis', version: 5, exporteLe: new Date().toISOString(), spots: Etat.spots, cueillettes: Etat.cueillettes, especes: Etat.especesCustom, illustrations: Object.values(Etat.illustrations), cachees: Etat.cachees, supprimees: Etat.supprimees, checklist: Object.values(Etat.checklist) };
   const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -2183,16 +2207,18 @@ $('st-import-fichier').addEventListener('change', async e => {
     if (!Array.isArray(data.illustrations)) data.illustrations = [];
     if (!Array.isArray(data.cachees)) data.cachees = [];
     if (!Array.isArray(data.supprimees)) data.supprimees = [];
+    if (!Array.isArray(data.checklist)) data.checklist = [];
     const nCue = data.cueillettes.length, nSpots = data.spots.length, nEsp = data.especes.length;
     const resume = 'Remplacer TOUTES les données actuelles ? Le fichier contient ' + nCue + ' cueillette' + (nCue > 1 ? 's' : '') + ', ' + nSpots + ' spot' + (nSpots > 1 ? 's' : '') + (nEsp ? ' et ' + nEsp + ' variété' + (nEsp > 1 ? 's' : '') : '') + '. Exportez d\'abord si nécessaire.';
     if (!await confirmer(resume, '📥 Import')) return;
-    await Stockage.vider('spots'); await Stockage.vider('cueillettes'); await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches'); await Stockage.vider('supprimees');
+    await Stockage.vider('spots'); await Stockage.vider('cueillettes'); await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches'); await Stockage.vider('supprimees'); await Stockage.vider('checklist');
     for (const s of data.spots) await Stockage.ecrire('spots', s);
     for (const c of data.cueillettes) await Stockage.ecrire('cueillettes', c);
     for (const e2 of data.especes) await Stockage.ecrire('especes', e2);
     for (const i of data.illustrations) await Stockage.ecrire('illustrations', i);
     for (const id of data.cachees) await Stockage.ecrire('caches', { id });
     for (const id of data.supprimees) await Stockage.ecrire('supprimees', { id });
+    for (const cl of data.checklist) await Stockage.ecrire('checklist', cl);
     toast('Import réussi ✅');
     await recharger();
   } catch (err) {
