@@ -921,9 +921,25 @@ const toutesEspeces = () => [
   ...Etat.especesCustom
 ];
 const normNom = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+const distLevenshtein = (a, b) => {
+  if (!a.length) return b.length; if (!b.length) return a.length;
+  const m = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 0; j <= b.length; j++) m[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
+    m[i][j] = Math.min(m[i - 1][j] + 1, m[i][j - 1] + 1, m[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return m[a.length][b.length];
+};
 const infoEspece = nom => {
   const n = normNom(nom);
-  const e = toutesEspeces().find(x => normNom(x.nom) === n || normNom(x.latin) === n);
+  let e = toutesEspeces().find(x => normNom(x.nom) === n || normNom(x.latin) === n);
+  // Matche flou : une faute de frappe ne doit pas faire perdre le badge de sécurité
+  if (!e && n.length >= 4) {
+    const candidat = toutesEspeces()
+      .map(x => ({ x, d: Math.min(distLevenshtein(n, normNom(x.nom)), distLevenshtein(n, normNom(x.latin || ''))) }))
+      .filter(c => c.d <= 2)
+      .sort((a, b) => a.d - b.d)[0];
+    if (candidat) e = candidat.x;
+  }
   return e ? { id: e.id, statut: e.statut, prudence: !!e.prudence, perso: !!e.perso, photo: e.img || e.photo } : { id: null, statut: null, prudence: false, perso: false, photo: null };
 };
 const nomSpot = id => { const s = Etat.spots.find(x => x.id === id); return s ? s.nom : null; };
@@ -992,6 +1008,28 @@ function fermerConfirm() {
 $('confirm-oui').addEventListener('click', () => { const ok = resolveConfirm; fermerConfirm(); if (ok) ok(true); });
 $('confirm-non').addEventListener('click', () => { const ok = resolveConfirm; fermerConfirm(); if (ok) ok(false); });
 $('voile-confirm').addEventListener('click', () => { const ok = resolveConfirm; fermerConfirm(); if (ok) ok(false); });
+/* Focus trap + Escape sur les modales Memphis (confirm + choix) */
+function boiteVisible() { return $('boite-confirm').classList.contains('visible') || $('boite-choix').classList.contains('visible'); }
+function boutonsBoite() {
+  const b = $('boite-confirm').classList.contains('visible') ? $('boite-confirm') : $('boite-choix');
+  return [...b.querySelectorAll('button')].filter(x => x.offsetParent !== null);
+}
+document.addEventListener('keydown', ev => {
+  if (!boiteVisible()) return;
+  if (ev.key === 'Escape') {
+    ev.preventDefault();
+    const ok = resolveConfirm; fermerConfirm(); if (ok) ok(false);
+    fermerChoix();
+    return;
+  }
+  if (ev.key === 'Tab') {
+    const btns = boutonsBoite();
+    if (!btns.length) return;
+    const premier = btns[0], dernier = btns[btns.length - 1];
+    if (ev.shiftKey && document.activeElement === premier) { ev.preventDefault(); dernier.focus(); }
+    else if (!ev.shiftKey && document.activeElement === dernier) { ev.preventDefault(); premier.focus(); }
+  }
+});
 
 /* --- Choix pour une espèce : masquer / supprimer définitivement / annuler --- */
 let choixEspeceId = null, choixEspecePerso = false;
@@ -1303,7 +1341,7 @@ function ouvrirDetail(id, perso) {
     ).join('') +
     (e.statut === 'comestible' || e.statut === 'prudence'
       ? '<div class="verdict-carte verdict-ok' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">✅ Tous les critères correspondent</div>' + esc(e.nom) + ' confirmé' + (e.statut === 'comestible' ? ' — récolte possible.' : ' — restez prudent (cuisson obligatoire).') + '</div>'
-      : '<div class="verdict-carte verdict-danger' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">☠️ 5/5 critères vérifiés</div>' + esc(e.nom) + ' est ' + (e.statut === 'mortel' ? 'MORTELLE' : 'non comestible') + ' — ne pas consommer.</div>') +
+      : '<div class="verdict-carte verdict-danger' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">☠️ ' + nbFaits + '/' + illu.items.length + ' critères vérifiés</div>' + esc(e.nom) + ' est ' + (e.statut === 'mortel' ? 'MORTELLE' : 'non comestible') + ' — ne pas consommer.</div>') +
     '<div class="verdict-carte verdict-att' + (nbFaits < illu.items.length ? ' ouv' : '') + '" id="spec-verdict-att"><div class="t">⚠️ ' + (nbFaits === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants') + '</div>' + (nbFaits === 0 ? 'Cochez chaque critère sur le champignon avant de consommer. En cas de doute : on ne mange pas.' : 'Ne consommez pas tant que tout n\'est pas vérifié. En cas de doute : on ne mange pas.') + '</div>'
   ) : '';
   const boutons = '<button class="btn btn-jaune" onclick="ouvrirSheetIllu(\'' + e.id + '\')">🎨 Illustrations IA</button>' +
@@ -1320,12 +1358,12 @@ function ouvrirDetail(id, perso) {
     (perso ? ' <span class="pastille-statut st-immangeable" style="background:var(--noir);color:var(--creme)">⭐ perso</span>' : '') + '</div>' +
     '<div class="ligne-latin">' + esc(e.latin || '') + '</div>' +
     avis +
+    galerie +
     '<div class="detail-kv"><b>🗓️ Saison :</b> ' + esc(e.saison || '—') + '<br><b>🌲 Habitat :</b> ' + esc(e.habitat || '—') + '</div>' +
     '<span class="guide-sujet">📖 Description</span><p style="margin:4px 0 0;font-size:14.5px;line-height:1.65">' + esc(e.desc || '—') + '</p>' +
     '<span class="guide-sujet">🔍 Caractéristiques clés</span>' +
     '<ul class="carac-list">' + (e.carac && e.carac.length ? e.carac.map(c => '<li>' + esc(c) + '</li>').join('') : '<li>—</li>') + '</ul>' +
     '<span class="guide-sujet">⚠️ Confusions possibles</span><p style="margin:4px 0 0;font-size:14px;line-height:1.65">' + esc(e.confusions || '—') + '</p>' +
-    galerie +
     '<div class="grille2" style="margin-top:14px">' + boutons + '</div>' +
     '</div>';
   naviguer('detail');
@@ -2030,10 +2068,18 @@ $('illu-toutes').addEventListener('click', async () => {
 function ouvrirLightbox(src) {
   const anc = document.createElement('div');
   anc.id = 'lightbox';
+  anc.setAttribute('role', 'dialog');
+  anc.setAttribute('aria-modal', 'true');
+  anc.setAttribute('aria-label', 'Photo agrandie');
+  anc.tabIndex = -1;
   anc.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(20,14,8,.92);display:flex;align-items:center;justify-content:center;cursor:zoom-out';
   anc.innerHTML = '<img src="' + src + '" alt="Agrandissement" style="max-width:94%;max-height:92%;border:3px solid var(--noir);border-radius:14px;box-shadow:0 0 0 6px var(--creme)">';
-  anc.addEventListener('click', () => anc.remove());
+  const fermer = () => { document.removeEventListener('keydown', surEchap); anc.remove(); };
+  const surEchap = ev => { if (ev.key === 'Escape') fermer(); };
+  anc.addEventListener('click', fermer);
+  document.addEventListener('keydown', surEchap);
   document.body.appendChild(anc);
+  anc.focus();
 }
 
 /* ================= Identification par photo (Gemini vision) ================= */
