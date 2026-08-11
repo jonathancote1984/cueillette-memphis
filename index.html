@@ -943,10 +943,8 @@ function fermerFeuilles() {
   $('voile').classList.remove('visible');
 }
 $('voile').addEventListener('click', () => {
-  const especeOuverte = document.getElementById('sheet-espece').classList.contains('ouverte');
-  if (especeOuverte && formulaireEspeceSale()) {
-    confirmer('Quitter sans enregistrer ? Les champs remplis seront perdus.', '✏️ Variété non enregistrée').then(ok => { if (ok) fermerFeuilles(); });
-  } else fermerFeuilles();
+  if (document.getElementById('sheet-espece').classList.contains('ouverte')) fermerFeuilleVariete();
+  else fermerFeuilles();
 });
 document.querySelectorAll('.feuille .poignee').forEach(p => p.addEventListener('click', fermerFeuilles));
 /* Clavier : Enter/Espace déclenche les éléments role="button" (puces, cartes, items) */
@@ -1047,6 +1045,17 @@ function afficherPhoto(zoneId, data) {
   $(zoneId).innerHTML = data
     ? '<img src="' + data + '" alt="photo">'
     : '<div class="vide"><span class="ico">📷</span>Appareil photo ou galerie</div>';
+}
+/* Attache caméra + galerie + retrait à une zone photo (spot, cueillette, variété) */
+function lierPhoto(prefixe, get, set) {
+  const zone = prefixe + '-photo-zone';
+  $(prefixe + '-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { set(d); afficherPhoto(zone, d); }));
+  $(prefixe + '-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { set(d); afficherPhoto(zone, d); }));
+  $(zone).addEventListener('click', () => {
+    if (get()) {
+      confirmer('Retirer cette photo ?', '📷 Photo').then(ok => { if (ok) { set(null); afficherPhoto(zone, null); toast('Photo retirée'); } });
+    } else ouvrirChoixPhoto(false, d => { set(d); afficherPhoto(zone, d); });
+  });
 }
 function ouvrirChoixPhoto(camera, cb) {
   const inp = document.createElement('input');
@@ -1194,9 +1203,7 @@ $('s-carte').addEventListener('click', () => {
   const lat = $('s-lat').value.trim(), lng = $('s-lng').value.trim();
   if (lat && lng) window.open('https://www.google.com/maps?q=' + encodeURIComponent(lat + ',' + lng), '_blank');
 });
-$('s-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { Etat.spot.photo = d; afficherPhoto('s-photo-zone', d); }));
-$('s-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { Etat.spot.photo = d; afficherPhoto('s-photo-zone', d); }));
-$('s-photo-zone').addEventListener('click', () => { if (Etat.spot.photo) { confirmer('Retirer cette photo du spot ?', '📷 Photo').then(ok => { if (ok) { Etat.spot.photo = null; afficherPhoto('s-photo-zone', null); toast('Photo retirée'); } }); } else ouvrirChoixPhoto(false, d => { Etat.spot.photo = d; afficherPhoto('s-photo-zone', d); }); });
+lierPhoto('s', () => Etat.spot.photo, d => Etat.spot.photo = d);
 
 /* ================= Guide ================= */
 function rendreFiltres() {
@@ -1212,13 +1219,10 @@ function rendreFiltres() {
 }
 function filtrerGuide(f) { Etat.filtre = f; rendreFiltres(); rendreGuide(); }
 function filtrerSaison(fs) { Etat.filtreSaison = fs; rendreFiltres(); rendreGuide(); }
-function saisonDe(e) {
+const MOIS_SAISON = { 'janvier':'hiver', 'février':'hiver', 'mars':'printemps', 'avril':'printemps', 'mai':'printemps', 'juin':'ete', 'juillet':'ete', 'août':'ete', 'septembre':'automne', 'octobre':'automne', 'novembre':'automne', 'décembre':'hiver' };
+function saisonsDe(e) {
   const s = (e.saison || '').toLowerCase();
-  if (s.includes('printemps') || s.includes('mai') || s.includes('avril')) return 'printemps';
-  if (s.includes('hiver') || s.includes('décembre') || s.includes('déc')) return 'hiver';
-  if (s.includes('septembre') || s.includes('octobre') || s.includes('novembre') || s.includes('automne')) return 'automne';
-  if (s.includes('juin') || s.includes('juillet') || s.includes('août') || s.includes('été')) return 'ete';
-  return 'toutes';
+  return [...new Set(Object.keys(MOIS_SAISON).filter(m => s.includes(m)).map(m => MOIS_SAISON[m]))];
 }
 function rendreGuide() {
   const q = normNom(Etat.recherche.trim());
@@ -1228,7 +1232,7 @@ function rendreGuide() {
     else if (Etat.filtre === 'prudence') okF = !!e.prudence;
     else if (Etat.filtre === 'npas') okF = e.statut === 'toxique' || e.statut === 'immangeable';
     else if (Etat.filtre === 'mortel') okF = e.statut === 'mortel';
-    const okS = Etat.filtreSaison === 'toutes' || saisonDe(e) === Etat.filtreSaison;
+    const okS = Etat.filtreSaison === 'toutes' || saisonsDe(e).includes(Etat.filtreSaison);
     const okT = !q || normNom(e.nom + ' ' + (e.latin || '')).includes(q);
     return okF && okS && okT;
   });
@@ -1433,9 +1437,7 @@ $('c-save').addEventListener('click', async () => {
 $('c-cancel').addEventListener('click', fermerFeuilles);
 $('c-espece').addEventListener('input', remplirDatalist);
 $('c-espece').addEventListener('focus', remplirDatalist);
-$('c-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }));
-$('c-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }));
-$('c-photo-zone').addEventListener('click', () => { if (Etat.cueillette.photo) { confirmer('Retirer cette photo de la cueillette ?', '📷 Photo').then(ok => { if (ok) { Etat.cueillette.photo = null; afficherPhoto('c-photo-zone', null); toast('Photo retirée'); } }); } else ouvrirChoixPhoto(false, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }); });
+lierPhoto('c', () => Etat.cueillette.photo, d => Etat.cueillette.photo = d);
 
 /* ================= Variétés perso + IA ================= */
 let editEspeceId = null, photoEspece = null;
@@ -1450,6 +1452,23 @@ function messageErreurIA(err) {
   if (m.includes('500') || m.includes('503') || m.includes('unavailable') || m.includes('overloaded')) return '⚠️ Service IA momentanément indisponible — réessayez dans quelques instants.';
   if (m.includes('404')) return '⚠️ Modèle IA introuvable — réessayez plus tard.';
   return '⚠️ Erreur IA : ' + (err.message || 'inconnue') + ' — réessayez.';
+}
+/* Appel Gemini unifié : texte ou image, JSON optionnel. Retourne le texte concaténé des parts. */
+async function appelGemini(cle, modele, prompt, opts) {
+  const o = opts || {};
+  const body = { contents: [{ parts: [{ text: prompt }] }] };
+  if (o.parts) body.contents[0].parts = o.parts;
+  if (o.json) body.generationConfig = { responseMimeType: 'application/json' };
+  if (o.image) body.generationConfig = { responseModalities: ['TEXT', 'IMAGE'] };
+  const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + modele + ':generateContent?key=' + encodeURIComponent(cle), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!rep.ok) throw new Error('API ' + rep.status);
+  const d = await rep.json();
+  if (o.raw) return d;
+  return (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('') || '';
 }
 
 function ouvrirSheetEspece() {
@@ -1475,14 +1494,15 @@ function editerEspece(id) {
   afficherPhoto('e-photo-zone', photoEspece);
   ouvrirFeuille('sheet-espece');
 }
-$('e-cancel').addEventListener('click', () => {
-  if (formulaireEspeceSale()) {
-    confirmer('Quitter sans enregistrer ? Les champs remplis seront perdus.', '✏️ Variété non enregistrée').then(ok => { if (ok) fermerFeuilles(); });
-  } else fermerFeuilles();
-});
+$('e-cancel').addEventListener('click', fermerFeuilleVariete);
 function formulaireEspeceSale() {
   return ['e-nom', 'e-latin', 'e-saison', 'e-habitat', 'e-desc', 'e-carac', 'e-confusions']
     .some(i => $(i).value.trim() !== '') || photoEspece !== null;
+}
+function fermerFeuilleVariete() {
+  if (formulaireEspeceSale()) {
+    confirmer('Quitter sans enregistrer ? Les champs remplis seront perdus.', '✏️ Variété non enregistrée').then(ok => { if (ok) fermerFeuilles(); });
+  } else fermerFeuilles();
 }
 $('e-save').addEventListener('click', async () => {
   const nom = $('e-nom').value.trim();
@@ -1544,17 +1564,7 @@ async function genererDetailsIA(nom, latin) {
   const prompt = 'Tu es un mycologue expert du Québec. Rédige une fiche pour le champignon « ' + nom + ' »' +
     (latin ? ' (nom latin : ' + latin + ')' : '') +
     '. Réponds UNIQUEMENT en JSON valide, structure exacte : {"nom":"nom français","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","prudence":true|false,"saison":"période de fructification","habitat":"habitat type","description":"2-3 phrases","caracteristiques":["4 puces concrètes d\'identification : chapeau, lames/pores/aiguillons, pied, odeur/chair"],"confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Respecte les accents et le français du Québec.';
-  const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' + encodeURIComponent(cle), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: 'application/json' }
-    })
-  });
-  if (!rep.ok) throw new Error('API ' + rep.status);
-  const d = await rep.json();
-  const texte = (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('') || '';
+  const texte = await appelGemini(cle, 'gemini-flash-latest', prompt, { json: true });
   const propre = texte.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
   return JSON.parse(propre);
 }
@@ -1688,16 +1698,7 @@ async function genererImageIA(nom, latin, spec, desc) {
   let derniereErreur = null;
   for (const modele of MODELES_IMAGE) {
     try {
-      const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + modele + ':generateContent?key=' + encodeURIComponent(cle), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
-        })
-      });
-      if (!rep.ok) { derniereErreur = new Error('API ' + rep.status); continue; }
-      const d = await rep.json();
+      const d = await appelGemini(cle, modele, prompt, { image: true, raw: true });
       const part = (d.candidates?.[0]?.content?.parts || []).find(p => p.inlineData);
       if (!part) { derniereErreur = new Error('PAS_IMAGE'); continue; }
       return 'data:' + part.inlineData.mimeType + ';base64,' + part.inlineData.data;
@@ -1720,9 +1721,7 @@ $('e-photo-ia').addEventListener('click', async () => {
       : '⚠️ Génération d\'image non disponible avec cette clé — utilisez « 🔎 Chercher une photo » (gratuit).';
   }
 });
-$('e-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { photoEspece = d; afficherPhoto('e-photo-zone', d); }));
-$('e-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { photoEspece = d; afficherPhoto('e-photo-zone', d); }));
-$('e-photo-zone').addEventListener('click', () => { if (photoEspece) { confirmer('Retirer cette photo de la variété ?', '📷 Photo').then(ok => { if (ok) { photoEspece = null; afficherPhoto('e-photo-zone', null); toast('Photo retirée'); } }); } else ouvrirChoixPhoto(false, d => { photoEspece = d; afficherPhoto('e-photo-zone', d); }); });
+lierPhoto('e', () => photoEspece, d => photoEspece = d);
 
 /* ================= Illustrations IA par spécificité ================= */
 let illuEspeceId = null;
@@ -2116,23 +2115,20 @@ async function identifierPhotoIA(dataUrl) {
   const mime = (dataUrl.split(';')[0] || 'data:image/jpeg').replace('data:', '') || 'image/jpeg';
   const base64 = dataUrl.split(',')[1] || '';
   const prompt = 'Tu es un mycologue expert du Québec. Identifie le champignon sur cette photo. Réponds UNIQUEMENT en JSON valide, structure exacte : {"espece":"nom français le plus probable","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","confiance":0-100,"prudence":true si la consommation exige une préparation particulière (ex. cuisson obligatoire) ou si une confusion dangereuse est possible même à haute confiance, sinon false,"description":"2-3 phrases","confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Si la photo ne permet pas une identification fiable, mets "espece":"inconnu" et confiance basse. Respecte les accents. Ne réponds JAMAIS "comestible" sans prudence si l\'espèce exige une cuisson obligatoire (morille, amanite rougissante, etc.).';
-  const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' + encodeURIComponent(cle), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: mime, data: base64 } }] }],
-      generationConfig: { responseMimeType: 'application/json' }
-    })
-  });
-  if (!rep.ok) throw new Error('API ' + rep.status);
-  const d = await rep.json();
-  const texte = (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
+  const texte = await appelGemini(cle, 'gemini-flash-latest', prompt, { json: true, parts: [{ text: prompt }, { inlineData: { mimeType: mime, data: base64 } }] });
   const propre = texte.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
   return JSON.parse(propre || '{}');
 }
 
 /* ================= Stats ================= */
 const COULEURS_MOIS = ['#B45309', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#B94527', '#B45309', '#B45309', '#D9A441', '#6F8F3E', '#8A5A2B', '#B94527'];
+function topRangs(entries, max, couleur) {
+  if (!entries.length) return '<div class="vide-etat" style="padding:8px">Aucune donnée.</div>';
+  return entries.map((e, i) =>
+    '<div class="rang"><span class="pos">' + (i + 1) + '</span><span class="nom-rang">' + esc(e[0]) + '</span><span class="valeur-rang">' + fmtKg(e[1]) + '</span></div>' +
+    '<div class="barre-fond"><div class="barre" style="width:' + Math.max(4, e[1] / max * 100) + '%;' + (couleur ? 'background:' + couleur : '') + '"></div></div>'
+  ).join('');
+}
 function rendreStats() {
   const totalKg = Etat.cueillettes.reduce((a, c) => a + (c.poids || 0), 0);
   const dernier = Etat.cueillettes.length ? [...Etat.cueillettes].sort((a, b) => b.date.localeCompare(a.date))[0] : null;
@@ -2147,18 +2143,12 @@ function rendreStats() {
   Etat.cueillettes.forEach(c => { parEspece[c.espece] = (parEspece[c.espece] || 0) + (c.poids || 0); });
   const topE = Object.entries(parEspece).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const maxE = topE.length ? topE[0][1] : 1;
-  $('st-especes').innerHTML = topE.length ? topE.map((e, i) =>
-    '<div class="rang"><span class="pos">' + (i + 1) + '</span><span class="nom-rang">' + esc(e[0]) + '</span><span class="valeur-rang">' + fmtKg(e[1]) + '</span></div>' +
-    '<div class="barre-fond"><div class="barre" style="width:' + Math.max(4, e[1] / maxE * 100) + '%"></div></div>'
-  ).join('') : '<div class="vide-etat" style="padding:8px">Ajoutez des cueillettes pour voir vos tops !</div>';
+  $('st-especes').innerHTML = topRangs(topE, maxE);
   const parSpot = {};
   Etat.cueillettes.forEach(c => { if (c.spotId) { const n = nomSpot(c.spotId) || 'Sans spot'; parSpot[n] = (parSpot[n] || 0) + (c.poids || 0); } });
   const topS = Object.entries(parSpot).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const maxS = topS.length ? topS[0][1] : 1;
-  $('st-spots').innerHTML = topS.length ? topS.map((s, i) =>
-    '<div class="rang"><span class="pos">' + (i + 1) + '</span><span class="nom-rang">' + esc(s[0]) + '</span><span class="valeur-rang">' + fmtKg(s[1]) + '</span></div>' +
-    '<div class="barre-fond"><div class="barre" style="width:' + Math.max(4, s[1] / maxS * 100) + '%;background:var(--rose)"></div></div>'
-  ).join('') : '<div class="vide-etat" style="padding:8px">Aucune cueillette liée à un spot.</div>';
+  $('st-spots').innerHTML = topRangs(topS, maxS, 'var(--rose)');
   const mois = new Array(12).fill(0);
   Etat.cueillettes.forEach(c => {
     const m = parseInt((c.date || '').split('-')[1], 10);
@@ -2309,13 +2299,12 @@ $('credits-fermer').addEventListener('click', fermerFeuilles);
 let seqRecharger = 0;
 async function recharger() {
   const seq = ++seqRecharger;
-  const s = await Stockage.lire('spots');
-  const c = await Stockage.lire('cueillettes');
-  const e = await Stockage.lire('especes');
-  const ca = (await Stockage.lire('caches')).map(x => x.id);
-  const il = await Stockage.lire('illustrations');
-  const su = (await Stockage.lire('supprimees')).map(x => x.id);
-  const cl = await Stockage.lire('checklist');
+  const [s, c, e, caBrut, il, suBrut, cl] = await Promise.all([
+    Stockage.lire('spots'), Stockage.lire('cueillettes'), Stockage.lire('especes'),
+    Stockage.lire('caches'), Stockage.lire('illustrations'), Stockage.lire('supprimees'), Stockage.lire('checklist')
+  ]);
+  const ca = caBrut.map(x => x.id);
+  const su = suBrut.map(x => x.id);
   if (seq !== seqRecharger) return; // un rechargement plus récent est en cours
   const connus = new Set([...ESPECES, ...e].map(x => x.id));
   const orphelins = ca.filter(id => !connus.has(id));
