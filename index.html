@@ -46,13 +46,21 @@ header h1{
   transform:rotate(-1.5deg); display:inline-block;
   text-shadow:2px 2px 0 var(--rose); text-wrap:balance;
 }
-header .sous{margin:2px 0 0; font-size:12.5px; font-weight:600; color:var(--noir); opacity:.9;}
+header .sous{margin:2px 0 0; font-size:12.5px; font-weight:700; color:var(--noir); opacity:1;}
 header .pastille{
   margin-left:auto; background:var(--rouge); color:var(--blanc);
   border:3px solid var(--noir); border-radius:999px; min-width:34px; height:34px;
   display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;
   box-shadow:3px 3px 0 var(--noir); transform:rotate(4deg); font-variant-numeric:tabular-nums;
 }
+header .btn-retour{
+  margin-left:auto; width:44px; height:44px; border-radius:14px 14px 14px 4px;
+  background:var(--blanc); color:var(--noir); border:3px solid var(--noir);
+  font-size:20px; font-weight:700; line-height:1; cursor:pointer;
+  box-shadow:3px 3px 0 var(--noir); display:none; align-items:center; justify-content:center;
+}
+header .btn-retour:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--noir);}
+header .btn-retour.visible{display:flex;}
 .formes{position:absolute; inset:0; pointer-events:none; opacity:.5;}
 .formes svg{position:absolute;}
 .f-1{top:6px; right:84px; width:34px;}
@@ -163,6 +171,7 @@ h2.titre-vue .ico{font-size:20px;}
 }
 .puce:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--noir);}
 .puce.actif{transform:rotate(-2deg);}
+.puce.actif[data-fs]{background:var(--noir); color:var(--creme);}
 .puce.actif[data-f="tous"]{background:var(--gris);}
 .puce.actif[data-f="comestible"]{background:var(--vert);}
 .puce.actif[data-f="prudence"]{background:var(--jaune);}
@@ -178,6 +187,7 @@ h2.titre-vue .ico{font-size:20px;}
   box-shadow:inset 2px 2px 0 rgba(31,26,23,.08);
 }
 .champ input:focus, .champ select:focus, .champ textarea:focus, .saisie:focus{box-shadow:0 0 0 3px var(--jaune), inset 2px 2px 0 rgba(31,26,23,.08);}
+.btn:focus-visible, .puce:focus-visible, .item:focus-visible, .fab:focus-visible, nav.tabs button:focus-visible, .btn-retour:focus-visible{outline:3px solid var(--noir); outline-offset:2px; box-shadow:0 0 0 3px var(--jaune);}
 .champ textarea{resize:vertical; min-height:64px;}
 .grille2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
 /* ===== Photo ===== */
@@ -293,7 +303,7 @@ h2.titre-vue .ico{font-size:20px;}
 .stat-carte:nth-child(4){background:var(--rose); color:var(--blanc);}
 .stat-carte .valeur{font-size:24px; font-weight:700; margin-top:3px; line-height:1.1; font-variant-numeric:tabular-nums;}
 .stat-carte .libelle{font-size:12px; font-weight:700; opacity:.8;}
-.stat-carte:nth-child(2) .libelle, .stat-carte:nth-child(4) .libelle{opacity:1;}
+.stat-carte:nth-child(2) .libelle, .stat-carte:nth-child(3) .libelle, .stat-carte:nth-child(4) .libelle{opacity:1;}
 .rang{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:3px dashed var(--noir); font-size:14px; font-weight:600;}
 .rang:last-child{border-bottom:0;}
 .rang .pos{
@@ -360,6 +370,7 @@ h2.titre-vue .ico{font-size:20px;}
       <p class="sous">🍄 Carnet de champignons · édition Memphis</p>
     </div>
     <span class="pastille" id="badge" title="Cueillettes enregistrées">0</span>
+    <button class="btn-retour" id="btn-retour" onclick="fermerDetail()" aria-label="Retour au guide">←</button>
   </div>
   <svg class="zigzag" viewBox="0 0 1200 14" preserveAspectRatio="none" aria-hidden="true">
     <polygon points="0,14 30,0 60,14 90,0 120,14 150,0 180,14 210,0 240,14 270,0 300,14 330,0 360,14 390,0 420,14 450,0 480,14 510,0 540,14 570,0 600,14 630,0 660,14 690,0 720,14 750,0 780,14 810,0 840,14 870,0 900,14 930,0 960,14 990,0 1020,14 1050,0 1080,14 1110,0 1140,14 1170,0 1200,14 1200,14 0,14" fill="#241A0F"/>
@@ -921,10 +932,11 @@ function naviguer(vue) {
   Etat.vue = vue;
   document.querySelectorAll('.vue').forEach(v => v.classList.remove('visible'));
   $('vue-' + vue).classList.add('visible');
-  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('actif', b.dataset.vue === vue));
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('actif', b.dataset.vue === vue || (vue === 'detail' && b.dataset.vue === 'guide')));
   const fab = $('fab');
   fab.classList.toggle('cache', vue === 'stats' || vue === 'detail' || vue === 'parametres');
   fab.textContent = vue === 'spots' ? '📍' : '＋';
+  $('btn-retour').classList.toggle('visible', vue === 'detail');
   if (vue === 'stats') { rendreAlerteExport(); rendreStats(); }
   if (vue === 'guide') { rendreBandeauCle(); rendreGuide(); }
   if (vue === 'parametres') rendreParametres();
@@ -2092,7 +2104,7 @@ async function analyserPhoto(dataUrl) {
       '</div>';
   } catch (err) {
     $('idphoto-contenu').innerHTML =
-      '<div class="vide-etat" style="padding:16px"><span class="ico">⚠️</span>Identification impossible : ' + esc(err.message || 'erreur') + '<br><small>Vérifiez votre clé et votre connexion.</small></div>' +
+      '<div class="vide-etat" style="padding:16px"><span class="ico">⚠️</span>' + esc(messageErreurIA(err)) + '<br><small>Vérifiez votre clé et votre connexion.</small></div>' +
       '<button class="btn btn-gris btn-plein" onclick="fermerFeuilles()">Fermer</button>';
   }
 }
@@ -2216,7 +2228,7 @@ $('st-effacer').addEventListener('click', async () => {
   if (!await confirmer('Tout effacer ? Cette action est IRRÉVERSIBLE. Exportez d\'abord si nécessaire.', '🗑️ Tout effacer')) return;
   if (!await confirmer('Vraiment sûr ? Pensez à exporter vos données avant (bouton Exporter).', '⚠️ Dernière vérification')) return;
   await Stockage.vider('spots'); await Stockage.vider('cueillettes');
-  await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches'); await Stockage.vider('supprimees');
+  await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches'); await Stockage.vider('supprimees'); await Stockage.vider('checklist');
   toast('Toutes les données ont été effacées');
   await recharger();
 });
