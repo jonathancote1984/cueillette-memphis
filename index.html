@@ -20,6 +20,7 @@
   --creme:#F3E8D5; --noir:#241A0F; --blanc:#FDF6E7;
   --rouge:#B3261E; --jaune:#D9A441; --bleu:#8A5A2B; --rose:#B94527;
   --vert:#6F8F3E; --orange:#B45309; --gris:#A89882;
+  --ambre:#D9A441; --olive:#6F8F3E; --cuir:#8A5A2B;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;}
@@ -45,7 +46,7 @@ header h1{
   transform:rotate(-1.5deg); display:inline-block;
   text-shadow:2px 2px 0 var(--rose);
 }
-header .sous{margin:2px 0 0; font-size:12.5px; font-weight:600; color:var(--noir); opacity:.75;}
+header .sous{margin:2px 0 0; font-size:12.5px; font-weight:600; color:var(--noir); opacity:.9;}
 header .pastille{
   margin-left:auto; background:var(--rouge); color:var(--blanc);
   border:3px solid var(--noir); border-radius:999px; min-width:34px; height:34px;
@@ -132,7 +133,7 @@ h2.titre-vue .ico{font-size:20px;}
 .item .vig img{width:100%; height:100%; object-fit:cover;}
 .item .corps{flex:1; padding:10px 12px; min-width:0;}
 .item .nom{font-weight:700; font-size:15.5px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
-.item .meta{font-size:12.5px; opacity:.75; margin-top:2px; line-height:1.5;}
+.item .meta{font-size:12.5px; opacity:.85; margin-top:2px; line-height:1.5;}
 .item .mesures{font-size:14px; font-weight:700; color:#0B7A55; margin-top:3px;}
 .item .actions{margin-top:6px; display:flex; gap:8px;}
 /* ===== Boutons ===== */
@@ -261,7 +262,7 @@ h2.titre-vue .ico{font-size:20px;}
 .verdict-carte{margin:14px 0 0;border:3px solid var(--noir);border-radius:14px 14px 14px 4px;padding:11px 13px;font-size:13.5px;display:none}
 .verdict-carte.ouv{display:block}
 .verdict-carte .t{font-weight:700;display:flex;gap:6px;align-items:center;margin-bottom:3px}
-.verdict-ok{background:var(--olive);color:var(--blanc)}
+.verdict-ok{background:var(--olive);color:var(--noir)}
 .verdict-att{background:var(--ambre);color:var(--noir)}
 .spec-compteur{font-size:12.5px;background:var(--noir);color:var(--creme);padding:2px 10px;border-radius:999px;font-weight:700}
 .feuille{
@@ -323,7 +324,7 @@ h2.titre-vue .ico{font-size:20px;}
 /* ===== Divers ===== */
 .vide-etat{text-align:center; padding:30px 12px; font-weight:600; font-size:15px; opacity:.8;}
 .vide-etat .ico{font-size:48px; display:block; margin-bottom:10px; filter:drop-shadow(3px 3px 0 var(--noir));}
-.note{font-size:12px; font-weight:500; opacity:.7; margin-top:10px; line-height:1.5;}
+.note{font-size:12px; font-weight:500; opacity:.85; margin-top:10px; line-height:1.5;}
 .deco-tri{position:absolute; right:10px; bottom:10px; width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent; border-bottom:20px solid var(--noir); opacity:.12; pointer-events:none;}
 #toast{
   position:fixed; left:50%; bottom:calc(104px + env(safe-area-inset-bottom)); z-index:99;
@@ -333,6 +334,9 @@ h2.titre-vue .ico{font-size:20px;}
   box-shadow:4px 4px 0 var(--rose); max-width:88%; text-align:center;
 }
 #toast.visible{transform:translateX(-50%) translateY(0); opacity:1;}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important; scroll-behavior:auto !important;}
+}
 </style>
 </head>
 <body>
@@ -530,9 +534,8 @@ h2.titre-vue .ico{font-size:20px;}
     </label>
   </div>
   <label class="champ">Espèce
-    <select id="c-espece" style="margin-top:5px;width:100%;padding:12px;font-size:16px;font-family:inherit;border:3px solid var(--noir);border-radius:12px 12px 12px 4px;background:var(--blanc);color:var(--noir);outline:none">
-      <option value="">— Choisir une espèce —</option>
-    </select>
+    <input class="saisie" id="c-espece" placeholder="Tapez ou choisissez…" autocomplete="off" style="margin-bottom:6px">
+    <div id="c-espece-suggestions"></div>
   </label>
   <div class="grille2">
     <label class="champ">Spot
@@ -675,7 +678,7 @@ h2.titre-vue .ico{font-size:20px;}
   <div id="idphoto-contenu"></div>
 </section>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* ================= Utilitaires ================= */
@@ -947,6 +950,13 @@ $('voile').addEventListener('click', () => {
   } else fermerFeuilles();
 });
 document.querySelectorAll('.feuille .poignee').forEach(p => p.addEventListener('click', fermerFeuilles));
+/* Clavier : Enter/Espace déclenche les éléments role="button" (puces, cartes, items) */
+document.addEventListener('keydown', ev => {
+  if ((ev.key === 'Enter' || ev.key === ' ') && ev.target && ev.target.getAttribute && ev.target.getAttribute('role') === 'button') {
+    ev.preventDefault();
+    ev.target.click();
+  }
+});
 function ouvrirFeuille(id) {
   fermerFeuilles();
   $(id).classList.add('ouverte');
@@ -1122,7 +1132,7 @@ function remplirSelectEspecesSpot() {
   const zone = $('s-especes'); if (!zone) return;
   const selection = new Set(Etat.spot.especes || []);
   zone.innerHTML = toutesEspeces().map(e =>
-    '<span class="puce' + (selection.has(e.nom) ? ' actif' : '') + '" data-nom="' + esc(e.nom) + '" onclick="basculerEspeceSpot(this)">' + esc(e.nom) + '</span>'
+    '<span class="puce' + (selection.has(e.nom) ? ' actif' : '') + '" data-nom="' + esc(e.nom) + '" role="button" tabindex="0" onclick="basculerEspeceSpot(this)">' + esc(e.nom) + '</span>'
   ).join('');
 }
 function basculerEspeceSpot(el) {
@@ -1195,10 +1205,10 @@ function rendreFiltres() {
   const saisons = [['toutes', '🗓️ Toutes'], ['printemps', '🌸 Printemps'], ['ete', '☀️ Été'], ['automne', '🍂 Automne'], ['hiver', '❄️ Hiver']];
   $('g-filtres').innerHTML =
     '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">' + options.map(o =>
-      `<span class="puce${Etat.filtre === o[0] ? ' actif' : ''}" data-f="${o[0]}" onclick="filtrerGuide('${o[0]}')">${o[1]}</span>`
+      `<span class="puce${Etat.filtre === o[0] ? ' actif' : ''}" data-f="${o[0]}" role="button" tabindex="0" onclick="filtrerGuide('${o[0]}')">${o[1]}</span>`
     ).join('') + '</div>' +
     '<div style="display:flex;flex-wrap:wrap;gap:6px">' + saisons.map(s =>
-      `<span class="puce puce-saison${Etat.filtreSaison === s[0] ? ' actif' : ''}" data-fs="${s[0]}" onclick="filtrerSaison('${s[0]}')">${s[1]}</span>`
+      `<span class="puce puce-saison${Etat.filtreSaison === s[0] ? ' actif' : ''}" data-fs="${s[0]}" role="button" tabindex="0" onclick="filtrerSaison('${s[0]}')">${s[1]}</span>`
     ).join('') + '</div>';
 }
 function filtrerGuide(f) { Etat.filtre = f; rendreFiltres(); rendreGuide(); }
@@ -1226,7 +1236,7 @@ function rendreGuide() {
   $('liste-guide').innerHTML = list.map(e => {
     const perso = !!e.perso;
     const img = e.img || e.photo;
-    return '<div class="item" style="cursor:pointer" onclick="ouvrirDetail(\'' + e.id + '\',' + perso + ')">' +
+    return '<div class="item" style="cursor:pointer" role="button" tabindex="0" onclick="ouvrirDetail(\'' + e.id + '\',' + perso + ')">' +
       '<div class="vig">' + (img ? '<img src="' + img + '" alt="' + esc(e.nom) + '" loading="lazy">' : '🍄') + '</div>' +
       '<div class="corps"><div class="nom">' + esc(e.nom) + ' ' + badgeStatut(e.statut, e.prudence) +
       (perso ? ' <span class="pastille-statut st-immangeable" style="background:var(--noir);color:var(--creme)">⭐ perso</span>' : '') + '</div>' +
@@ -1265,7 +1275,7 @@ function ouvrirDetail(id, perso) {
     '<span class="guide-sujet">🖼️ Spécificités à repérer</span>' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 10px"><span style="font-size:12.5px;opacity:.85">Vérifiez chaque critère sur le champignon</span><span class="spec-compteur" id="spec-compteur">' + nbFaits + '/' + illu.items.length + '</span></div>' +
     illu.items.map((it, i) =>
-      '<div class="spec-carte' + (faits.faits[i] ? ' fait' : '') + '" id="spec-carte-' + i + '" onclick="basculerSpec(' + i + ')">' +
+      '<div class="spec-carte' + (faits.faits[i] ? ' fait' : '') + '" id="spec-carte-' + i + '" role="button" tabindex="0" onclick="basculerSpec(' + i + ')">' +
       (it.img ? '<div class="spec-photo"><img src="' + it.img + '" alt="' + esc(it.spec) + '" onclick="event.stopPropagation();ouvrirLightbox(this.src)"><span class="spec-num">' + (i + 1) + '</span><span class="spec-zoom">🔍 Agrandir</span></div>' : '') +
       '<div class="spec-corps"><div class="spec-carre">✓</div><div class="spec-texte"><div class="spec-titre">' + esc(it.spec) + '</div>' + (it.desc ? '<div class="spec-desc">' + esc(it.desc) + '</div>' : '') + '</div></div>' +
       '</div>'
@@ -1311,7 +1321,7 @@ async function basculerSpec(i) {
   const cmp = $('spec-compteur'); if (cmp) cmp.textContent = nb + '/' + illu.items.length;
   const ok = $('spec-verdict-ok'), att = $('spec-verdict-att');
   if (ok) ok.classList.toggle('ouv', nb === illu.items.length);
-  if (att) att.classList.toggle('ouv', nb > 0 && nb < illu.items.length);
+  if (att) att.classList.toggle('ouv', nb < illu.items.length);
 }
 
 /* ================= Cueillettes ================= */
@@ -1341,12 +1351,24 @@ function rendreCueillettes() {
   }).join('');
 }
 function remplirDatalist() {
-  // Remplit le select Espèce de la cueillette (remplace l'ancien datalist, plus fiable sur mobile)
-  const sel = $('c-espece'); if (!sel) return;
-  const courante = sel.value;
-  const options = toutesEspeces().map(e => '<option value="' + esc(e.nom) + '">' + esc(e.nom) + (e.latin ? ' — ' + esc(e.latin) : '') + '</option>').join('');
-  sel.innerHTML = '<option value="">— Choisir une espèce —</option>' + options;
-  if (courante && [...sel.options].some(o => o.value === courante)) sel.value = courante;
+  // Autocomplétion : l'input c-espece suggère les espèces au fil de la frappe (valeur libre autorisée)
+  const inp = $('c-espece'); if (!inp) return;
+  const zone = $('c-espece-suggestions');
+  const q = normNom(inp.value.trim());
+  if (!q) { zone.innerHTML = ''; return; }
+  const matches = toutesEspeces()
+    .filter(e => normNom(e.nom + ' ' + (e.latin || '')).includes(q))
+    .slice(0, 6);
+  zone.innerHTML = matches.length
+    ? matches.map(e =>
+        '<button type="button" class="puce" style="margin:3px 6px 3px 0;display:inline-flex" onclick="choisirEspeceCueillette(\'' + esc(e.nom) + '\')">' + esc(e.nom) + '</button>'
+      ).join('')
+    : '<p class="note" style="margin:2px 0 0">Aucune correspondance — vous pouvez saisir un nom libre.</p>';
+}
+function choisirEspeceCueillette(nom) {
+  const inp = $('c-espece'); if (!inp) return;
+  inp.value = nom;
+  $('c-espece-suggestions').innerHTML = '';
 }
 function remplirSelectSpot() {
   $('c-spot').innerHTML = '<option value="">— Sans spot —</option>' +
@@ -1367,15 +1389,9 @@ function editerCueillette(id) {
   $('titre-cueillette').textContent = '✏️ Modifier la cueillette';
   $('c-date').value = c.date || aujourdhui();
   $('c-poids').value = c.poids ? (Etat.unite === 'lb' ? +(c.poids * 2.20462).toFixed(1) : c.poids) : '';
-  // Sélectionne l'espèce ; si elle a été masquée/supprimée du guide, garder une option fantôme pour ne pas perdre la valeur
-  const sel = $('c-espece');
-  const existe = [...sel.options].some(o => o.value === (c.espece || ''));
-  if (c.espece && !existe) {
-    const opt = document.createElement('option');
-    opt.value = c.espece; opt.textContent = c.espece + ' (espèce masquée)';
-    sel.appendChild(opt);
-  }
-  sel.value = c.espece || '';
+  // L'input accepte la valeur libre : l'espèce masquée/supprimée reste affichée sans option fantôme
+  $('c-espece').value = c.espece || '';
+  $('c-espece-suggestions').innerHTML = '';
   $('c-spot').value = c.spotId || '';
   $('c-meteo').value = c.meteo || '🌞 Ensoleillé';
   $('c-note').value = c.note || '';
@@ -1412,6 +1428,8 @@ $('c-save').addEventListener('click', async () => {
   await recharger();
 });
 $('c-cancel').addEventListener('click', fermerFeuilles);
+$('c-espece').addEventListener('input', remplirDatalist);
+$('c-espece').addEventListener('focus', remplirDatalist);
 $('c-photo-cam').addEventListener('click', () => ouvrirChoixPhoto(true, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }));
 $('c-photo-gal').addEventListener('click', () => ouvrirChoixPhoto(false, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }));
 $('c-photo-zone').addEventListener('click', () => { if (Etat.cueillette.photo) { confirmer('Retirer cette photo de la cueillette ?', '📷 Photo').then(ok => { if (ok) { Etat.cueillette.photo = null; afficherPhoto('c-photo-zone', null); toast('Photo retirée'); } }); } else ouvrirChoixPhoto(false, d => { Etat.cueillette.photo = d; afficherPhoto('c-photo-zone', d); }); });
