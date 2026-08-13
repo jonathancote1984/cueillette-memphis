@@ -940,7 +940,17 @@ const infoEspece = nom => {
       .sort((a, b) => a.d - b.d)[0];
     if (candidat) e = candidat.x;
   }
-  return e ? { id: e.id, statut: e.statut, prudence: !!e.prudence, perso: !!e.perso, photo: e.img || e.photo } : { id: null, statut: null, prudence: false, perso: false, photo: null };
+  // Matche par inclusion : les synonymes vernaculaires (« fausse morille », « ange destructeur ») sont dans les noms du guide
+  let viaInclusion = null;
+  if (!e && n.length >= 4) {
+    const parInclusion = toutesEspeces()
+      .map(x => ({ x, d: normNom(x.nom).includes(n) ? normNom(x.nom).length : Infinity }))
+      .filter(c => c.d !== Infinity)
+      .sort((a, b) => a.d - b.d)[0];
+    if (parInclusion) { e = parInclusion.x; viaInclusion = parInclusion.x; }
+  }
+  const estSynonyme = !!viaInclusion && normNom(viaInclusion.nom) !== n;
+  return e ? { id: e.id, statut: e.statut, prudence: !!e.prudence, perso: !!e.perso, photo: e.img || e.photo, synonyme: estSynonyme, nomComplet: e.nom } : { id: null, statut: null, prudence: false, perso: false, photo: null, synonyme: false, nomComplet: null };
 };
 const nomSpot = id => { const s = Etat.spots.find(x => x.id === id); return s ? s.nom : null; };
 
@@ -1479,6 +1489,9 @@ $('c-save').addEventListener('click', async () => {
   if (!date) { toast('Choisissez une date'); return; }
   if (!espece) { toast('Indiquez l\'espèce'); $('c-espece').focus(); return; }
   const info = infoEspece(espece);
+  if (info.synonyme && (info.statut === 'mortel' || info.statut === 'toxique' || info.statut === 'immangeable')) {
+    if (!await confirmer('⚠️ « ' + espece + ' » correspond à « ' + info.nomComplet + ' » — ' + (info.statut === 'mortel' ? 'MORTELLE : ne pas consommer' : 'non comestible') + '. Enregistrer quand même ?', '☠️ Sécurité')) return;
+  }
   const poids = kgDepuisSaisie($('c-poids').value);
   const c = {
     id: Etat.cueillette.edition || uid(),
@@ -1525,7 +1538,8 @@ async function appelGemini(cle, modele, prompt, opts) {
   const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + modele + ':generateContent?key=' + encodeURIComponent(cle), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: o.signal || undefined
   });
   if (!rep.ok) throw new Error('API ' + rep.status);
   const d = await rep.json();
@@ -2074,7 +2088,12 @@ function ouvrirLightbox(src) {
   anc.tabIndex = -1;
   anc.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(20,14,8,.92);display:flex;align-items:center;justify-content:center;cursor:zoom-out';
   anc.innerHTML = '<img src="' + src + '" alt="Agrandissement" style="max-width:94%;max-height:92%;border:3px solid var(--noir);border-radius:14px;box-shadow:0 0 0 6px var(--creme)">';
-  const fermer = () => { document.removeEventListener('keydown', surEchap); anc.remove(); };
+  const declencheur = document.activeElement;
+  const fermer = () => {
+    document.removeEventListener('keydown', surEchap);
+    anc.remove();
+    if (declencheur && declencheur.focus) declencheur.focus();
+  };
   const surEchap = ev => { if (ev.key === 'Escape') fermer(); };
   anc.addEventListener('click', fermer);
   document.addEventListener('keydown', surEchap);
@@ -2084,6 +2103,15 @@ function ouvrirLightbox(src) {
 
 /* ================= Identification par photo (Gemini vision) ================= */
 let dernierResultatId = null;
+let analyseAbort = null;
+let derniereSourcePhoto = false; // false = galerie, true = appareil
+function annulerAnalyse() {
+  if (analyseAbort) analyseAbort.abort();
+  $('idphoto-contenu').innerHTML =
+    '<div class="vide-etat" style="padding:16px"><span class="ico">✋</span>Analyse annulée.</div>' +
+    '<div class="grille2" style="margin-top:10px"><button class="btn btn-vert btn-plein" onclick="identifierParPhoto(false)">🖼️ Choisir une photo</button>' +
+    '<button class="btn btn-gris btn-plein" onclick="fermerFeuilles()">Fermer</button></div>';
+}
 function rendreBandeauCle() {
   const zone = $('g-cle-bandeau'); if (!zone) return;
   if (cleIA()) { zone.innerHTML = ''; return; }
@@ -2094,17 +2122,23 @@ function rendreBandeauCle() {
 }
 function identifierParPhoto(estAppareil) {
   if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini — bouton « Configurer la clé » ci-dessus'); return; }
+  derniereSourcePhoto = estAppareil;
   ouvrirChoixPhoto(estAppareil, d => analyserPhoto(d));
 }
 async function analyserPhoto(dataUrl) {
   dernierResultatId = null;
+  analyseAbort = new AbortController();
+  const signal = analyseAbort.signal;
   $('idphoto-contenu').innerHTML =
     '<img src="' + dataUrl + '" alt="Photo à identifier" style="width:100%;border:3px solid var(--noir);border-radius:16px;box-shadow:4px 4px 0 var(--noir);margin-bottom:12px">' +
-    '<div class="vide-etat" style="padding:16px"><span class="ico">🔍</span>Analyse en cours…<br><small style="font-size:12.5px">L\'IA examine chapeau, lames, pied et habitat (10-20 s)</small></div>';
+    '<div class="vide-etat" style="padding:16px"><span class="ico">🔍</span>Analyse en cours…<br><small style="font-size:12.5px">L\'IA examine chapeau, lames, pied et habitat (10-20 s)</small></div>' +
+    '<button class="btn btn-gris btn-plein" style="margin-top:10px" onclick="annulerAnalyse()">✋ Annuler</button>';
   ouvrirFeuille('sheet-idphoto');
   try {
-    const r = await identifierPhotoIA(dataUrl);
+    const r = await identifierPhotoIA(dataUrl, signal);
+    if (signal.aborted) return;
     if (!r || !r.espece || r.espece === 'inconnu') {
+      if (!$('sheet-idphoto').classList.contains('ouverte')) { ouvrirFeuille('sheet-idphoto'); toast('Analyse terminée ✨'); }
       $('idphoto-contenu').innerHTML =
         '<img src="' + dataUrl + '" alt="Photo à identifier" style="width:100%;border:3px solid var(--noir);border-radius:16px;box-shadow:4px 4px 0 var(--noir);margin-bottom:12px">' +
         '<div class="vide-etat" style="padding:16px"><span class="ico">😕</span>Impossible d\'identifier ce champignon avec certitude.<br><small>Comparez avec le guide (filtres, recherche) ou ajoutez-le comme variété.</small></div>' +
@@ -2133,7 +2167,7 @@ async function analyserPhoto(dataUrl) {
         '<div class="vide-etat" style="padding:16px"><span class="ico">😕</span>Impossible d\'identifier ce champignon avec certitude' +
         (confiance !== null ? ' (confiance ' + Math.round(confiance) + ' %)' : '') + '.<br><small>Comparez avec le guide (filtres, recherche) ou ajoutez-le comme variété.</small></div>' +
         '<div class="alerte alerte-rouge" style="margin-top:10px">⚠️ <b>En cas de doute, on ne mange pas.</b> Faites vérifier votre récolte par un expert avant toute consommation.</div>' +
-        '<div class="grille2" style="margin-top:10px"><button class="btn btn-vert btn-plein" onclick="identifierParPhoto(false)">📷 Réessayer</button>' +
+        '<div class="grille2" style="margin-top:10px"><button class="btn btn-vert btn-plein" onclick="identifierParPhoto(derniereSourcePhoto)">📷 Réessayer</button>' +
         '<button class="btn btn-gris btn-plein" onclick="fermerFeuilles()">Fermer</button></div>';
       return;
     }
@@ -2160,7 +2194,10 @@ async function analyserPhoto(dataUrl) {
       '<button class="btn btn-jaune btn-plein" style="margin-top:8px" onclick="preparerVarieteDepuisResultat()">➕ Ajouter comme variété</button>' +
       '<button class="btn btn-gris btn-plein" style="margin-top:8px" onclick="fermerFeuilles()">Fermer</button>' +
       '</div>';
+    if (!$('sheet-idphoto').classList.contains('ouverte')) { ouvrirFeuille('sheet-idphoto'); toast('Analyse terminée ✨'); }
   } catch (err) {
+    if (analyseAbort && analyseAbort.signal.aborted) return;
+    if (!$('sheet-idphoto').classList.contains('ouverte')) { ouvrirFeuille('sheet-idphoto'); }
     $('idphoto-contenu').innerHTML =
       '<div class="vide-etat" style="padding:16px"><span class="ico">⚠️</span>' + esc(messageErreurIA(err)) + '<br><small>Vérifiez votre clé et votre connexion.</small></div>' +
       '<button class="btn btn-gris btn-plein" onclick="fermerFeuilles()">Fermer</button>';
@@ -2180,12 +2217,12 @@ function preparerVarieteDepuisResultat() {
   if (photoResultat) { photoEspece = photoResultat; afficherPhoto('e-photo-zone', photoResultat); }
   toast('Fiche pré-remplie — complétez puis enregistrez ✨');
 }
-async function identifierPhotoIA(dataUrl) {
+async function identifierPhotoIA(dataUrl, signal) {
   const cle = cleIA(); if (!cle) throw new Error('PAS_DE_CLE');
   const mime = (dataUrl.split(';')[0] || 'data:image/jpeg').replace('data:', '') || 'image/jpeg';
   const base64 = dataUrl.split(',')[1] || '';
   const prompt = 'Tu es un mycologue expert du Québec. Identifie le champignon sur cette photo. Réponds UNIQUEMENT en JSON valide, structure exacte : {"espece":"nom français le plus probable","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","confiance":0-100,"prudence":true si la consommation exige une préparation particulière (ex. cuisson obligatoire) ou si une confusion dangereuse est possible même à haute confiance, sinon false,"description":"2-3 phrases","confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Si la photo ne permet pas une identification fiable, mets "espece":"inconnu" et confiance basse. Respecte les accents. Ne réponds JAMAIS "comestible" sans prudence si l\'espèce exige une cuisson obligatoire (morille, amanite rougissante, etc.).';
-  const texte = await appelGemini(cle, 'gemini-flash-latest', prompt, { json: true, parts: [{ text: prompt }, { inlineData: { mimeType: mime, data: base64 } }] });
+  const texte = await appelGemini(cle, 'gemini-flash-latest', prompt, { json: true, signal, parts: [{ text: prompt }, { inlineData: { mimeType: mime, data: base64 } }] });
   const propre = texte.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
   return JSON.parse(propre || '{}');
 }
@@ -2264,6 +2301,13 @@ $('st-import-fichier').addEventListener('change', async e => {
     if (!Array.isArray(data.cachees)) data.cachees = [];
     if (!Array.isArray(data.supprimees)) data.supprimees = [];
     if (!Array.isArray(data.checklist)) data.checklist = [];
+    // P2-2 : vérification de la version du fichier (perte silencieuse de la checklist)
+    const version = typeof data.version === 'number' ? data.version : (data.version ? 0 : null);
+    if (version !== null && version > 5) {
+      if (!await confirmer('⚠️ Ce fichier provient d\'une version PLUS RÉCENTE de l\'app (v' + version + '). Son format peut être inconnu — import risqué. Continuer ?', '📥 Import')) return;
+    } else if (version !== null && version < 5) {
+      if (!await confirmer('⚠️ Ce fichier date d\'une version ANTÉRIEURE (v' + version + ') : la checklist terrain (vos vérifications ⚠️/✅) sera perdue. Continuer ?', '📥 Import')) return;
+    }
     const nCue = data.cueillettes.length, nSpots = data.spots.length, nEsp = data.especes.length;
     const resume = 'Remplacer TOUTES les données actuelles ? Le fichier contient ' + nCue + ' cueillette' + (nCue > 1 ? 's' : '') + ', ' + nSpots + ' spot' + (nSpots > 1 ? 's' : '') + (nEsp ? ' et ' + nEsp + ' variété' + (nEsp > 1 ? 's' : '') : '') + '. Exportez d\'abord si nécessaire.';
     if (!await confirmer(resume, '📥 Import')) return;
