@@ -1564,10 +1564,15 @@ function remplirSuggestionsMyco() {
   chargerBaseMyco().then(base => {
     const matches = base
       .filter(x => (x.nomFr && normNom(x.nomFr).includes(q)) || normNom(x.latin).includes(q))
+      .sort((a, b) => {
+        const aFr = a.nomFr && normNom(a.nomFr).includes(q) ? 0 : 1;
+        const bFr = b.nomFr && normNom(b.nomFr).includes(q) ? 0 : 1;
+        return aFr - bFr;
+      })
       .slice(0, 6);
     zone.innerHTML = matches.length
       ? matches.map(x =>
-          '<button type="button" class="puce" style="margin:3px 6px 3px 0;display:inline-flex" onclick="choisirNomMyco(\'' + esc(x.nomFr || x.latin) + '\',\'' + esc(x.latin) + '\')">' + esc(x.nomFr || x.latin) + (x.nomFr ? ' <i style="opacity:.7">' + esc(x.latin) + '</i>' : '') + '</button>'
+          '<button type="button" class="puce" style="margin:3px 6px 3px 0;display:inline-flex" onclick="choisirNomMyco(\'' + esc(x.nomFr || x.latin) + '\',\'' + esc(x.latin) + '\')">' + esc(x.nomFr || x.latin) + (x.nomFr ? ' <i style="opacity:.85">' + esc(x.latin) + '</i>' : '') + '</button>'
         ).join('')
       : '';
   });
