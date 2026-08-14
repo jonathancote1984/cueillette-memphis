@@ -1,0 +1,871 @@
+[
+ {
+  "latin": "Agaricus arvensis",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-3-30020274934.jpg"
+ },
+ {
+  "latin": "Agaricus campestris",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-7-3314855226.jpg"
+ },
+ {
+  "latin": "Albatrellus ovinus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2363-2934926234.jpg"
+ },
+ {
+  "latin": "Aleuria aurantia",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-27-3237511638.jpg"
+ },
+ {
+  "latin": "Amanita brunnescens",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-37-4091794396.jpg"
+ },
+ {
+  "latin": "Amanita citrina",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-40-51843394267.jpg"
+ },
+ {
+  "latin": "Amanita flavoconia",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-47-317400665.jpg"
+ },
+ {
+  "latin": "Amanita jacksonii",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-51-19035618986.jpg"
+ },
+ {
+  "latin": "Amanita porphyria",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-64-9778820426.jpg"
+ },
+ {
+  "latin": "Amanita rhacopus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-69-4847155245.jpg"
+ },
+ {
+  "latin": "Amanita sinicoflava",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-74-48762171156.jpg"
+ },
+ {
+  "latin": "Amanita velatipes",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-80-2141683331.jpg"
+ },
+ {
+  "latin": "Amanita phalloides",
+  "img": null,
+  "nomFr": "Amanite phalloïde"
+ },
+ {
+  "latin": "Amanita rubescens",
+  "img": null,
+  "nomFr": "Amanite rougissante"
+ },
+ {
+  "latin": "Amanita muscaria",
+  "img": null,
+  "nomFr": "Amanite tue-mouches"
+ },
+ {
+  "latin": "Amanita virosa",
+  "img": null,
+  "nomFr": "Amanite vireuse"
+ },
+ {
+  "latin": "Apiosporina morbosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-112-4196291784.jpg"
+ },
+ {
+  "latin": "Armillaria ostoyae",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-125-6215670159.jpg"
+ },
+ {
+  "latin": "Armillaria sinapina",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-126-51656916908.jpg"
+ },
+ {
+  "latin": "Artomyces pyxidatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-130-9148893164.jpg"
+ },
+ {
+  "latin": "Auricularia americana",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-143-4560213953.jpg"
+ },
+ {
+  "latin": "Tylopilus felleus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2577-9540516976.jpg",
+  "nomFr": "Bolet amer"
+ },
+ {
+  "latin": "Imleria badia",
+  "img": null,
+  "nomFr": "Bolet bai"
+ },
+ {
+  "latin": "Calocera cornea",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-207-3652758106.jpg"
+ },
+ {
+  "latin": "Caloscypha fulgens",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-213-4571210855.jpg"
+ },
+ {
+  "latin": "Calvatia gigantea",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-218-4312866584.jpg"
+ },
+ {
+  "latin": "Ceratiomyxa fruticulosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-233-2590499577.jpg"
+ },
+ {
+  "latin": "Ceratiomyxa porioides",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-234-3278824057.jpg"
+ },
+ {
+  "latin": "Cerrena unicolor",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-241-26344029072.jpg"
+ },
+ {
+  "latin": "Chalciporus piperatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-243-2081239413.jpg"
+ },
+ {
+  "latin": "Chalciporus rubinellus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-244-6335320857.jpg"
+ },
+ {
+  "latin": "Cantharellus cibarius",
+  "img": null,
+  "nomFr": "Chanterelle commune"
+ },
+ {
+  "latin": "Cantharellus tubaeformis",
+  "img": null,
+  "nomFr": "Chanterelle en tube"
+ },
+ {
+  "latin": "Clavaria fragilis",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-280-7983591224.jpg"
+ },
+ {
+  "latin": "Clavaria rosea",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-277-6036744961.jpg"
+ },
+ {
+  "latin": "Clavaria rubicundula",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-278-52231961294.jpg"
+ },
+ {
+  "latin": "Clavulina coralloides",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-291-3919005597.jpg"
+ },
+ {
+  "latin": "Clitocybe rivulosa",
+  "img": null,
+  "nomFr": "Clitocybe blanchâtre"
+ },
+ {
+  "latin": "Clitocybe odora",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-320-4994804088.jpg"
+ },
+ {
+  "latin": "Clitocybula familia",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-331-5018592881.jpg"
+ },
+ {
+  "latin": "Coltricia perennis",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-343-308362808.jpg"
+ },
+ {
+  "latin": "Coprinus comatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-385-2577125702.jpg",
+  "nomFr": "Coprin chevelu"
+ },
+ {
+  "latin": "Coprinellus micaceus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-369-4679470549.jpg"
+ },
+ {
+  "latin": "Coprinopsis lagopus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-378-3068653610.jpg"
+ },
+ {
+  "latin": "Coprinopsis variegata",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-384-2634751023.jpg"
+ },
+ {
+  "latin": "Cordyceps militaris",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-391-51946265386.jpg"
+ },
+ {
+  "latin": "Cortinarius armillatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-405-2230970734.jpg"
+ },
+ {
+  "latin": "Cortinarius camphoratus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-432-52800312667.jpg"
+ },
+ {
+  "latin": "Cortinarius caperatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-435-41488015191.jpg"
+ },
+ {
+  "latin": "Cortinarius evernius",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-463-3773222116.jpg"
+ },
+ {
+  "latin": "Cortinarius flexipes",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-470-320101384.jpg"
+ },
+ {
+  "latin": "Cortinarius iodes",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-488-3066334055.jpg"
+ },
+ {
+  "latin": "Cortinarius malicorius",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-501-4864580850.jpg"
+ },
+ {
+  "latin": "Cortinarius traganus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-566-2078430596.jpg"
+ },
+ {
+  "latin": "Craterellus fallax",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-590-20515347612.jpg"
+ },
+ {
+  "latin": "Craterellus ignicolor",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-592-3794271556.jpg"
+ },
+ {
+  "latin": "Crepidotus applanatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-598-3200138562.jpg"
+ },
+ {
+  "latin": "Crepidotus calolepis",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-600-8949779234.jpg"
+ },
+ {
+  "latin": "Crucibulum laeve",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-627-3744243866.jpg"
+ },
+ {
+  "latin": "Cudonia circinans",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-629-2878612283.jpg"
+ },
+ {
+  "latin": "Cyathus striatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-636-3744243872.jpg"
+ },
+ {
+  "latin": "Cystoderma amianthinum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-639-2106348197.jpg"
+ },
+ {
+  "latin": "Boletus edulis",
+  "img": null,
+  "nomFr": "Cèpe de Bordeaux"
+ },
+ {
+  "latin": "Daldinia childiae",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-665-29024617786.jpg"
+ },
+ {
+  "latin": "Entoloma abortivum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-731-3341775922.jpg"
+ },
+ {
+  "latin": "Entoloma bicolor",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-698-9270630935.jpg"
+ },
+ {
+  "latin": "Entoloma formosum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1437-50923017392.jpg"
+ },
+ {
+  "latin": "Entoloma murrayi",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1111-3065388571.jpg"
+ },
+ {
+  "latin": "Entoloma quadratum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1112-6517913025.jpg"
+ },
+ {
+  "latin": "Entoloma rhodopolium",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-714-2591047666.jpg"
+ },
+ {
+  "latin": "Entoloma vernum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1732-14237881173.jpg"
+ },
+ {
+  "latin": "Exidia glandulosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-723-5720200740.jpg"
+ },
+ {
+  "latin": "Exidia recisa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-725-2202989492.jpg"
+ },
+ {
+  "latin": "Flammula alnicola",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1858-9739438743.jpg"
+ },
+ {
+  "latin": "Flammulina velutipes",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-739-426722316.jpg"
+ },
+ {
+  "latin": "Fomes fomentarius",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-741-5058575410.jpg"
+ },
+ {
+  "latin": "Fomitopsis rosea",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-748-4088292584.jpg"
+ },
+ {
+  "latin": "Galerina marginata",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-779-19041142711.jpg",
+  "nomFr": "Galerine marginée"
+ },
+ {
+  "latin": "Ganoderma applanatum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-806-4826417865.jpg"
+ },
+ {
+  "latin": "Ganoderma tsugae",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-808-2274504417.jpg"
+ },
+ {
+  "latin": "Geastrum triplex",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-819-2907586181.jpg"
+ },
+ {
+  "latin": "Gomphidius glutinosus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-837-15247764966.jpg"
+ },
+ {
+  "latin": "Gomphus clavatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-841-2867753764.jpg"
+ },
+ {
+  "latin": "Gymnopilus luteus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-853-3213202458.jpg"
+ },
+ {
+  "latin": "Gymnopus dryophilus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-865-2727145978.jpg"
+ },
+ {
+  "latin": "Gyromitra esculenta",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-883-8915950671.jpg",
+  "nomFr": "Gyromitre (fausse morille)"
+ },
+ {
+  "latin": "Gyroporus cyanescens",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-890-15469476230.jpg"
+ },
+ {
+  "latin": "Hapalopilus rutilans",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-896-2124047004.jpg"
+ },
+ {
+  "latin": "Helvella crispa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-925-5457428988.jpg"
+ },
+ {
+  "latin": "Helvella elastica",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-928-2761758046.jpg"
+ },
+ {
+  "latin": "Helvella lacunosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-932-18914537470.jpg"
+ },
+ {
+  "latin": "Helvella macropus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-934-2093385499.jpg"
+ },
+ {
+  "latin": "Hemitrichia calyculata",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-945-4997486614.jpg"
+ },
+ {
+  "latin": "Hemitrichia serpula",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-947-21905583883.jpg"
+ },
+ {
+  "latin": "Hericium americanum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-949-4975043455.jpg"
+ },
+ {
+  "latin": "Hericium coralloides",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-951-1843328825.jpg"
+ },
+ {
+  "latin": "Humidicutis marginata",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-966-6529364085.jpg"
+ },
+ {
+  "latin": "Sarcodon imbricatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2329-2078261453.jpg",
+  "nomFr": "Hydne imbriqué"
+ },
+ {
+  "latin": "Hydnellum aurantiacum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-970-2707390328.jpg"
+ },
+ {
+  "latin": "Hydnellum caeruleum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-971-4902203020.jpg"
+ },
+ {
+  "latin": "Hydnum umbilicatum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-985-3097736005.jpg"
+ },
+ {
+  "latin": "Hygrocybe chlorophana",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-997-6529369991.jpg"
+ },
+ {
+  "latin": "Hygrocybe punicea",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1017-4955034799.jpg"
+ },
+ {
+  "latin": "Hygrocybe squamulosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1021-9519486356.jpg"
+ },
+ {
+  "latin": "Hygrophorus speciosus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1058-55188381940.jpg"
+ },
+ {
+  "latin": "Hypholoma capnoides",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1070-4042904572.jpg"
+ },
+ {
+  "latin": "Hypholoma lateritium",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1081-8048889595.jpg"
+ },
+ {
+  "latin": "Hypomyces hyalinus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1092-3759638754.jpg"
+ },
+ {
+  "latin": "Hypsizygus tessulatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1102-6204835562.jpg"
+ },
+ {
+  "latin": "Inocybe geophylla",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1153-2897208446.jpg"
+ },
+ {
+  "latin": "Inonotus obliquus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-3051-2302137228.jpg"
+ },
+ {
+  "latin": "Irpex lacteus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1243-2272574697.jpg"
+ },
+ {
+  "latin": "Ischnoderma resinosum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1246-4001040184.jpg"
+ },
+ {
+  "latin": "Laccaria amethystina",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1258-2164700774.jpg"
+ },
+ {
+  "latin": "Laccaria bicolor",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1259-9601543924.jpg"
+ },
+ {
+  "latin": "Laccaria striatula",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1268-4055258675.jpg"
+ },
+ {
+  "latin": "Lachnellula agassizii",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1271-8151538953.jpg"
+ },
+ {
+  "latin": "Lactarius deliciosus",
+  "img": null,
+  "nomFr": "Lactaire délicieux"
+ },
+ {
+  "latin": "Lactarius camphoratus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1284-54472607157.jpg"
+ },
+ {
+  "latin": "Lactarius deterrimus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1293-7914232528.jpg"
+ },
+ {
+  "latin": "Lactarius griseus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1301-2848435401.jpg"
+ },
+ {
+  "latin": "Lactarius helvus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1302-52011442715.jpg"
+ },
+ {
+  "latin": "Lactarius lignyotus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1308-18724824326.jpg"
+ },
+ {
+  "latin": "Lactarius mammosus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1314-1289763865.jpg"
+ },
+ {
+  "latin": "Lactarius mucidus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1317-21908686164.jpg"
+ },
+ {
+  "latin": "Lactarius thyinos",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1346-3803018756.jpg"
+ },
+ {
+  "latin": "Lactarius torminosus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1347-6131367411.jpg"
+ },
+ {
+  "latin": "Laetiporus sulphureus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1363-4249116422.jpg"
+ },
+ {
+  "latin": "Leccinum aurantiacum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1369-15025687686.jpg"
+ },
+ {
+  "latin": "Leccinum holopus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1375-20655358434.jpg"
+ },
+ {
+  "latin": "Leccinum piceinum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1382-20037678118.jpg"
+ },
+ {
+  "latin": "Leccinum scabrum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1386-15025376960.jpg"
+ },
+ {
+  "latin": "Lentinellus ursinus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1393-4093999337.jpg"
+ },
+ {
+  "latin": "Leotia lubrica",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1402-2243539087.jpg"
+ },
+ {
+  "latin": "Leotia viscosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1403-3232809332.jpg"
+ },
+ {
+  "latin": "Lepista irina",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1422-37144032656.jpg"
+ },
+ {
+  "latin": "Lepista nuda",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1424-52697217647.jpg"
+ },
+ {
+  "latin": "Loweomyces fractipes",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1497-2622384049.jpg"
+ },
+ {
+  "latin": "Lycoperdon marginatum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1508-5006346967.jpg"
+ },
+ {
+  "latin": "Lycoperdon perlatum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1511-3080719160.jpg"
+ },
+ {
+  "latin": "Lyophyllum decastes",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1514-2607079615.jpg"
+ },
+ {
+  "latin": "Lepiota brunneoincarnata",
+  "img": null,
+  "nomFr": "Lépiote brunâtre"
+ },
+ {
+  "latin": "Lepiota cristata",
+  "img": null,
+  "nomFr": "Lépiote élevée"
+ },
+ {
+  "latin": "Marasmius oreades",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1548-3858167972.jpg"
+ },
+ {
+  "latin": "Marasmius rotula",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1551-1122394207.jpg"
+ },
+ {
+  "latin": "Marasmius siccus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1552-43479743375.jpg"
+ },
+ {
+  "latin": "Mensularia radiata",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1567-3035734167.jpg"
+ },
+ {
+  "latin": "Mitrula elegans",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1581-4688559855.jpg"
+ },
+ {
+  "latin": "Morchella esculenta",
+  "img": null,
+  "nomFr": "Morille"
+ },
+ {
+  "latin": "Mutinus ravenelii",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1593-316180158.jpg"
+ },
+ {
+  "latin": "Mycena haematopus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1631-9739335847.jpg"
+ },
+ {
+  "latin": "Mycena leaiana",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1640-750776321.jpg"
+ },
+ {
+  "latin": "Mycena meliigena",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1651-8107306104.jpg"
+ },
+ {
+  "latin": "Mycena pura",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1669-15340102418.jpg"
+ },
+ {
+  "latin": "Neobulgaria pura",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1711-8154526664.jpg"
+ },
+ {
+  "latin": "Neolecta irregularis",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1714-2081611521.jpg"
+ },
+ {
+  "latin": "Omphalotus illudens",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1738-32785299226.jpg"
+ },
+ {
+  "latin": "Onnia tomentosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1740-3036566882.jpg"
+ },
+ {
+  "latin": "Oxyporus populinus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1756-4494800911.jpg"
+ },
+ {
+  "latin": "Panaeolina foenisecii",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1765-3688056609.jpg"
+ },
+ {
+  "latin": "Panellus stipticus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1773-18628106126.jpg"
+ },
+ {
+  "latin": "Parasola plicatilis",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1786-2819310392.jpg"
+ },
+ {
+  "latin": "Peniophora rufa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1794-3497934638.jpg"
+ },
+ {
+  "latin": "Phlebia radiata",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1853-2184195342.jpg"
+ },
+ {
+  "latin": "Phlebia tremellosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1855-2922821144.jpg"
+ },
+ {
+  "latin": "Pholiota granulosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1868-51529442204.jpg"
+ },
+ {
+  "latin": "Pholiota lenta",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1871-15224826872.jpg"
+ },
+ {
+  "latin": "Pholiota limonella",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1872-2313203819.jpg"
+ },
+ {
+  "latin": "Pholiota spumosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1885-3971313285.jpg"
+ },
+ {
+  "latin": "Pholiota squarrosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1887-9739480981.jpg"
+ },
+ {
+  "latin": "Physalacria inflata",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1896-2717744426.jpg"
+ },
+ {
+  "latin": "Hydnum repandum",
+  "img": null,
+  "nomFr": "Pied-de-mouton"
+ },
+ {
+  "latin": "Pleurotus ostreatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1913-24170112252.jpg",
+  "nomFr": "Pleurote en huître"
+ },
+ {
+  "latin": "Pleurotus populinus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1914-3564974920.jpg"
+ },
+ {
+  "latin": "Pleurotus pulmonarius",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1915-9728877724.jpg"
+ },
+ {
+  "latin": "Pluteus cervinus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1922-34338185413.jpg"
+ },
+ {
+  "latin": "Polyporus radicatus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-1960-3841831077.jpg"
+ },
+ {
+  "latin": "Ramariopsis kunzei",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2135-2760904867.jpg"
+ },
+ {
+  "latin": "Retiboletus ornatipes",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-180-20252023638.jpg"
+ },
+ {
+  "latin": "Russula compacta",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2209-18965169553.jpg"
+ },
+ {
+  "latin": "Russula peckii",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2267-2168969158.jpg"
+ },
+ {
+  "latin": "Sarcomyxa serotina",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2338-2946822863.jpg"
+ },
+ {
+  "latin": "Scleroderma citrinum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2349-3835253266.jpg"
+ },
+ {
+  "latin": "Stemonitis axifera",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2397-8672008622.jpg"
+ },
+ {
+  "latin": "Stropharia caerulea",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2665-3964200442.jpg"
+ },
+ {
+  "latin": "Stropharia hardii",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2420-367543441.jpg"
+ },
+ {
+  "latin": "Stropharia hornemannii",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2421-2929894378.jpg"
+ },
+ {
+  "latin": "Suillus americanus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2427-9677853085.jpg"
+ },
+ {
+  "latin": "Suillus glandulosus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2430-2196420632.jpg"
+ },
+ {
+  "latin": "Suillus grevillei",
+  "img": "https://mycoquebec.org/images/espece-mini/0.jpg"
+ },
+ {
+  "latin": "Suillus luteus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2435-4313780129.jpg"
+ },
+ {
+  "latin": "Suillus paluster",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2437-6335326677.jpg"
+ },
+ {
+  "latin": "Thelephora palmata",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2468-31114937715.jpg"
+ },
+ {
+  "latin": "Thelephora terrestris",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2471-4476951537.jpg"
+ },
+ {
+  "latin": "Trametes gibbosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2475-5185637026.jpg"
+ },
+ {
+  "latin": "Trametes pubescens",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2478-7847928728.jpg"
+ },
+ {
+  "latin": "Trametes suaveolens",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2479-10310976934.jpg"
+ },
+ {
+  "latin": "Trametes versicolor",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2480-24413197296.jpg"
+ },
+ {
+  "latin": "Tremella mesenterica",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2487-18916706783.jpg"
+ },
+ {
+  "latin": "Trichaptum biforme",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2498-912922092.jpg"
+ },
+ {
+  "latin": "Tricholoma davisiae",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2522-3418448434.jpg"
+ },
+ {
+  "latin": "Tricholoma magnivelare",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2533-15491385426.jpg"
+ },
+ {
+  "latin": "Tricholoma pessundatum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2539-4748268971.jpg"
+ },
+ {
+  "latin": "Tricholoma portentosum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2541-50920010702.jpg"
+ },
+ {
+  "latin": "Tricholoma saponaceum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2547-3094648616.jpg"
+ },
+ {
+  "latin": "Tricholoma vaccinum",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2556-45292329645.jpg"
+ },
+ {
+  "latin": "Craterellus cornucopioides",
+  "img": null,
+  "nomFr": "Trompette de la mort"
+ },
+ {
+  "latin": "Tubaria confragosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2567-8395598642.jpg"
+ },
+ {
+  "latin": "Tubifera ferruginosa",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2570-18681988314.jpg"
+ },
+ {
+  "latin": "Turbinellus floccosus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-842-9725618601.jpg"
+ },
+ {
+  "latin": "Tyromyces chioneus",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2585-2908867164.jpg"
+ },
+ {
+  "latin": "Volvariella bombycina",
+  "img": "https://mycoquebec.org/images/espece-mini/IUMQ-2598-14963238282.jpg"
+ }
+]

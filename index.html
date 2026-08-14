@@ -447,6 +447,18 @@ h2.titre-vue .ico{font-size:20px;}
       </div>
     </div>
     <div class="carte">
+      <h3 style="margin:0 0 10px">🖼️ Ordre des images</h3>
+      <p class="note" style="margin-bottom:8px">Choisissez l'ordre de priorité des sources d'images lors de la génération des illustrations (spécificités et photos).</p>
+      <select class="saisie" id="p-ordre-images" aria-label="Ordre de priorité des images">
+        <option value="myco,wikimedia,ia">🍄 MycoQuébec → Wikimedia → IA</option>
+        <option value="wikimedia,myco,ia">🌐 Wikimedia → MycoQuébec → IA</option>
+        <option value="myco,ia,wikimedia">🍄 MycoQuébec → IA → Wikimedia</option>
+        <option value="wikimedia,ia,myco">🌐 Wikimedia → IA → MycoQuébec</option>
+        <option value="ia,myco,wikimedia">✨ IA → MycoQuébec → Wikimedia</option>
+        <option value="ia,wikimedia,myco">✨ IA → Wikimedia → MycoQuébec</option>
+      </select>
+    </div>
+    <div class="carte">
       <h3 style="margin:0 0 10px">📸 Crédits photos</h3>
       <p class="note" style="margin-bottom:8px">Les photos du guide et des spécificités viennent de Wikimedia Commons, sous licence libre (CC).</p>
       <button class="btn btn-bleu btn-plein" id="p-credits">📸 Voir les crédits</button>
@@ -593,7 +605,8 @@ h2.titre-vue .ico{font-size:20px;}
   <div class="alerte alerte-orange" style="font-size:12.5px;padding:9px 12px;margin-bottom:12px">✨ Entrez le nom, puis « Détails par IA » pour générer la fiche automatiquement (clé Gemini dans ⚙️ Paramètres).</div>
   <div class="grille2">
     <label class="champ">Nom français
-      <input id="e-nom" placeholder="Ex. : Lactaire délicieux" maxlength="80">
+      <input id="e-nom" placeholder="Ex. : Lactaire délicieux" maxlength="80" autocomplete="off">
+      <div id="e-nom-suggestions"></div>
     </label>
     <label class="champ">Nom latin
       <input id="e-latin" placeholder="Ex. : Lactarius deliciosus" maxlength="80">
@@ -917,6 +930,7 @@ const Etat = {
   spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], illustrations: {}, checklist: {},
   vue: 'spots', filtre: 'tous', filtreSaison: 'toutes', recherche: '', detailId: null,
   unite: localStorage.getItem('cqm_unite') === 'lb' ? 'lb' : 'kg',
+  ordreImages: localStorage.getItem('cqm_ordre_images') || 'myco,wikimedia,ia',
   spot: { edition: null, photo: null, especes: [] },
   cueillette: { edition: null, photo: null }
 };
@@ -1533,6 +1547,40 @@ lierPhoto('c', () => Etat.cueillette.photo, d => Etat.cueillette.photo = d);
 
 /* ================= Variétés perso + IA ================= */
 let editEspeceId = null, photoEspece = null;
+let baseMyco = null;
+async function chargerBaseMyco() {
+  if (baseMyco) return baseMyco;
+  try {
+    const rep = await fetch('img/mycoquebec.json');
+    baseMyco = await rep.json();
+  } catch (e) { baseMyco = []; }
+  return baseMyco;
+}
+function remplirSuggestionsMyco() {
+  const inp = $('e-nom'); if (!inp) return;
+  const zone = $('e-nom-suggestions');
+  const q = normNom(inp.value.trim());
+  if (!q) { zone.innerHTML = ''; return; }
+  chargerBaseMyco().then(base => {
+    const matches = base
+      .filter(x => (x.nomFr && normNom(x.nomFr).includes(q)) || normNom(x.latin).includes(q))
+      .slice(0, 6);
+    zone.innerHTML = matches.length
+      ? matches.map(x =>
+          '<button type="button" class="puce" style="margin:3px 6px 3px 0;display:inline-flex" onclick="choisirNomMyco(\'' + esc(x.nomFr || x.latin) + '\',\'' + esc(x.latin) + '\')">' + esc(x.nomFr || x.latin) + (x.nomFr ? ' <i style="opacity:.7">' + esc(x.latin) + '</i>' : '') + '</button>'
+        ).join('')
+      : '';
+  });
+}
+function choisirNomMyco(nomFr, latin) {
+  const inp = $('e-nom'); if (!inp) return;
+  inp.value = nomFr;
+  $('e-nom-suggestions').innerHTML = '';
+  const latinInp = $('e-latin');
+  if (latinInp && !latinInp.value.trim()) latinInp.value = latin;
+}
+$('e-nom').addEventListener('input', remplirSuggestionsMyco);
+$('e-nom').addEventListener('focus', remplirSuggestionsMyco);
 const cleIA = () => (localStorage.getItem('cqm_cle_ia') || '').trim();
 function messageErreurIA(err) {
   if (!err) return 'Une erreur est survenue. Réessayez.';
@@ -1740,21 +1788,39 @@ async function chercherPhotoSpec(terme, limit) {
 async function illustrerSpec(e, it) {
   const base = (e.latin || '').trim() || (e.nom || '').trim();
   const mots = motsWikiPour(it.spec);
-  if (base) {
+  const ordre = (Etat.ordreImages || 'myco,wikimedia,ia').split(',');
+  // 1. MycoQuébec : miniature depuis la base embarquée (hors-ligne, CORS OK en <img>)
+  const myco = async () => {
+    const b = await chargerBaseMyco();
+    const entree = b.find(x => normNom(x.latin) === normNom(base));
+    if (entree && entree.img) return { src: entree.img, source: 'myco' };
+    return null;
+  };
+  // 2. Wikimedia : recherche par termes
+  const wiki = async () => {
+    if (!base) return null;
     const termes = mots.length ? mots.map(m => base + ' ' + m) : [base];
     for (const terme of termes) {
       try {
         const ii = await chercherPhotoSpec(terme);
         if (ii) {
           const url = ii.thumburl || ii.url;
-          try {
-            return { src: await imageEnBase64(url), source: 'wikimedia' };
-          } catch (e) {
-            return { src: url, source: 'wikimedia' };
-          }
+          try { return { src: await imageEnBase64(url), source: 'wikimedia' }; }
+          catch (e) { return { src: url, source: 'wikimedia' }; }
         }
       } catch (e) { /* essaie le terme suivant */ }
     }
+    return null;
+  };
+  // 3. IA : génération Gemini
+  const ia = async () => ({ src: await genererImageIA(e.nom, e.latin, it.spec, it.desc), source: 'ia' });
+  const sources = { myco, wikimedia: wiki, ia };
+  for (const cle of ordre) {
+    if (!sources[cle]) continue;
+    try {
+      const res = await sources[cle]();
+      if (res) return res;
+    } catch (e) { /* essaie la source suivante */ }
   }
   return { src: await genererImageIA(e.nom, e.latin, it.spec, it.desc), source: 'ia' };
 }
@@ -2023,8 +2089,8 @@ function rendreListeIllu() {
     '<button class="btn btn-rouge btn-petit" onclick="retirerIllu(' + i + ')">✖️</button>' +
     '<button class="btn btn-jaune btn-petit" onclick="genererIllu(' + i + ')">' + (it.img ? '🔄 Refaire' : '🎨 Générer') + '</button>' +
     '</div>' +
-    (it.desc ? '<div style="padding:0 10px 8px;font-size:12.5px;opacity:.85;line-height:1.5">' + esc(it.desc) + '</div>' : '') +
     (it.img ? '<img src="' + it.img + '" style="width:100%;display:block;border-top:3px solid var(--noir)" alt="' + esc(it.spec) + '">' : '') +
+    (it.desc ? '<div style="padding:8px 10px;font-size:12.5px;opacity:.85;line-height:1.5">' + esc(it.desc) + '</div>' : '') +
     '</div>'
   ).join('') : '<div class="vide-etat" style="padding:10px">Aucune spécificité — ajoutez-en une ci-dessous ou générez les 5 classiques.</div>';
 }
@@ -2386,6 +2452,12 @@ function setUnite(u) {
 }
 $('p-unite-kg').addEventListener('click', () => setUnite('kg'));
 $('p-unite-lb').addEventListener('click', () => setUnite('lb'));
+$('p-ordre-images').addEventListener('change', e => {
+  Etat.ordreImages = e.target.value;
+  localStorage.setItem('cqm_ordre_images', e.target.value);
+  toast('Ordre des images enregistré ✅');
+});
+$('p-ordre-images').value = Etat.ordreImages;
 $('p-cle-save').addEventListener('click', () => {
   localStorage.setItem('cqm_cle_ia', $('p-cle').value.trim());
   toast('Clé API enregistrée 🔑');
