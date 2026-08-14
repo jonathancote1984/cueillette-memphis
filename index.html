@@ -124,13 +124,6 @@ h2.titre-vue .ico{font-size:20px;}
   box-shadow:5px 5px 0 var(--noir); margin-bottom:16px; overflow:hidden; display:flex; position:relative;
   transition:transform .12s;
 }
-.btn-suppr-item{
-  position:absolute; top:8px; right:8px; z-index:3;
-  border:2.5px solid var(--noir); background:var(--blanc); border-radius:999px;
-  width:44px; height:44px; font-size:16px; cursor:pointer;
-  box-shadow:2px 2px 0 var(--noir); display:flex; align-items:center; justify-content:center;
-}
-.btn-suppr-item:active{transform:translate(2px,2px); box-shadow:none;}
 .item:active{transform:translate(3px,3px); box-shadow:2px 2px 0 var(--noir);}
 .item .vig{
   width:88px; min-height:92px; flex-shrink:0;
@@ -1287,15 +1280,17 @@ lierPhoto('s', () => Etat.spot.photo, d => Etat.spot.photo = d);
 
 /* ================= Guide ================= */
 function rendreFiltres() {
-  const options = [['tous', 'Tous'], ['comestible', '✅ Comestibles'], ['prudence', '⚠️ Prudence'], ['npas', '☠️ Ne pas manger'], ['mortel', '💀 Mortels']];
-  const saisons = [['toutes', '🗓️ Toutes'], ['printemps', '🌸 Printemps'], ['ete', '☀️ Été'], ['automne', '🍂 Automne'], ['hiver', '❄️ Hiver']];
+  const options = [['tous', 'Tous les statuts'], ['comestible', '✅ Comestibles'], ['prudence', '⚠️ Prudence'], ['npas', '☠️ Ne pas manger'], ['mortel', '💀 Mortels']];
+  const saisons = [['toutes', 'Toutes les saisons'], ['printemps', '🌸 Printemps'], ['ete', '☀️ Été'], ['automne', '🍂 Automne'], ['hiver', '❄️ Hiver']];
   $('g-filtres').innerHTML =
-    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">' + options.map(o =>
-      `<span class="puce${Etat.filtre === o[0] ? ' actif' : ''}" data-f="${o[0]}" role="button" tabindex="0" onclick="filtrerGuide('${o[0]}')">${o[1]}</span>`
-    ).join('') + '</div>' +
-    '<div style="display:flex;flex-wrap:wrap;gap:6px">' + saisons.map(s =>
-      `<span class="puce puce-saison${Etat.filtreSaison === s[0] ? ' actif' : ''}" data-fs="${s[0]}" role="button" tabindex="0" onclick="filtrerSaison('${s[0]}')">${s[1]}</span>`
-    ).join('') + '</div>';
+    '<div class="grille2" style="margin-bottom:10px">' +
+    '<select class="saisie" id="g-filtre-statut" aria-label="Filtrer par statut" onchange="filtrerGuide(this.value)">' + options.map(o =>
+      '<option value="' + o[0] + '"' + (Etat.filtre === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'
+    ).join('') + '</select>' +
+    '<select class="saisie" id="g-filtre-saison" aria-label="Filtrer par saison" onchange="filtrerSaison(this.value)">' + saisons.map(s =>
+      '<option value="' + s[0] + '"' + (Etat.filtreSaison === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'
+    ).join('') + '</select>' +
+    '</div>';
 }
 function filtrerGuide(f) { Etat.filtre = f; rendreFiltres(); rendreGuide(); }
 function filtrerSaison(fs) { Etat.filtreSaison = fs; rendreFiltres(); rendreGuide(); }
@@ -1330,7 +1325,6 @@ function rendreGuide() {
       '<div class="ligne-latin">' + esc(e.latin || '') + '</div>' +
       '<div class="meta">🗓️ ' + esc(e.saison || '—') + '<br>🌲 ' + esc(e.habitat || '—') + '</div>' +
       '</div>' +
-      '<button class="btn-suppr-item" title="Masquer ou supprimer" onclick="event.stopPropagation();ouvrirChoixEspece(\'' + e.id + '\',' + perso + ')">🙈</button>' +
       '</div>';
   }).join('') + (Etat.cachees.length
     ? '<button class="btn btn-gris btn-plein" onclick="ouvrirSheetRestaurer()" style="margin-top:2px">↩️ Restaurer des espèces (' + Etat.cachees.length + ' masquée' + (Etat.cachees.length > 1 ? 's' : '') + ')</button>'
