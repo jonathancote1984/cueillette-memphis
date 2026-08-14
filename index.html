@@ -332,7 +332,7 @@ h2.titre-vue .ico{font-size:20px;}
 .ligne-latin{font-style:italic; opacity:.85; font-size:13px; margin:2px 0 10px;}
 .detail-img{width:100%; max-height:280px; object-fit:cover; border:3px solid var(--noir); border-radius:16px 16px 16px 5px; box-shadow:4px 4px 0 var(--noir); margin-bottom:14px; display:block; background:var(--creme); outline:1px solid rgba(0,0,0,.1); outline-offset:-1px;}
 /* ===== Divers ===== */
-.vide-etat{text-align:center; padding:30px 12px; font-weight:600; font-size:15px; opacity:.8;}
+.vide-etat{text-align:center; padding:30px 12px; font-weight:600; font-size:15px; opacity:1;}
 .vide-etat .ico{font-size:48px; display:block; margin-bottom:10px; filter:drop-shadow(3px 3px 0 var(--noir));}
 .note{font-size:12px; font-weight:500; opacity:.85; margin-top:10px; line-height:1.5;}
 .deco-tri{position:absolute; right:10px; bottom:10px; width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent; border-bottom:20px solid var(--noir); opacity:.12; pointer-events:none;}
@@ -525,7 +525,7 @@ h2.titre-vue .ico{font-size:20px;}
   </div>
   <div class="champ">Espèces qu'on y trouve (optionnel)
     <div id="s-especes" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px"></div>
-    <p class="note" style="font-size:12px;opacity:.75;margin:4px 2px 0">Touchez une espèce pour l'ajouter ou la retirer.</p>
+    <p class="note" style="font-size:12px;opacity:.85;margin:4px 2px 0">Touchez une espèce pour l'ajouter ou la retirer.</p>
   </div>
   <div class="champ">Photo
     <div class="photo-zone" id="s-photo-zone" title="Cliquez pour retirer la photo">
@@ -643,6 +643,9 @@ h2.titre-vue .ico{font-size:20px;}
     <div class="grille2" style="margin-top:8px">
       <button class="btn btn-vert" id="e-photo-commons">🔎 Chercher une photo</button>
       <button class="btn btn-jaune" id="e-photo-ia">🎨 Illustration IA</button>
+    </div>
+    <div class="grille2" style="margin-top:8px">
+      <button class="btn btn-bleu" id="e-photo-myco">🍄 Fiche MycoQuébec</button>
     </div>
     <div class="info-gps" id="e-photo-info"></div>
   </div>
@@ -1062,6 +1065,7 @@ function ouvrirChoixEspece(id, perso) {
   $('choix-supprimer').style.display = '';
   $('boite-choix').classList.add('visible');
   $('voile-confirm').classList.add('visible');
+  $('choix-masquer').focus();
 }
 function fermerChoix() {
   $('boite-choix').classList.remove('visible');
@@ -1371,21 +1375,22 @@ function ouvrirDetail(id, perso) {
       ? '<button class="btn btn-bleu" onclick="editerEspece(\'' + e.id + '\')">✏️ Modifier</button>' +
         '<button class="btn btn-rouge" onclick="ouvrirChoixEspece(\'' + e.id + '\',true)">🗑️ Supprimer</button>' +
         '<button class="btn btn-gris" onclick="fermerDetail()">← Retour</button>'
-      : '<button class="btn btn-gris" onclick="ouvrirChoixEspece(\'' + e.id + '\',false)">🗑️ Masquer</button>' +
-        '<button class="btn btn-gris" onclick="fermerDetail()">← Retour</button>');
+      : '<button class="btn btn-gris" onclick="ouvrirChoixEspece(\'' + e.id + '\',false)">🙈 Masquer</button>' +
+        '<button class="btn btn-gris" onclick="fermerDetail()">← Retour</button>') +
+    (e.latin ? '<button class="btn btn-bleu" onclick="ouvrirMyco(\'' + esc(e.latin) + '\')">🍄 Fiche MycoQuébec</button>' : '');
   $('detail-contenu').innerHTML =
     '<div class="carte">' +
     (img ? '<img class="detail-img" src="' + img + '" alt="' + esc(e.nom) + '" role="button" tabindex="0" aria-label="Agrandir la photo" onclick="ouvrirLightbox(this.src)" style="cursor:zoom-in">' : '') +
-    '<div class="nom" style="font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">🍄 ' + esc(e.nom) + ' ' + badgeStatut(e.statut, e.prudence) +
-    (perso ? ' <span class="pastille-statut st-immangeable" style="background:var(--noir);color:var(--creme)">⭐ perso</span>' : '') + '</div>' +
+    '<h2 class="nom" style="margin:0;font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">🍄 ' + esc(e.nom) + ' ' + badgeStatut(e.statut, e.prudence) +
+    (perso ? ' <span class="pastille-statut st-immangeable" style="background:var(--noir);color:var(--creme)">⭐ perso</span>' : '') + '</h2>' +
     '<div class="ligne-latin">' + esc(e.latin || '') + '</div>' +
     avis +
     galerie +
     '<div class="detail-kv"><b>🗓️ Saison :</b> ' + esc(e.saison || '—') + '<br><b>🌲 Habitat :</b> ' + esc(e.habitat || '—') + '</div>' +
-    '<span class="guide-sujet">📖 Description</span><p style="margin:4px 0 0;font-size:14.5px;line-height:1.65">' + esc(e.desc || '—') + '</p>' +
-    '<span class="guide-sujet">🔍 Caractéristiques clés</span>' +
+    '<h3 class="guide-sujet">📖 Description</h3><p style="margin:4px 0 0;font-size:14.5px;line-height:1.65">' + esc(e.desc || '—') + '</p>' +
+    '<h3 class="guide-sujet">🔍 Caractéristiques clés</h3>' +
     '<ul class="carac-list">' + (e.carac && e.carac.length ? e.carac.map(c => '<li>' + esc(c) + '</li>').join('') : '<li>—</li>') + '</ul>' +
-    '<span class="guide-sujet">⚠️ Confusions possibles</span><p style="margin:4px 0 0;font-size:14px;line-height:1.65">' + esc(e.confusions || '—') + '</p>' +
+    '<h3 class="guide-sujet">⚠️ Confusions possibles</h3><p style="margin:4px 0 0;font-size:14px;line-height:1.65">' + esc(e.confusions || '—') + '</p>' +
     '<div class="grille2" style="margin-top:14px">' + boutons + '</div>' +
     '</div>';
   naviguer('detail');
@@ -1794,6 +1799,11 @@ async function genererImageIA(nom, latin, spec, desc) {
   }
   throw derniereErreur || new Error('PAS_IMAGE');
 }
+$('e-photo-myco').addEventListener('click', () => {
+  const latin = $('e-latin').value.trim();
+  if (!latin) { toast('Entrez le nom latin d\'abord'); return; }
+  ouvrirMyco(latin);
+});
 $('e-photo-ia').addEventListener('click', async () => {
   if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (Paramètres ⚙️)'); return; }
   const nom = $('e-nom').value.trim(), latin = $('e-latin').value.trim();
@@ -2091,6 +2101,9 @@ $('illu-toutes').addEventListener('click', async () => {
 });
 
 /* ================= Lightbox photo ================= */
+function ouvrirMyco(latin) {
+  window.open('https://mycoquebec.org/bas.php?tag=' + encodeURIComponent(latin), '_blank', 'noopener');
+}
 function ouvrirLightbox(src) {
   const anc = document.createElement('div');
   anc.id = 'lightbox';
@@ -2150,7 +2163,7 @@ async function analyserPhoto(dataUrl) {
     const r = await identifierPhotoIA(dataUrl, signal);
     if (signal.aborted) return;
     if (!r || !r.espece || r.espece === 'inconnu') {
-      if (!$('sheet-idphoto').classList.contains('ouverte')) { ouvrirFeuille('sheet-idphoto'); toast('Analyse terminée ✨'); }
+      if (!$('sheet-idphoto').classList.contains('ouverte')) { ouvrirFeuille('sheet-idphoto'); toast('Analyse terminée — à vérifier'); }
       $('idphoto-contenu').innerHTML =
         '<img src="' + dataUrl + '" alt="Photo à identifier" style="width:100%;border:3px solid var(--noir);border-radius:16px;box-shadow:4px 4px 0 var(--noir);margin-bottom:12px">' +
         '<div class="vide-etat" style="padding:16px"><span class="ico">😕</span>Impossible d\'identifier ce champignon avec certitude.<br><small>Comparez avec le guide (filtres, recherche) ou ajoutez-le comme variété.</small></div>' +
