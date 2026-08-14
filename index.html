@@ -262,6 +262,8 @@ h2.titre-vue .ico{font-size:20px;}
 .spec-carre{width:28px;height:28px;min-width:28px;border:3px solid var(--noir);border-radius:9px 9px 9px 3px;background:var(--creme);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:transparent;margin-top:1px}
 .spec-carte.fait .spec-carre{background:var(--olive);color:var(--blanc)}
 .spec-carte.fait .spec-titre{text-decoration:line-through;text-decoration-thickness:2px;opacity:.75}
+.spec-carte.dangereux.fait .spec-carre{background:var(--rouge);color:var(--blanc)}
+.spec-carte.dangereux.fait .spec-titre{text-decoration:none;opacity:1}
 .spec-texte{flex:1;font-size:13.5px}
 .spec-texte .spec-titre{font-weight:700;font-size:14.5px}
 .spec-texte .spec-desc{opacity:.85;margin-top:2px;font-size:13px}
@@ -270,6 +272,7 @@ h2.titre-vue .ico{font-size:20px;}
 .verdict-carte .t{font-weight:700;display:flex;gap:6px;align-items:center;margin-bottom:3px}
 .verdict-ok{background:var(--olive);color:var(--noir)}
 .verdict-danger{background:var(--rouge);color:var(--blanc)}
+.verdict-danger-att{background:var(--rouge);color:var(--blanc)}
 .verdict-att{background:var(--ambre);color:var(--noir)}
 .spec-compteur{font-size:12.5px;background:var(--noir);color:var(--creme);padding:2px 10px;border-radius:999px;font-weight:700;font-variant-numeric:tabular-nums}
 .feuille{
@@ -401,7 +404,7 @@ h2.titre-vue .ico{font-size:20px;}
 
   <!-- ===== CUEILLETTES ===== -->
   <section class="vue" id="vue-cueillettes">
-    <h2 class="titre-vue"><span class="ico">🧺</span> Mon journal</h2>
+    <h2 class="titre-vue"><span class="ico">🧺</span> Cueillettes</h2>
     <div id="liste-cueillettes"></div>
   </section>
 
@@ -1307,7 +1310,7 @@ function rendreGuide() {
     let okF = Etat.filtre === 'tous';
     if (Etat.filtre === 'comestible') okF = e.statut === 'comestible' && !e.prudence;
     else if (Etat.filtre === 'prudence') okF = !!e.prudence;
-    else if (Etat.filtre === 'npas') okF = e.statut === 'toxique' || e.statut === 'immangeable';
+    else if (Etat.filtre === 'npas') okF = e.statut === 'toxique' || e.statut === 'immangeable' || e.statut === 'mortel';
     else if (Etat.filtre === 'mortel') okF = e.statut === 'mortel';
     const okS = Etat.filtreSaison === 'toutes' || saisonsDe(e).includes(Etat.filtreSaison);
     const okT = !q || normNom(e.nom + ' ' + (e.latin || '')).includes(q);
@@ -1356,11 +1359,12 @@ function ouvrirDetail(id, perso) {
   const illu = Etat.illustrations[e.id] || { items: [] };
   const faits = Etat.checklist[e.id] || { id: e.id, faits: [] };
   const nbFaits = illu.items.filter((_, i) => faits.faits[i]).length;
+  const nonComestible = e.statut !== 'comestible' && e.statut !== 'prudence';
   const galerie = illu.items.length ? (
     '<span class="guide-sujet">🖼️ Spécificités à repérer</span>' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 10px"><span style="font-size:12.5px;opacity:.85">Vérifiez chaque critère sur le champignon</span><span class="spec-compteur" id="spec-compteur">' + nbFaits + '/' + illu.items.length + '</span></div>' +
     illu.items.map((it, i) =>
-      '<div class="spec-carte' + (faits.faits[i] ? ' fait' : '') + '" id="spec-carte-' + i + '" role="button" tabindex="0" onclick="basculerSpec(' + i + ')">' +
+      '<div class="spec-carte' + (faits.faits[i] ? ' fait' : '') + (nonComestible ? ' dangereux' : '') + '" id="spec-carte-' + i + '" role="button" tabindex="0" onclick="basculerSpec(' + i + ')">' +
       (it.img ? '<div class="spec-photo"><img src="' + it.img + '" alt="' + esc(it.spec) + '" onclick="event.stopPropagation();ouvrirLightbox(this.src)"><span class="spec-num">' + (i + 1) + '</span><span class="spec-zoom" role="button" tabindex="0" onclick="event.stopPropagation();ouvrirLightbox(\'' + it.img + '\')">🔍 Agrandir</span></div>' : '') +
       '<div class="spec-corps"><div class="spec-carre">✓</div><div class="spec-texte"><div class="spec-titre">' + esc(it.spec) + '</div>' + (it.desc ? '<div class="spec-desc">' + esc(it.desc) + '</div>' : '') + '</div></div>' +
       '</div>'
@@ -1368,7 +1372,9 @@ function ouvrirDetail(id, perso) {
     (e.statut === 'comestible' || e.statut === 'prudence'
       ? '<div class="verdict-carte verdict-ok' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">✅ Tous les critères correspondent</div>' + esc(e.nom) + ' confirmé' + (e.statut === 'comestible' ? ' — récolte possible.' : ' — restez prudent (cuisson obligatoire).') + '</div>'
       : '<div class="verdict-carte verdict-danger' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">☠️ ' + nbFaits + '/' + illu.items.length + ' critères vérifiés</div>' + esc(e.nom) + ' est ' + (e.statut === 'mortel' ? 'MORTELLE' : 'non comestible') + ' — ne pas consommer.</div>') +
-    '<div class="verdict-carte verdict-att' + (nbFaits < illu.items.length ? ' ouv' : '') + '" id="spec-verdict-att"><div class="t">⚠️ ' + (nbFaits === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants') + '</div>' + (nbFaits === 0 ? 'Cochez chaque critère sur le champignon avant de consommer. En cas de doute : on ne mange pas.' : 'Ne consommez pas tant que tout n\'est pas vérifié. En cas de doute : on ne mange pas.') + '</div>'
+    (e.statut === 'comestible' || e.statut === 'prudence'
+      ? '<div class="verdict-carte verdict-att' + (nbFaits < illu.items.length ? ' ouv' : '') + '" id="spec-verdict-att"><div class="t">⚠️ ' + (nbFaits === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants') + '</div>' + (nbFaits === 0 ? 'Cochez chaque critère sur le champignon avant de consommer. En cas de doute : on ne mange pas.' : 'Ne consommez pas tant que tout n\'est pas vérifié. En cas de doute : on ne mange pas.') + '</div>'
+      : '<div class="verdict-carte verdict-danger-att' + (nbFaits < illu.items.length ? ' ouv' : '') + '" id="spec-verdict-att"><div class="t">☠️ ' + (nbFaits === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants') + '</div>' + (e.statut === 'mortel' ? 'Espèce MORTELLE — ne jamais consommer, même si tous les critères semblent correspondre.' : 'Espèce non comestible — ne pas consommer, même si tous les critères semblent correspondre.') + '</div>')
   ) : '';
   const boutons = '<button class="btn btn-jaune" onclick="ouvrirSheetIllu(\'' + e.id + '\')">🎨 Illustrations IA</button>' +
     (perso
@@ -1385,12 +1391,12 @@ function ouvrirDetail(id, perso) {
     (perso ? ' <span class="pastille-statut st-immangeable" style="background:var(--noir);color:var(--creme)">⭐ perso</span>' : '') + '</h2>' +
     '<div class="ligne-latin">' + esc(e.latin || '') + '</div>' +
     avis +
+    '<h3 class="guide-sujet">⚠️ Confusions possibles</h3><p style="margin:4px 0 0;font-size:14px;line-height:1.65">' + esc(e.confusions || '—') + '</p>' +
     galerie +
     '<div class="detail-kv"><b>🗓️ Saison :</b> ' + esc(e.saison || '—') + '<br><b>🌲 Habitat :</b> ' + esc(e.habitat || '—') + '</div>' +
     '<h3 class="guide-sujet">📖 Description</h3><p style="margin:4px 0 0;font-size:14.5px;line-height:1.65">' + esc(e.desc || '—') + '</p>' +
     '<h3 class="guide-sujet">🔍 Caractéristiques clés</h3>' +
     '<ul class="carac-list">' + (e.carac && e.carac.length ? e.carac.map(c => '<li>' + esc(c) + '</li>').join('') : '<li>—</li>') + '</ul>' +
-    '<h3 class="guide-sujet">⚠️ Confusions possibles</h3><p style="margin:4px 0 0;font-size:14px;line-height:1.65">' + esc(e.confusions || '—') + '</p>' +
     '<div class="grille2" style="margin-top:14px">' + boutons + '</div>' +
     '</div>';
   naviguer('detail');
@@ -1401,7 +1407,7 @@ let positionGuide = 0;
 function fermerDetail() {
   naviguer('guide');
   $('sous-titre').textContent = '🍄 Carnet de champignons · édition Memphis';
-  $('badge').style.display = '';
+  $('badge').style.display = Etat.cueillettes.length ? 'flex' : 'none';
   requestAnimationFrame(() => window.scrollTo(0, positionGuide));
 }
 async function basculerSpec(i) {
@@ -2140,10 +2146,10 @@ function annulerAnalyse() {
 function rendreBandeauCle() {
   const zone = $('g-cle-bandeau'); if (!zone) return;
   if (cleIA()) { zone.innerHTML = ''; return; }
-  zone.innerHTML = '<div class="alerte alerte-orange" style="margin:-6px 0 12px">' +
+  zone.innerHTML = '<p class="note" style="margin:-4px 0 12px">' +
     '🔑 <b>Identification par photo :</b> ajoutez votre clé Gemini gratuite pour activer l\'IA. ' +
-    '<button class="btn btn-jaune btn-petit" style="margin-top:8px" onclick="naviguer(\'parametres\');document.getElementById(\'p-cle\').focus()">Configurer la clé →</button>' +
-    '</div>';
+    '<button class="btn btn-jaune btn-petit" style="margin-top:6px" onclick="naviguer(\'parametres\');document.getElementById(\'p-cle\').focus()">Configurer la clé →</button>' +
+    '</p>';
 }
 function identifierParPhoto(estAppareil) {
   if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini — bouton « Configurer la clé » ci-dessus'); return; }
@@ -2456,6 +2462,7 @@ async function recharger() {
   Etat.checklist = {};
   cl.forEach(x => { Etat.checklist[x.id] = x; });
   $('badge').textContent = String(Etat.cueillettes.length);
+  $('badge').style.display = Etat.cueillettes.length ? 'flex' : 'none';
   rendreSpots();
   rendreCueillettes();
   remplirDatalist();
