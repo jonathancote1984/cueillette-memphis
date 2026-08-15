@@ -919,8 +919,6 @@ const STATUTS = {
 };
 
 /* ================= État ================= */
-/* Migration : l'ancien ordre par défaut mettait MycoQuébec en tête (même image pour toutes les parties) */
-if (localStorage.getItem('cqm_ordre_images') === 'myco,wikimedia,ia') localStorage.setItem('cqm_ordre_images', 'wikimedia,myco,ia');
 const Etat = {
   spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], illustrations: {}, checklist: {},
   vue: 'spots', filtre: 'tous', filtreSaison: 'toutes', recherche: '', detailId: null,
@@ -1861,7 +1859,7 @@ async function chercherPhotoSpec(terme, limit) {
 async function illustrerSpec(e, it) {
   const base = (e.latin || '').trim() || (e.nom || '').trim();
   const mots = motsWikiPour(it.spec);
-  const ordre = (Etat.ordreImages || 'myco,wikimedia,ia').split(',');
+  const ordre = (Etat.ordreImages || 'wikimedia,myco,ia').split(',');
   // 1. MycoQuébec : miniature depuis la base embarquée (hors-ligne, CORS OK en <img>)
   const myco = async () => {
     const b = await chargerBaseMyco();
