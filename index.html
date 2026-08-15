@@ -177,7 +177,7 @@ h2.titre-vue .ico{font-size:20px;}
   box-shadow:inset 2px 2px 0 rgba(31,26,23,.08);
 }
 .champ input:focus, .champ select:focus, .champ textarea:focus, .saisie:focus{box-shadow:0 0 0 3px var(--jaune), inset 2px 2px 0 rgba(31,26,23,.08);}
-.btn:focus-visible, .puce:focus-visible, .item:focus-visible, .fab:focus-visible, nav.tabs button:focus-visible, .btn-retour:focus-visible{outline:3px solid var(--noir); outline-offset:2px; box-shadow:0 0 0 3px var(--jaune);}
+.btn:focus-visible, .puce:focus-visible, .item:focus-visible, .fab:focus-visible, nav.tabs button:focus-visible, .btn-retour:focus-visible, .etape:focus-visible{outline:3px solid var(--noir); outline-offset:2px; box-shadow:0 0 0 3px var(--jaune);}
 .champ textarea{resize:vertical; min-height:64px;}
 .grille2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
 /* ===== Photo ===== */
@@ -217,6 +217,13 @@ h2.titre-vue .ico{font-size:20px;}
 .alerte-orange::after{
   content:''; position:absolute; right:-10px; bottom:-10px; width:34px; height:34px;
   background:var(--orange); border:3px solid var(--noir); transform:rotate(14deg);
+}
+/* Encart d'aide (neutre, sans le losange « Prudence » réservé aux alertes) */
+.encart-aide{
+  border:3px solid var(--noir); border-radius:16px 16px 16px 5px;
+  padding:10px 13px; font-size:12.5px; line-height:1.5; font-weight:500;
+  box-shadow:3px 3px 0 var(--noir); margin-bottom:12px;
+  background:repeating-linear-gradient(45deg, rgba(217,164,65,.25), rgba(217,164,65,.25) 8px, transparent 8px, transparent 16px), var(--blanc);
 }
 /* ===== Feuilles (bottom sheets) ===== */
 .voile{
@@ -619,8 +626,8 @@ h2.titre-vue .ico{font-size:20px;}
     <button type="button" class="etape" id="etape-2-btn" role="tab" aria-selected="false" onclick="etapeEspece(2)"><span class="num">2</span> Détails &amp; photo</button>
   </div>
   <!-- ÉTAPE 1 : identité -->
-  <div id="etape-1">
-    <div class="alerte alerte-orange" style="font-size:12.5px;padding:9px 12px;margin-bottom:12px">✨ Entrez le nom, puis « Détails par IA » pour générer la fiche automatiquement (clé Gemini dans ⚙️ Paramètres).</div>
+  <div id="etape-1" role="tabpanel" aria-labelledby="etape-1-btn">
+    <div class="encart-aide">✨ Entrez le nom, puis « Détails par IA » pour générer la fiche automatiquement (clé Gemini dans ⚙️ Paramètres).</div>
     <div class="grille2">
       <label class="champ">Nom français
         <input id="e-nom" placeholder="Ex. : Lactaire délicieux" maxlength="80" autocomplete="off">
@@ -650,7 +657,7 @@ h2.titre-vue .ico{font-size:20px;}
     <button class="btn btn-vert btn-plein" style="margin-top:10px" id="e-suivant">Suivant : détails &amp; photo →</button>
   </div>
   <!-- ÉTAPE 2 : détails + photo -->
-  <div id="etape-2" style="display:none">
+  <div id="etape-2" role="tabpanel" aria-labelledby="etape-2-btn" style="display:none">
     <label class="champ">Habitat
       <input id="e-habitat" placeholder="Ex. : Sous les pins, sols sablonneux">
     </label>
@@ -966,7 +973,7 @@ const toutesEspeces = () => [
   ...ESPECES.filter(e => !Etat.cachees.includes(e.id) && !Etat.supprimees.includes(e.id)),
   ...Etat.especesCustom
 ];
-const normNom = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+const normNom = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\s\u00A0\-–—_.]+/g, ' ').trim();
 const distLevenshtein = (a, b) => {
   if (!a.length) return b.length; if (!b.length) return a.length;
   const m = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
@@ -1719,6 +1726,8 @@ function etapeEspece(n) {
   $('etape-2-btn').classList.toggle('actif', n === 2);
   $('etape-1-btn').setAttribute('aria-selected', n === 1);
   $('etape-2-btn').setAttribute('aria-selected', n === 2);
+  const premier = n === 1 ? $('e-nom') : $('e-habitat');
+  if (premier) premier.focus();
 }
 $('e-suivant').addEventListener('click', () => etapeEspece(2));
 $('e-retour').addEventListener('click', () => etapeEspece(1));
@@ -1873,7 +1882,8 @@ $('e-generer').addEventListener('click', async () => {
     $('e-desc').value = fiche.description || '';
     $('e-carac').value = Array.isArray(fiche.caracteristiques) ? fiche.caracteristiques.map(c => (c && typeof c === 'object' && c.spec && c.desc) ? c.spec + ' : ' + c.desc : String(c || '')).join('\n') : '';
     $('e-confusions').value = fiche.confusions || '';
-    toast('Fiche générée ✨ — vérifiez puis enregistrez');
+    etapeEspece(2); // les détails générés sont sur l'étape 2 — on y va pour les faire vérifier
+    toast('Fiche générée ✨ — vérifiez les détails ci-dessous puis enregistrez');
   } catch (err) {
     toast(messageErreurIA(err));
   }
@@ -2464,7 +2474,7 @@ function preparerVarieteDepuisResultat() {
   $('e-confusions').value = r.confusions || '';
   // P2-11 : transférer la photo déjà prise vers la fiche variété
   if (photoResultat) { photoEspece = photoResultat; afficherPhoto('e-photo-zone', photoResultat); }
-  toast('Fiche pré-remplie — complétez puis enregistrez ✨');
+  toast('Fiche pré-remplie — vérifiez l\u2019identité, puis « Suivant » pour les détails ✨');
 }
 async function identifierPhotoIA(dataUrl, signal) {
   const cle = cleIA(); if (!cle) throw new Error('PAS_DE_CLE');

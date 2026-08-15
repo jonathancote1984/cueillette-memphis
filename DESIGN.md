@@ -219,6 +219,13 @@ Forme de base : coins arrondis généreux (12-24 px) avec **un coin cassé** —
 - **Compteur :** pastille ambre « n/5 » à droite de l'en-tête de section.
 - **Verdicts :** carte pleine largeur, bordure noire 3 px, coin cassé — ✅ vert (tous les critères) / ⚠️ ambre (critères manquants, « En cas de doute : on ne mange pas »).
 
+### Étapes progressives (feuille variété)
+- **But :** divulgation progressive — jamais plus de 5-6 champs à l'écran (règle « choix minimaux ≤ 4 »).
+- **Barre :** deux pilules numérotées (1 Identité → 2 Détails & photo), bordure noire 2,5 px, ombre dure 2 px, transition transform/box-shadow .1 s.
+- **Étape active :** fond ambre, inclinaison -1,5°, pastille numérotée rouge sur blanc ; étape inactive fond crème.
+- **Sémantique :** `role="tablist"`/`tab`/`tabpanel"` + `aria-selected`/`aria-labelledby` ; focus déplacé sur le premier champ à chaque bascule ; validation du nom avant l'étape 2.
+- **Encart d'aide :** fond blanc à rayures ambre 45° (zigzag d'aide), bordure noire 3 px, coins cassés — distinct de l'alerte de prudence (losange rouille réservé aux alertes de sécurité).
+
 ## Do's and Don'ts
 
 ### Do :

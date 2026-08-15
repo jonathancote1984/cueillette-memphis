@@ -23,7 +23,7 @@ Le carnet vit sur le téléphone, sans compte ni serveur : les données ne quitt
 - Terrain : forêts du Québec, téléphone en main, souvent sans réseau — PWA installable, 100 % hors-ligne dès la première visite.
 - Saisons de cueillette : morilles au printemps, chanterelles/cèpes été-automne.
 - Utilisation : noter un spot (GPS), identifier sur place (photo), journaliser la récolte (poids, météo, spot), consulter les stats.
-- Partage : export/import JSON complet (version 4, inclut espèces masquées, supprimées et illustrations).
+- Partage : export/import JSON complet (version 5, inclut espèces masquées, supprimées et illustrations).
 
 ## Capabilities and Constraints
 
@@ -35,7 +35,7 @@ Le carnet vit sur le téléphone, sans compte ni serveur : les données ne quitt
 - Cueillettes : date, espèce (suggestions + libre), poids kg (virgule acceptée), spot lié, météo, note, photo.
 - Stats : total récolté, sorties, espèces distinctes, dernière sortie, tops espèces/spots, barres mensuelles.
 - Sauvegarde : export/import JSON, effacement complet avec double confirmation.
-- Contrainte technique : PWA statique mono-fichier (`index.html`, ~140 Ko, zéro framework, pas de build), service worker cache-first avec bump `cqm-vN` (actuellement v20), API Wikimedia/Gemini exclues du cache. Déployée sur GitHub Pages (jonathancote1984.github.io/cueillette-memphis), push main → déploiement auto.
+- Contrainte technique : PWA statique mono-fichier (`index.html`, ~140 Ko, zéro framework, pas de build), service worker cache-first avec bump `cqm-vN` (actuellement v48), API Wikimedia/Gemini exclues du cache. Déployée sur GitHub Pages (jonathancote1984.github.io/cueillette-memphis), push main → déploiement auto.
 - Données : IndexedDB (`cqm_bd` v5 : spots, cueillettes, especesCustom, cachees, supprimees, illustrations, checklist) avec repli localStorage ; clé Gemini stockée localement, jamais envoyée ailleurs. Paramètres : unités kg/lb (affichage + saisie), clé API. Suppression d'espèces d'origine = store `supprimees` + double confirmation.
 - Langue : français du Québec.
 
