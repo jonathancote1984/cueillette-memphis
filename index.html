@@ -1634,23 +1634,49 @@ function messageErreurIA(err) {
   if (m.includes('aucune image trouvée')) return '⚠️ Aucune image trouvée dans les sources choisies — essayez un autre ordre ou une autre espèce.';
   return '⚠️ Erreur IA : ' + (err.message || 'inconnue') + ' — réessayez.';
 }
-/* Appel Gemini unifié : texte ou image, JSON optionnel. Retourne le texte concaténé des parts. */
+/* Appel Gemini unifié : texte ou image, JSON optionnel. Retourne le texte concaténé des parts.
+   NB : on ne force PLUS responseMimeType:'application/json' — ce backend Google est saturé (503 high demand) ;
+   le prompt demande du JSON et le parsing manuel (parserJSONIA) s'en charge.
+   Résilience : 503/500/429 intermittents → retry (1,5 s) puis repli sur gemini-flash-lite-latest. */
 async function appelGemini(cle, modele, prompt, opts) {
   const o = opts || {};
   const body = { contents: [{ parts: [{ text: prompt }] }] };
   if (o.parts) body.contents[0].parts = o.parts;
-  if (o.json) body.generationConfig = { responseMimeType: 'application/json' };
   if (o.image) body.generationConfig = { responseModalities: ['TEXT', 'IMAGE'] };
-  const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + modele + ':generateContent?key=' + encodeURIComponent(cle), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-    signal: o.signal || undefined
-  });
-  if (!rep.ok) throw new Error('API ' + rep.status);
-  const d = await rep.json();
-  if (o.raw) return d;
-  return (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('') || '';
+  const essayer = async (m) => {
+    const rep = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent?key=' + encodeURIComponent(cle), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: o.signal || undefined
+    });
+    if (!rep.ok) throw new Error('API ' + rep.status);
+    const d = await rep.json();
+    if (o.raw) return d;
+    return (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('') || '';
+  };
+  const retryable = e => /API (429|500|503)/.test(e.message || '');
+  try {
+    return await essayer(modele);
+  } catch (e1) {
+    if (!retryable(e1) || o.image) throw e1; // une requête image interrompue ne se relance pas (signal)
+    await new Promise(r => setTimeout(r, 1500));
+    try { return await essayer(modele); }
+    catch (e2) {
+      if (!retryable(e2)) throw e2;
+      await new Promise(r => setTimeout(r, 1500));
+      return await essayer('gemini-flash-lite-latest');
+    }
+  }
+}
+/* Parsing JSON robuste : retire les fences ```json et extrait le premier objet {…}. */
+function parserJSONIA(texte) {
+  let t = String(texte || '').trim();
+  t = t.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+  const i = t.indexOf('{');
+  const j = t.lastIndexOf('}');
+  if (i >= 0 && j > i) t = t.slice(i, j + 1);
+  return JSON.parse(t);
 }
 
 function ouvrirSheetEspece() {
@@ -1781,9 +1807,8 @@ async function genererDetailsIA(nom, latin) {
   const prompt = 'Tu es un mycologue expert du Québec. Rédige une fiche pour le champignon « ' + nom + ' »' +
     (latin ? ' (nom latin : ' + latin + ')' : '') +
     '. Réponds UNIQUEMENT en JSON valide, structure exacte : {"nom":"nom français","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","prudence":true|false,"saison":"période de fructification","habitat":"habitat type","description":"2-3 phrases","caracteristiques":[{"spec":"Chapeau","desc":"détail concret du chapeau : forme, couleur, taille"},{"spec":"Hyménium (lames/tubes/aiguillons)","desc":"détail concret du dessous du chapeau"},{"spec":"Pied","desc":"détail concret du pied : forme, couleur, anneau, volve"},{"spec":"Chair et odeur","desc":"détail concret de la chair : couleur, fermeté, odeur"},{"spec":"Habitat","desc":"où il pousse, saison"}],"confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Respecte les accents et le français du Québec. Chaque entrée de caracteristiques DOIT commencer par une de ces 5 valeurs de spec EXACTES.';
-  const texte = await appelGemini(cle, 'gemini-flash-latest', prompt, { json: true });
-  const propre = texte.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
-  return JSON.parse(propre);
+  const texte = await appelGemini(cle, 'gemini-flash-latest', prompt, {});
+  return parserJSONIA(texte);
 }
 $('e-generer').addEventListener('click', async () => {
   const nom = $('e-nom').value.trim();
@@ -2401,9 +2426,8 @@ async function identifierPhotoIA(dataUrl, signal) {
   const mime = (dataUrl.split(';')[0] || 'data:image/jpeg').replace('data:', '') || 'image/jpeg';
   const base64 = dataUrl.split(',')[1] || '';
   const prompt = 'Tu es un mycologue expert du Québec. Identifie le champignon sur cette photo. Réponds UNIQUEMENT en JSON valide, structure exacte : {"espece":"nom français le plus probable","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","confiance":0-100,"prudence":true si la consommation exige une préparation particulière (ex. cuisson obligatoire) ou si une confusion dangereuse est possible même à haute confiance, sinon false,"description":"2-3 phrases","caracteristiques":[{"spec":"Chapeau","desc":"détail visible sur la photo"},{"spec":"Hyménium (lames/tubes/aiguillons)","desc":"détail visible sur la photo"},{"spec":"Pied","desc":"détail visible sur la photo"},{"spec":"Chair et odeur","desc":"détail si visible, sinon hypothèse prudente"},{"spec":"Habitat","desc":"contexte visible ou probable"}],"confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Si la photo ne permet pas une identification fiable, mets "espece":"inconnu" et confiance basse. Respecte les accents. Ne réponds JAMAIS "comestible" sans prudence si l\'espèce exige une cuisson obligatoire (morille, amanite rougissante, etc.). Chaque entrée de caracteristiques DOIT commencer par une de ces 5 valeurs de spec EXACTES.';
-  const texte = await appelGemini(cle, 'gemini-flash-latest', prompt, { json: true, signal, parts: [{ text: prompt }, { inlineData: { mimeType: mime, data: base64 } }] });
-  const propre = texte.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-  return JSON.parse(propre || '{}');
+  const texte = await appelGemini(cle, 'gemini-flash-latest', prompt, { signal, parts: [{ text: prompt }, { inlineData: { mimeType: mime, data: base64 } }] });
+  return parserJSONIA(texte || '{}');
 }
 
 /* ================= Stats ================= */
