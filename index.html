@@ -629,7 +629,7 @@ h2.titre-vue .ico{font-size:20px;}
     <textarea id="e-desc" placeholder="2-3 phrases…"></textarea>
   </label>
   <label class="champ">Caractéristiques clés (une par ligne)
-    <textarea id="e-carac" placeholder="Chapeau…&#10;Lames ou pores…&#10;Pied…&#10;Odeur / chair…"></textarea>
+    <textarea id="e-carac" placeholder="Chapeau : forme, couleur, taille…&#10;Hyménium (lames/tubes/aiguillons) : …&#10;Pied : forme, couleur, anneau, volve…&#10;Chair et odeur : …&#10;Habitat : où, saison…"></textarea>
   </label>
   <label class="champ">Confusions possibles
     <textarea id="e-confusions" placeholder="⚠️ Avec … — toxique : …"></textarea>
@@ -919,11 +919,13 @@ const STATUTS = {
 };
 
 /* ================= État ================= */
+/* Migration : l'ancien ordre par défaut mettait MycoQuébec en tête (même image pour toutes les parties) */
+if (localStorage.getItem('cqm_ordre_images') === 'myco,wikimedia,ia') localStorage.setItem('cqm_ordre_images', 'wikimedia,myco,ia');
 const Etat = {
   spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], illustrations: {}, checklist: {},
   vue: 'spots', filtre: 'tous', filtreSaison: 'toutes', recherche: '', detailId: null,
   unite: localStorage.getItem('cqm_unite') === 'lb' ? 'lb' : 'kg',
-  ordreImages: localStorage.getItem('cqm_ordre_images') || 'myco,wikimedia,ia',
+  ordreImages: localStorage.getItem('cqm_ordre_images') || 'wikimedia,myco,ia',
   spot: { edition: null, photo: null, especes: [] },
   cueillette: { edition: null, photo: null }
 };
@@ -1682,6 +1684,39 @@ function fermerFeuilleVariete() {
     confirmer('Quitter sans enregistrer ? Les champs remplis seront perdus.', '✏️ Variété non enregistrée').then(ok => { if (ok) fermerFeuilles(); });
   } else fermerFeuilles();
 }
+/* --- Transfert des caractéristiques IA vers les items d'illustration (détails sous les photos) --- */
+function transfererCaracVersItems(esp) {
+  if (!esp || !Array.isArray(esp.carac) || !esp.carac.length) return;
+  const ent = Etat.illustrations[esp.id] || { id: esp.id, items: specsDefautPour(esp.id) };
+  const cles = [
+    { re: /chapeau|calotte|cuticule/, spec: /chapeau/ },
+    { re: /lames|tubes|pores|aiguillons|hyménium|hymen|veines|dessous/, spec: /hyménium|lames|tubes|pores|aiguillons|veines/ },
+    { re: /pied|stipe/, spec: /pied/ },
+    { re: /chair|odeur|saveur|goût|gout|fermeté|fermete/, spec: /chair/ },
+    { re: /habitat|saison|forêt|foret|bois|sol/, spec: /habitat/ }
+  ];
+  const estGenerique = d => !d || /^(forme, couleur, taille\.|dessous du chapeau : lames, tubes ou aiguillons\.|forme, couleur, anneau, volve\.|couleur, fermeté, odeur\.|où il pousse, saison\.)$/i.test(d.trim());
+  let modifie = false;
+  esp.carac.forEach(ligne => {
+    const iSep = ligne.indexOf(' : ');
+    if (iSep < 0) return;
+    const intitule = ligne.slice(0, iSep).trim().toLowerCase();
+    const desc = ligne.slice(iSep + 3).trim();
+    if (!desc) return;
+    const g = cles.find(c => c.re.test(intitule));
+    const item = g
+      ? ent.items.find(x => g.spec.test((x.spec || '').toLowerCase()))
+      : ent.items.find(x => (x.spec || '').toLowerCase().includes(intitule));
+    if (item && estGenerique(item.desc)) {
+      item.desc = desc;
+      modifie = true;
+    }
+  });
+  if (modifie) {
+    Etat.illustrations[esp.id] = ent;
+    Stockage.ecrire('illustrations', ent);
+  }
+}
 $('e-save').addEventListener('click', async () => {
   const nom = $('e-nom').value.trim();
   if (!nom) { toast('Donnez un nom à la variété'); $('e-nom').focus(); return; }
@@ -1701,6 +1736,7 @@ $('e-save').addEventListener('click', async () => {
     cree: editEspeceId ? (Etat.especesCustom.find(x => x.id === editEspeceId) || {}).cree : aujourdhui()
   };
   await Stockage.ecrire('especes', esp);
+  transfererCaracVersItems(esp);
   toast('Variété enregistrée ✅');
   fermerFeuilles();
   await recharger();
@@ -1741,7 +1777,7 @@ async function genererDetailsIA(nom, latin) {
   if (!cle) throw new Error('PAS_DE_CLE');
   const prompt = 'Tu es un mycologue expert du Québec. Rédige une fiche pour le champignon « ' + nom + ' »' +
     (latin ? ' (nom latin : ' + latin + ')' : '') +
-    '. Réponds UNIQUEMENT en JSON valide, structure exacte : {"nom":"nom français","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","prudence":true|false,"saison":"période de fructification","habitat":"habitat type","description":"2-3 phrases","caracteristiques":["4 puces concrètes d\'identification : chapeau, lames/pores/aiguillons, pied, odeur/chair"],"confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Respecte les accents et le français du Québec.';
+    '. Réponds UNIQUEMENT en JSON valide, structure exacte : {"nom":"nom français","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","prudence":true|false,"saison":"période de fructification","habitat":"habitat type","description":"2-3 phrases","caracteristiques":[{"spec":"Chapeau","desc":"détail concret du chapeau : forme, couleur, taille"},{"spec":"Hyménium (lames/tubes/aiguillons)","desc":"détail concret du dessous du chapeau"},{"spec":"Pied","desc":"détail concret du pied : forme, couleur, anneau, volve"},{"spec":"Chair et odeur","desc":"détail concret de la chair : couleur, fermeté, odeur"},{"spec":"Habitat","desc":"où il pousse, saison"}],"confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Respecte les accents et le français du Québec. Chaque entrée de caracteristiques DOIT commencer par une de ces 5 valeurs de spec EXACTES.';
   const texte = await appelGemini(cle, 'gemini-flash-latest', prompt, { json: true });
   const propre = texte.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
   return JSON.parse(propre);
@@ -1762,7 +1798,7 @@ $('e-generer').addEventListener('click', async () => {
     $('e-saison').value = fiche.saison || '';
     $('e-habitat').value = fiche.habitat || '';
     $('e-desc').value = fiche.description || '';
-    $('e-carac').value = Array.isArray(fiche.caracteristiques) ? fiche.caracteristiques.join('\n') : '';
+    $('e-carac').value = Array.isArray(fiche.caracteristiques) ? fiche.caracteristiques.map(c => (c && typeof c === 'object' && c.spec && c.desc) ? c.spec + ' : ' + c.desc : String(c || '')).join('\n') : '';
     $('e-confusions').value = fiche.confusions || '';
     toast('Fiche générée ✨ — vérifiez puis enregistrez');
   } catch (err) {
@@ -2351,6 +2387,7 @@ function preparerVarieteDepuisResultat() {
   $('e-latin').value = r.latin || '';
   if (['comestible', 'immangeable', 'toxique', 'mortel'].includes(r.statut)) $('e-statut').value = r.statut;
   $('e-desc').value = r.description || '';
+  $('e-carac').value = Array.isArray(r.caracteristiques) ? r.caracteristiques.map(c => (c && typeof c === 'object' && c.spec && c.desc) ? c.spec + ' : ' + c.desc : String(c || '')).join('\n') : '';
   $('e-confusions').value = r.confusions || '';
   // P2-11 : transférer la photo déjà prise vers la fiche variété
   if (photoResultat) { photoEspece = photoResultat; afficherPhoto('e-photo-zone', photoResultat); }
@@ -2360,7 +2397,7 @@ async function identifierPhotoIA(dataUrl, signal) {
   const cle = cleIA(); if (!cle) throw new Error('PAS_DE_CLE');
   const mime = (dataUrl.split(';')[0] || 'data:image/jpeg').replace('data:', '') || 'image/jpeg';
   const base64 = dataUrl.split(',')[1] || '';
-  const prompt = 'Tu es un mycologue expert du Québec. Identifie le champignon sur cette photo. Réponds UNIQUEMENT en JSON valide, structure exacte : {"espece":"nom français le plus probable","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","confiance":0-100,"prudence":true si la consommation exige une préparation particulière (ex. cuisson obligatoire) ou si une confusion dangereuse est possible même à haute confiance, sinon false,"description":"2-3 phrases","confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Si la photo ne permet pas une identification fiable, mets "espece":"inconnu" et confiance basse. Respecte les accents. Ne réponds JAMAIS "comestible" sans prudence si l\'espèce exige une cuisson obligatoire (morille, amanite rougissante, etc.).';
+  const prompt = 'Tu es un mycologue expert du Québec. Identifie le champignon sur cette photo. Réponds UNIQUEMENT en JSON valide, structure exacte : {"espece":"nom français le plus probable","latin":"nom latin","statut":"comestible|immangeable|toxique|mortel","confiance":0-100,"prudence":true si la consommation exige une préparation particulière (ex. cuisson obligatoire) ou si une confusion dangereuse est possible même à haute confiance, sinon false,"description":"2-3 phrases","caracteristiques":[{"spec":"Chapeau","desc":"détail visible sur la photo"},{"spec":"Hyménium (lames/tubes/aiguillons)","desc":"détail visible sur la photo"},{"spec":"Pied","desc":"détail visible sur la photo"},{"spec":"Chair et odeur","desc":"détail si visible, sinon hypothèse prudente"},{"spec":"Habitat","desc":"contexte visible ou probable"}],"confusions":"1-2 phrases sur les espèces à ne pas confondre, avec mises en garde"}. Si la photo ne permet pas une identification fiable, mets "espece":"inconnu" et confiance basse. Respecte les accents. Ne réponds JAMAIS "comestible" sans prudence si l\'espèce exige une cuisson obligatoire (morille, amanite rougissante, etc.). Chaque entrée de caracteristiques DOIT commencer par une de ces 5 valeurs de spec EXACTES.';
   const texte = await appelGemini(cle, 'gemini-flash-latest', prompt, { json: true, signal, parts: [{ text: prompt }, { inlineData: { mimeType: mime, data: base64 } }] });
   const propre = texte.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
   return JSON.parse(propre || '{}');
