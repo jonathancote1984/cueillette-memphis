@@ -1435,8 +1435,6 @@ function ouvrirDetail(id, perso) {
 let positionGuide = 0;
 function fermerDetail() {
   naviguer('guide');
-  $('sous-titre').textContent = '🍄 Carnet de champignons · édition Memphis';
-  $('badge').style.display = Etat.cueillettes.length ? 'flex' : 'none';
   requestAnimationFrame(() => window.scrollTo(0, positionGuide));
 }
 async function basculerSpec(i) {
