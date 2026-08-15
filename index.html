@@ -286,6 +286,20 @@ h2.titre-vue .ico{font-size:20px;}
 .feuille h3{margin:0 0 14px; font-size:18px; font-weight:700; display:inline-block;
   background:var(--jaune); border:3px solid var(--noir); border-radius:12px 12px 12px 4px;
   padding:4px 12px; transform:rotate(-1deg); box-shadow:3px 3px 0 var(--noir);}
+/* ===== Étapes progressives (feuille variété) ===== */
+.etapes-espece{display:flex; align-items:center; gap:8px; margin:2px 0 14px;}
+.etape{
+  display:inline-flex; align-items:center; gap:7px;
+  background:var(--creme); border:2.5px solid var(--noir); border-radius:999px;
+  padding:6px 13px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer;
+  box-shadow:2px 2px 0 var(--noir); transition:transform .1s, box-shadow .1s;
+}
+.etape:active{transform:translate(2px,2px); box-shadow:0 0 0 var(--noir);}
+.etape .num{background:var(--noir); color:var(--creme); border-radius:999px; width:21px; height:21px;
+  display:inline-flex; align-items:center; justify-content:center; font-size:11.5px; flex-shrink:0;}
+.etape.actif{background:var(--jaune); transform:rotate(-1.5deg);}
+.etape.actif .num{background:var(--rouge); color:var(--blanc);}
+.etape-fleche{font-weight:700; font-size:15px; opacity:.6;}
 /* ===== Stats ===== */
 .stat-grille{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;}
 .stat-carte{
@@ -595,69 +609,82 @@ h2.titre-vue .ico{font-size:20px;}
   </div>
 </section>
 
-<!-- ===== FEUILLE ESPÈCE (variétés perso + IA) ===== -->
+<!-- ===== FEUILLE ESPÈCE (variétés perso + IA) — 2 étapes progressives ===== -->
 <section class="feuille" id="sheet-espece">
   <div class="poignee"></div>
   <h3 id="titre-espece">➕ Nouvelle variété</h3>
-  <div class="alerte alerte-orange" style="font-size:12.5px;padding:9px 12px;margin-bottom:12px">✨ Entrez le nom, puis « Détails par IA » pour générer la fiche automatiquement (clé Gemini dans ⚙️ Paramètres).</div>
-  <div class="grille2">
-    <label class="champ">Nom français
-      <input id="e-nom" placeholder="Ex. : Lactaire délicieux" maxlength="80" autocomplete="off">
-      <div id="e-nom-suggestions"></div>
-    </label>
-    <label class="champ">Nom latin
-      <input id="e-latin" placeholder="Ex. : Lactarius deliciosus" maxlength="80">
-    </label>
+  <div class="etapes-espece" role="tablist" aria-label="Étapes de la fiche">
+    <button type="button" class="etape actif" id="etape-1-btn" role="tab" aria-selected="true" onclick="etapeEspece(1)"><span class="num">1</span> Identité</button>
+    <span class="etape-fleche" aria-hidden="true">→</span>
+    <button type="button" class="etape" id="etape-2-btn" role="tab" aria-selected="false" onclick="etapeEspece(2)"><span class="num">2</span> Détails &amp; photo</button>
   </div>
-  <div class="grille2">
-    <label class="champ">Comestibilité
-      <select id="e-statut">
-        <option value="comestible">✅ Comestible</option>
-        <option value="immangeable">Immangeable</option>
-        <option value="toxique">⚠️ Toxique</option>
-        <option value="mortel">☠️ MORTEL</option>
-      </select>
+  <!-- ÉTAPE 1 : identité -->
+  <div id="etape-1">
+    <div class="alerte alerte-orange" style="font-size:12.5px;padding:9px 12px;margin-bottom:12px">✨ Entrez le nom, puis « Détails par IA » pour générer la fiche automatiquement (clé Gemini dans ⚙️ Paramètres).</div>
+    <div class="grille2">
+      <label class="champ">Nom français
+        <input id="e-nom" placeholder="Ex. : Lactaire délicieux" maxlength="80" autocomplete="off">
+        <div id="e-nom-suggestions"></div>
+      </label>
+      <label class="champ">Nom latin
+        <input id="e-latin" placeholder="Ex. : Lactarius deliciosus" maxlength="80">
+      </label>
+    </div>
+    <div class="grille2">
+      <label class="champ">Comestibilité
+        <select id="e-statut">
+          <option value="comestible">✅ Comestible</option>
+          <option value="immangeable">Immangeable</option>
+          <option value="toxique">⚠️ Toxique</option>
+          <option value="mortel">☠️ MORTEL</option>
+        </select>
+      </label>
+      <label class="champ">Saison
+        <input id="e-saison" placeholder="Ex. : Juillet à octobre">
+      </label>
+    </div>
+    <label class="champ" style="display:flex;align-items:center;gap:8px;font-size:13.5px;margin-top:-4px">
+      <input type="checkbox" id="e-prudence" style="width:20px;height:20px;margin:0"> ⚠️ Prudence (cuisson obligatoire / réservé aux experts)
     </label>
-    <label class="champ">Saison
-      <input id="e-saison" placeholder="Ex. : Juillet à octobre">
+    <button class="btn btn-jaune btn-plein" id="e-generer">✨ Détails par IA</button>
+    <button class="btn btn-vert btn-plein" style="margin-top:10px" id="e-suivant">Suivant : détails &amp; photo →</button>
+  </div>
+  <!-- ÉTAPE 2 : détails + photo -->
+  <div id="etape-2" style="display:none">
+    <label class="champ">Habitat
+      <input id="e-habitat" placeholder="Ex. : Sous les pins, sols sablonneux">
     </label>
-  </div>
-  <label class="champ" style="display:flex;align-items:center;gap:8px;font-size:13.5px;margin-top:-4px">
-    <input type="checkbox" id="e-prudence" style="width:20px;height:20px;margin:0"> ⚠️ Prudence (cuisson obligatoire / réservé aux experts)
-  </label>
-  <label class="champ">Habitat
-    <input id="e-habitat" placeholder="Ex. : Sous les pins, sols sablonneux">
-  </label>
-  <label class="champ">Description
-    <textarea id="e-desc" placeholder="2-3 phrases…"></textarea>
-  </label>
-  <label class="champ">Caractéristiques clés (une par ligne)
-    <textarea id="e-carac" placeholder="Chapeau : forme, couleur, taille…&#10;Hyménium (lames/tubes/aiguillons) : …&#10;Pied : forme, couleur, anneau, volve…&#10;Chair et odeur : …&#10;Habitat : où, saison…"></textarea>
-  </label>
-  <label class="champ">Confusions possibles
-    <textarea id="e-confusions" placeholder="⚠️ Avec … — toxique : …"></textarea>
-  </label>
-  <button class="btn btn-jaune btn-plein" id="e-generer">✨ Détails par IA</button>
-  <div class="champ" style="margin-top:14px">Photo
-    <div class="photo-zone" id="e-photo-zone" title="Cliquez pour retirer la photo">
-      <div class="vide"><span class="ico">📷</span>Photo de la variété</div>
+    <label class="champ">Description
+      <textarea id="e-desc" placeholder="2-3 phrases…"></textarea>
+    </label>
+    <label class="champ">Caractéristiques clés (une par ligne)
+      <textarea id="e-carac" placeholder="Chapeau : forme, couleur, taille…&#10;Hyménium (lames/tubes/aiguillons) : …&#10;Pied : forme, couleur, anneau, volve…&#10;Chair et odeur : …&#10;Habitat : où, saison…"></textarea>
+    </label>
+    <label class="champ">Confusions possibles
+      <textarea id="e-confusions" placeholder="⚠️ Avec … — toxique : …"></textarea>
+    </label>
+    <div class="champ" style="margin-top:14px">Photo
+      <div class="photo-zone" id="e-photo-zone" title="Cliquez pour retirer la photo">
+        <div class="vide"><span class="ico">📷</span>Photo de la variété</div>
+      </div>
+      <div class="grille2" style="margin-top:8px">
+        <button class="btn btn-rose" id="e-photo-cam">📷 Appareil</button>
+        <button class="btn btn-bleu" id="e-photo-gal">🖼️ Galerie</button>
+      </div>
+      <div class="grille2" style="margin-top:8px">
+        <button class="btn btn-vert" id="e-photo-commons">🔎 Chercher une photo</button>
+        <button class="btn btn-jaune" id="e-photo-ia">🎨 Illustration IA</button>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn btn-bleu btn-plein" id="e-photo-myco">🍄 Fiche MycoQuébec</button>
+      </div>
+      <div class="info-gps" id="e-photo-info"></div>
     </div>
-    <div class="grille2" style="margin-top:8px">
-      <button class="btn btn-rose" id="e-photo-cam">📷 Appareil</button>
-      <button class="btn btn-bleu" id="e-photo-gal">🖼️ Galerie</button>
+    <button class="btn btn-gris btn-plein" style="margin-bottom:10px" id="e-retour">← Retour à l'identité</button>
+    <div class="grille2">
+      <button class="btn btn-vert btn-plein" id="e-save">💾 Enregistrer</button>
+      <button class="btn btn-gris btn-plein" id="e-cancel">Annuler</button>
     </div>
-    <div class="grille2" style="margin-top:8px">
-      <button class="btn btn-vert" id="e-photo-commons">🔎 Chercher une photo</button>
-      <button class="btn btn-jaune" id="e-photo-ia">🎨 Illustration IA</button>
-    </div>
-    <div style="margin-top:8px">
-      <button class="btn btn-bleu btn-plein" id="e-photo-myco">🍄 Fiche MycoQuébec</button>
-    </div>
-    <div class="info-gps" id="e-photo-info"></div>
-  </div>
-  <div class="grille2">
-    <button class="btn btn-vert btn-plein" id="e-save">💾 Enregistrer</button>
-    <button class="btn btn-gris btn-plein" id="e-cancel">Annuler</button>
   </div>
 </section>
 
@@ -1679,6 +1706,22 @@ function parserJSONIA(texte) {
   return JSON.parse(t);
 }
 
+/* Navigation entre les 2 étapes progressives de la feuille variété */
+function etapeEspece(n) {
+  if (n === 2 && !$('e-nom').value.trim()) {
+    toast('Entrez d\u2019abord le nom de la variété');
+    $('e-nom').focus();
+    return;
+  }
+  $('etape-1').style.display = n === 1 ? '' : 'none';
+  $('etape-2').style.display = n === 2 ? '' : 'none';
+  $('etape-1-btn').classList.toggle('actif', n === 1);
+  $('etape-2-btn').classList.toggle('actif', n === 2);
+  $('etape-1-btn').setAttribute('aria-selected', n === 1);
+  $('etape-2-btn').setAttribute('aria-selected', n === 2);
+}
+$('e-suivant').addEventListener('click', () => etapeEspece(2));
+$('e-retour').addEventListener('click', () => etapeEspece(1));
 function ouvrirSheetEspece() {
   editEspeceId = null; photoEspece = null;
   $('titre-espece').textContent = '➕ Nouvelle variété';
@@ -1686,6 +1729,7 @@ function ouvrirSheetEspece() {
   $('e-statut').value = 'comestible'; $('e-prudence').checked = false;
   $('e-photo-info').textContent = '';
   afficherPhoto('e-photo-zone', null);
+  etapeEspece(1);
   ouvrirFeuille('sheet-espece');
 }
 function editerEspece(id) {
@@ -1700,6 +1744,7 @@ function editerEspece(id) {
   $('e-confusions').value = e.confusions || '';
   $('e-photo-info').textContent = '';
   afficherPhoto('e-photo-zone', photoEspece);
+  etapeEspece(1);
   ouvrirFeuille('sheet-espece');
 }
 $('e-cancel').addEventListener('click', fermerFeuilleVariete);
