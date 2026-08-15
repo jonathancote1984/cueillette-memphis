@@ -982,8 +982,12 @@ function naviguer(vue) {
   const fab = $('fab');
   fab.classList.toggle('cache', vue === 'stats' || vue === 'detail' || vue === 'parametres');
   fab.textContent = vue === 'spots' ? '📍' : '＋';
-  fab.setAttribute('aria-label', vue === 'spots' ? 'Ajouter un spot' : 'Ajouter une cueillette');
+  fab.setAttribute('aria-label', vue === 'spots' ? 'Ajouter un spot' : vue === 'cueillettes' ? 'Ajouter une cueillette' : 'Nouvelle variété');
   $('btn-retour').classList.toggle('visible', vue === 'detail');
+  if (vue !== 'detail') {
+    $('sous-titre').textContent = '🍄 Carnet de champignons · édition Memphis';
+    $('badge').style.display = Etat.cueillettes.length ? 'flex' : 'none';
+  }
   if (vue === 'stats') { rendreAlerteExport(); rendreStats(); }
   if (vue === 'guide') { rendreBandeauCle(); rendreGuide(); }
   if (vue === 'parametres') rendreParametres();
