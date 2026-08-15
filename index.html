@@ -166,11 +166,6 @@ h2.titre-vue .ico{font-size:20px;}
 .puce.actif{transform:rotate(-2deg);}
 .puce.actif[data-fs]{background:var(--noir); color:var(--creme);}
 .puce.actif[data-f="tous"]{background:var(--gris);}
-.puce.actif[data-f="comestible"]{background:var(--vert);}
-.puce.actif[data-f="prudence"]{background:var(--jaune);}
-.puce.actif[data-f="npas"]{background:var(--orange); color:var(--blanc);}
-.puce.actif[data-f="toxique"]{background:var(--orange); color:var(--blanc);}
-.puce.actif[data-f="mortel"]{background:var(--rouge); color:var(--blanc);}
 /* ===== Saisie ===== */
 .champ{display:block; margin-bottom:14px; font-size:13px; font-weight:700;}
 .champ input, .champ select, .champ textarea, .saisie{
@@ -469,7 +464,7 @@ h2.titre-vue .ico{font-size:20px;}
       <div style="font-size:13.5px;line-height:1.7">
         <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px"><span class="pastille-statut" style="background:var(--ambre);color:var(--noir);transform:none">⚠️</span><span><b>Rien n'est encore vérifié</b> — ne consommez pas. Cochez les critères un à un.</span></div>
         <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px"><span class="pastille-statut" style="background:var(--olive);color:var(--noir);transform:none">✅</span><span><b>Tous les critères correspondent</b> — espèce comestible ou à cuisson obligatoire : récolte possible en respectant la prudence.</span></div>
-        <div style="display:flex;gap:8px;align-items:flex-start"><span class="pastille-statut" style="background:var(--rouge);color:var(--blanc);transform:none">☠️</span><span><b>5/5 vérifiés sur une espèce mortelle</b> — ne pas consommer, jamais. En cas de doute : <b>on ne mange pas</b>.</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span class="pastille-statut" style="background:var(--rouge);color:var(--blanc);transform:none">☠️</span><span><b>Tous les critères vérifiés sur une espèce mortelle</b> — ne pas consommer, jamais. En cas de doute : <b>on ne mange pas</b>.</span></div>
       </div>
       <p class="note" style="margin-top:10px">En cas d'ingestion suspecte : centre antipoison du Québec <b>1-800-463-5060</b>.</p>
     </div>
@@ -653,8 +648,8 @@ h2.titre-vue .ico{font-size:20px;}
       <button class="btn btn-vert" id="e-photo-commons">🔎 Chercher une photo</button>
       <button class="btn btn-jaune" id="e-photo-ia">🎨 Illustration IA</button>
     </div>
-    <div class="grille2" style="margin-top:8px">
-      <button class="btn btn-bleu" id="e-photo-myco">🍄 Fiche MycoQuébec</button>
+    <div style="margin-top:8px">
+      <button class="btn btn-bleu btn-plein" id="e-photo-myco">🍄 Fiche MycoQuébec</button>
     </div>
     <div class="info-gps" id="e-photo-info"></div>
   </div>
@@ -744,7 +739,7 @@ function toast(msg) {
   t.textContent = msg;
   t.classList.add('visible');
   clearTimeout(minuteurToast);
-  minuteurToast = setTimeout(() => t.classList.remove('visible'), 2200);
+  minuteurToast = setTimeout(() => t.classList.remove('visible'), msg.length > 60 ? 4500 : 2200);
 }
 
 /* ================= Stockage (IndexedDB + repli localStorage) ================= */
@@ -986,6 +981,7 @@ function naviguer(vue) {
   const fab = $('fab');
   fab.classList.toggle('cache', vue === 'stats' || vue === 'detail' || vue === 'parametres');
   fab.textContent = vue === 'spots' ? '📍' : '＋';
+  fab.setAttribute('aria-label', vue === 'spots' ? 'Ajouter un spot' : 'Ajouter une cueillette');
   $('btn-retour').classList.toggle('visible', vue === 'detail');
   if (vue === 'stats') { rendreAlerteExport(); rendreStats(); }
   if (vue === 'guide') { rendreBandeauCle(); rendreGuide(); }
@@ -1008,7 +1004,10 @@ $('voile').addEventListener('click', () => {
   if (document.getElementById('sheet-espece').classList.contains('ouverte')) fermerFeuilleVariete();
   else fermerFeuilles();
 });
-document.querySelectorAll('.feuille .poignee').forEach(p => p.addEventListener('click', fermerFeuilles));
+document.querySelectorAll('.feuille .poignee').forEach(p => p.addEventListener('click', () => {
+  if (document.getElementById('sheet-espece').classList.contains('ouverte')) fermerFeuilleVariete();
+  else fermerFeuilles();
+}));
 /* Clavier : Enter/Espace déclenche les éléments role="button" (puces, cartes, items) */
 document.addEventListener('keydown', ev => {
   if ((ev.key === 'Enter' || ev.key === ' ') && ev.target && ev.target.getAttribute && ev.target.getAttribute('role') === 'button') {
@@ -1313,6 +1312,13 @@ function saisonsDe(e) {
   const s = (e.saison || '').toLowerCase();
   return [...new Set(Object.keys(MOIS_SAISON).filter(m => s.includes(m)).map(m => MOIS_SAISON[m]))];
 }
+function reinitialiserFiltres() {
+  Etat.filtre = 'tous'; Etat.filtreSaison = 'toutes'; Etat.recherche = '';
+  const r = $('g-recherche'); if (r) r.value = '';
+  const fs = $('g-filtre-statut'); if (fs) fs.value = 'tous';
+  const fss = $('g-filtre-saison'); if (fss) fss.value = 'toutes';
+  rendreGuide();
+}
 function rendreGuide() {
   const q = normNom(Etat.recherche.trim());
   const list = toutesEspeces().filter(e => {
@@ -1326,7 +1332,7 @@ function rendreGuide() {
     return okF && okS && okT;
   });
   if (!list.length) {
-    $('liste-guide').innerHTML = '<div class="vide-etat"><span class="ico">🔎</span>Aucun champignon trouvé.</div>';
+    $('liste-guide').innerHTML = '<div class="vide-etat"><span class="ico">🔎</span>Aucun champignon trouvé.<br><button class="btn btn-gris btn-petit" style="margin-top:8px" onclick="reinitialiserFiltres()">↩️ Réinitialiser les filtres</button></div>';
     return;
   }
   $('liste-guide').innerHTML = list.map(e => {
@@ -1643,7 +1649,8 @@ function editerEspece(id) {
 $('e-cancel').addEventListener('click', fermerFeuilleVariete);
 function formulaireEspeceSale() {
   return ['e-nom', 'e-latin', 'e-saison', 'e-habitat', 'e-desc', 'e-carac', 'e-confusions']
-    .some(i => $(i).value.trim() !== '') || photoEspece !== null;
+    .some(i => $(i).value.trim() !== '') || photoEspece !== null ||
+    $('e-statut').value !== 'comestible' || $('e-prudence').checked;
 }
 function fermerFeuilleVariete() {
   if (formulaireEspeceSale()) {
@@ -1827,7 +1834,11 @@ async function illustrerSpec(e, it) {
       if (res) return res;
     } catch (e) { /* essaie la source suivante */ }
   }
-  return { src: await genererImageIA(e.nom, e.latin, it.spec, it.desc), source: 'ia' };
+  // Repli IA uniquement si l'utilisateur l'a inclus dans son ordre
+  if (ordre.includes('ia')) {
+    return { src: await genererImageIA(e.nom, e.latin, it.spec, it.desc), source: 'ia' };
+  }
+  throw new Error('Aucune image trouvée dans les sources choisies (' + ordre.join(', ') + ')');
 }
 $('e-photo-commons').addEventListener('click', async () => {
   const terme = $('e-latin').value.trim() || $('e-nom').value.trim();
@@ -2092,7 +2103,7 @@ function rendreListeIllu() {
     '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;flex-wrap:wrap">' +
     '<span style="font-weight:700;font-size:13.5px;flex:1">' + esc(it.spec) + '</span>' +
     '<button class="btn btn-rouge btn-petit" onclick="retirerIllu(' + i + ')">✖️</button>' +
-    '<button class="btn btn-jaune btn-petit" onclick="genererIllu(' + i + ')">' + (it.img ? '🔄 Refaire' : '🎨 Générer') + '</button>' +
+    '<button class="btn btn-jaune btn-petit" onclick="genererIllu(' + i + ', this)">' + (it.img ? '🔄 Refaire' : '🎨 Générer') + '</button>' +
     '</div>' +
     (it.img ? '<img src="' + it.img + '" style="width:100%;display:block;border-top:3px solid var(--noir)" alt="' + esc(it.spec) + '">' : '') +
     (it.desc ? '<div style="padding:8px 10px;font-size:12.5px;opacity:.85;line-height:1.5">' + esc(it.desc) + '</div>' : '') +
@@ -2112,8 +2123,9 @@ $('illu-ajouter').addEventListener('click', async () => {
   rendreListeIllu();
   toast('Spécificité ajoutée — cliquez 🎨 pour générer l\'image');
 });
-async function genererIllu(i) {
-  if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (Paramètres ⚙️)'); return; }
+async function genererIllu(i, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ En cours…'; }
+  if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (Paramètres ⚙️)'); if (btn) { btn.disabled = false; btn.textContent = '🎨 Générer'; } return; }
   const e = toutesEspeces().find(x => x.id === illuEspeceId); if (!e) return;
   const ent = Etat.illustrations[illuEspeceId] || { id: illuEspeceId, items: [] };
   const it = ent.items[i]; if (!it) return;
@@ -2124,10 +2136,11 @@ async function genererIllu(i) {
     await Stockage.ecrire('illustrations', ent);
     Etat.illustrations[illuEspeceId] = ent;
     rendreListeIllu();
-    toast(res.source === 'wikimedia' ? 'Photo Wikimedia trouvée 📷' : 'Illustration « ' + it.spec + ' » générée ✅');
+    toast(res.source === 'wikimedia' ? 'Photo Wikimedia trouvée 📷' : res.source === 'myco' ? 'Photo MycoQuébec 🍄' : 'Illustration « ' + it.spec + ' » générée ✅');
   } catch (err) {
     toast(messageErreurIA(err));
   }
+  if (btn) { btn.disabled = false; btn.textContent = it.img ? '🔄 Refaire' : '🎨 Générer'; }
 }
 async function retirerIllu(i) {
   const ent = Etat.illustrations[illuEspeceId]; if (!ent) return;
@@ -2149,7 +2162,9 @@ async function retirerIllu(i) {
 }
 $('illu-toutes').addEventListener('click', async () => {
   if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini'); return; }
-  const e = toutesEspeces().find(x => x.id === illuEspeceId); if (!e) return;
+  const btn = $('illu-toutes');
+  btn.disabled = true; btn.textContent = '⏳ Génération en cours…';
+  const e = toutesEspeces().find(x => x.id === illuEspeceId); if (!e) { btn.disabled = false; btn.textContent = '✨ Générer les manquantes'; return; }
   const ent = Etat.illustrations[illuEspeceId] || { id: illuEspeceId, items: [] };
   const manquantes = ent.items.filter(x => !x.img);
   if (!manquantes.length) { toast('Toutes les spécificités ont déjà une image ✨'); return; }
@@ -2165,9 +2180,11 @@ $('illu-toutes').addEventListener('click', async () => {
       if (res.source === 'wikimedia') toast('Photo Wikimedia trouvée 📷 (' + (i + 1) + '/' + ent.items.length + ')');
     } catch (err) {
       toast(messageErreurIA(err) + ' — série interrompue');
+      btn.disabled = false; btn.textContent = '✨ Générer les manquantes';
       return;
     }
   }
+  btn.disabled = false; btn.textContent = '✨ Générer les manquantes';
   toast('Génération terminée ✨');
 });
 
