@@ -145,6 +145,7 @@ h2.titre-vue .ico{font-size:20px;}
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
 }
 .btn:active{transform:translate(3px,3px); box-shadow:0 0 0 var(--noir);}
+.btn:disabled{opacity:.55; cursor:not-allowed; box-shadow:2px 2px 0 var(--noir);}
 .btn-plein{width:100%; padding:13px; font-size:15.5px;}
 .btn-rouge{background:var(--rouge); color:var(--blanc);}
 .btn-bleu{background:var(--bleu); color:var(--blanc);}
@@ -164,8 +165,6 @@ h2.titre-vue .ico{font-size:20px;}
 }
 .puce:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--noir);}
 .puce.actif{transform:rotate(-2deg);}
-.puce.actif[data-fs]{background:var(--noir); color:var(--creme);}
-.puce.actif[data-f="tous"]{background:var(--gris);}
 /* ===== Saisie ===== */
 .champ{display:block; margin-bottom:14px; font-size:13px; font-weight:700;}
 .champ input, .champ select, .champ textarea, .saisie{
@@ -1047,6 +1046,16 @@ function boutonsBoite() {
   return [...b.querySelectorAll('button')].filter(x => x.offsetParent !== null);
 }
 document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape') {
+    const feuilleVariete = document.getElementById('sheet-espece');
+    if (feuilleVariete && feuilleVariete.classList.contains('ouverte')) {
+      ev.preventDefault();
+      fermerFeuilleVariete();
+      return;
+    }
+    const feuilleOuverte = document.querySelector('.feuille.ouverte');
+    if (feuilleOuverte) { ev.preventDefault(); fermerFeuilles(); return; }
+  }
   if (!boiteVisible()) return;
   if (ev.key === 'Escape') {
     ev.preventDefault();
@@ -1571,9 +1580,21 @@ function remplirSuggestionsMyco() {
     const matches = base
       .filter(x => (x.nomFr && normNom(x.nomFr).includes(q)) || normNom(x.latin).includes(q))
       .sort((a, b) => {
-        const aFr = a.nomFr && normNom(a.nomFr).includes(q) ? 0 : 1;
-        const bFr = b.nomFr && normNom(b.nomFr).includes(q) ? 0 : 1;
-        return aFr - bFr;
+        const aFr = a.nomFr ? normNom(a.nomFr) : '';
+        const bFr = b.nomFr ? normNom(b.nomFr) : '';
+        const aLat = normNom(a.latin || '');
+        const bLat = normNom(b.latin || '');
+        const score = x => {
+          const fr = x.nomFr ? normNom(x.nomFr) : '';
+          const lat = normNom(x.latin || '');
+          if (fr === q || lat === q) return 0;        // égalité exacte
+          if (fr.startsWith(q) || lat.startsWith(q)) return 1; // préfixe
+          if (x.guide) return 2;                       // espèce du guide
+          return 3;                                    // inclusion simple
+        };
+        const d = score(a) - score(b);
+        if (d) return d;
+        return (aFr || aLat).length - (bFr || bLat).length; // le plus court d'abord
       })
       .slice(0, 6);
     zone.innerHTML = matches.length
@@ -1602,6 +1623,7 @@ function messageErreurIA(err) {
   if (m.includes('429') || m.includes('quota') || m.includes('rate') || m.includes('resource exhausted')) return '⚠️ Limite de requêtes atteinte — patientez quelques instants puis réessayez.';
   if (m.includes('500') || m.includes('503') || m.includes('unavailable') || m.includes('overloaded')) return '⚠️ Service IA momentanément indisponible — réessayez dans quelques instants.';
   if (m.includes('404')) return '⚠️ Modèle IA introuvable — réessayez plus tard.';
+  if (m.includes('aucune image trouvée')) return '⚠️ Aucune image trouvée dans les sources choisies — essayez un autre ordre ou une autre espèce.';
   return '⚠️ Erreur IA : ' + (err.message || 'inconnue') + ' — réessayez.';
 }
 /* Appel Gemini unifié : texte ou image, JSON optionnel. Retourne le texte concaténé des parts. */
@@ -2126,9 +2148,9 @@ $('illu-ajouter').addEventListener('click', async () => {
 async function genererIllu(i, btn) {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ En cours…'; }
   if (!cleIA()) { toast('🔑 Ajoutez votre clé Gemini (Paramètres ⚙️)'); if (btn) { btn.disabled = false; btn.textContent = '🎨 Générer'; } return; }
-  const e = toutesEspeces().find(x => x.id === illuEspeceId); if (!e) return;
+  const e = toutesEspeces().find(x => x.id === illuEspeceId); if (!e) { if (btn) { btn.disabled = false; btn.textContent = '🎨 Générer'; } return; }
   const ent = Etat.illustrations[illuEspeceId] || { id: illuEspeceId, items: [] };
-  const it = ent.items[i]; if (!it) return;
+  const it = ent.items[i]; if (!it) { if (btn) { btn.disabled = false; btn.textContent = '🎨 Générer'; } return; }
   toast('🎨 Génération de « ' + it.spec + ' »… (10-20 s)');
   try {
     const res = await illustrerSpec(e, it);
@@ -2167,7 +2189,7 @@ $('illu-toutes').addEventListener('click', async () => {
   const e = toutesEspeces().find(x => x.id === illuEspeceId); if (!e) { btn.disabled = false; btn.textContent = '✨ Générer les manquantes'; return; }
   const ent = Etat.illustrations[illuEspeceId] || { id: illuEspeceId, items: [] };
   const manquantes = ent.items.filter(x => !x.img);
-  if (!manquantes.length) { toast('Toutes les spécificités ont déjà une image ✨'); return; }
+  if (!manquantes.length) { btn.disabled = false; btn.textContent = '✨ Générer les manquantes'; toast('Toutes les spécificités ont déjà une image ✨'); return; }
   for (let i = 0; i < ent.items.length; i++) {
     if (ent.items[i].img) continue;
     toast('🎨 Génération ' + (i + 1) + '/' + ent.items.length + ' : ' + ent.items[i].spec + '…');
@@ -2178,6 +2200,7 @@ $('illu-toutes').addEventListener('click', async () => {
       Etat.illustrations[illuEspeceId] = ent;
       rendreListeIllu();
       if (res.source === 'wikimedia') toast('Photo Wikimedia trouvée 📷 (' + (i + 1) + '/' + ent.items.length + ')');
+      else if (res.source === 'myco') toast('Photo MycoQuébec 🍄 (' + (i + 1) + '/' + ent.items.length + ')');
     } catch (err) {
       toast(messageErreurIA(err) + ' — série interrompue');
       btn.disabled = false; btn.textContent = '✨ Générer les manquantes';
