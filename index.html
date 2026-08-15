@@ -652,7 +652,6 @@ h2.titre-vue .ico{font-size:20px;}
     </div>
     <div class="info-gps" id="e-photo-info"></div>
   </div>
-  <div class="alerte alerte-orange" style="font-size:12.5px;padding:9px 12px;margin-bottom:12px">🔑 La clé Gemini se configure dans <b>Paramètres</b> (onglet ⚙️ en bas).</div>
   <div class="grille2">
     <button class="btn btn-vert btn-plein" id="e-save">💾 Enregistrer</button>
     <button class="btn btn-gris btn-plein" id="e-cancel">Annuler</button>
@@ -1047,6 +1046,12 @@ function boutonsBoite() {
 }
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape') {
+    if (boiteVisible()) {
+      ev.preventDefault();
+      const ok = resolveConfirm; fermerConfirm(); if (ok) ok(false);
+      fermerChoix();
+      return;
+    }
     const feuilleVariete = document.getElementById('sheet-espece');
     if (feuilleVariete && feuilleVariete.classList.contains('ouverte')) {
       ev.preventDefault();
@@ -1057,12 +1062,6 @@ document.addEventListener('keydown', ev => {
     if (feuilleOuverte) { ev.preventDefault(); fermerFeuilles(); return; }
   }
   if (!boiteVisible()) return;
-  if (ev.key === 'Escape') {
-    ev.preventDefault();
-    const ok = resolveConfirm; fermerConfirm(); if (ok) ok(false);
-    fermerChoix();
-    return;
-  }
   if (ev.key === 'Tab') {
     const btns = boutonsBoite();
     if (!btns.length) return;
@@ -1190,7 +1189,7 @@ function rendreSpots() {
       '<div class="actions">' +
       '<button class="btn btn-vert btn-petit" onclick="partagerSpot(\'' + s.id + '\')">📤 Partager</button>' +
       '<button class="btn btn-bleu btn-petit" onclick="editerSpot(\'' + s.id + '\')">✏️ Modifier</button>' +
-      '<button class="btn btn-rouge btn-petit" onclick="supprimerSpot(\'' + s.id + '\')">🗑️</button>' + carte +
+      '<button class="btn btn-rouge btn-petit" aria-label="Supprimer le spot" onclick="supprimerSpot(\'' + s.id + '\')">🗑️</button>' + carte +
       '</div></div></div>';
   }).join('');
 }
@@ -1471,7 +1470,7 @@ function rendreCueillettes() {
       (c.note ? '<div class="meta">' + esc(c.note) + '</div>' : '') +
       '<div class="actions">' +
       '<button class="btn btn-bleu btn-petit" onclick="editerCueillette(\'' + c.id + '\')">✏️ Modifier</button>' +
-      '<button class="btn btn-rouge btn-petit" onclick="supprimerCueillette(\'' + c.id + '\')">🗑️</button>' +
+      '<button class="btn btn-rouge btn-petit" aria-label="Supprimer la cueillette" onclick="supprimerCueillette(\'' + c.id + '\')">🗑️</button>' +
       '</div></div></div>';
   }).join('');
 }
@@ -1594,12 +1593,16 @@ function remplirSuggestionsMyco() {
         };
         const d = score(a) - score(b);
         if (d) return d;
+        if (a.guide && !b.guide) return -1;   // l'espèce du guide gagne l'égalité
+        if (b.guide && !a.guide) return 1;
         return (aFr || aLat).length - (bFr || bLat).length; // le plus court d'abord
       })
       .slice(0, 6);
     zone.innerHTML = matches.length
       ? matches.map(x =>
-          '<button type="button" class="puce" style="margin:3px 6px 3px 0;display:inline-flex" onclick="choisirNomMyco(\'' + esc(x.nomFr || x.latin) + '\',\'' + esc(x.latin) + '\')">' + esc(x.nomFr || x.latin) + (x.nomFr ? ' <i style="opacity:.85">' + esc(x.latin) + '</i>' : '') + '</button>'
+          '<button type="button" class="puce" style="margin:3px 6px 3px 0;display:inline-flex;align-items:center;gap:6px" onclick="choisirNomMyco(\'' + esc(x.nomFr || x.latin) + '\',\'' + esc(x.latin) + '\')">' +
+          (x.img ? '<img src="' + x.img + '" alt="" style="width:26px;height:26px;border:2px solid var(--noir);border-radius:6px;object-fit:cover">' : '') +
+          esc(x.nomFr || x.latin) + (x.nomFr ? ' <i style="opacity:.85">' + esc(x.latin) + '</i>' : '') + '</button>'
         ).join('')
       : '';
   });
@@ -2130,7 +2133,7 @@ function rendreListeIllu() {
     (it.img ? '<img src="' + it.img + '" style="width:100%;display:block;border-top:3px solid var(--noir)" alt="' + esc(it.spec) + '">' : '') +
     (it.desc ? '<div style="padding:8px 10px;font-size:12.5px;opacity:.85;line-height:1.5">' + esc(it.desc) + '</div>' : '') +
     '</div>'
-  ).join('') : '<div class="vide-etat" style="padding:10px">Aucune spécificité — ajoutez-en une ci-dessous ou générez les 5 classiques.</div>';
+  ).join('') : '<div class="vide-etat" style="padding:10px">Aucune spécificité — ajoutez-en une ci-dessous.</div>';
 }
 $('illu-fermer').addEventListener('click', fermerFeuilles);
 $('illu-ajouter').addEventListener('click', async () => {
