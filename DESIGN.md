@@ -189,7 +189,7 @@ Forme de base : coins arrondis généreux (12-24 px) avec **un coin cassé** —
 
 ### Pastilles de statut (chips)
 - **Style :** pilule (999 px), bordure 2.5 px noire, inclinée de -1,5°.
-- **Couleurs sémantiques :** vert Comestible · jaune Prudence · gris Immangeable · orange Toxique · rouge MORTEL ☠️ (texte blanc).
+- **Couleurs sémantiques :** vert Comestible · jaune Prudence · gris Immangeable · orange Toxique · rouge MORTEL ☠️ (texte blanc) · gris Inconnu ⚠️ (statut fail-safe : toute ambiguïté penche vers la prudence).
 - **Filtres du guide :** deux `<select>` (Comestibilité + Saison) pleine largeur, style champ Memphis — remplacés les puces filtres (depuis v22).
 
 ### Cartes / Conteneurs
@@ -216,7 +216,7 @@ Forme de base : coins arrondis généreux (12-24 px) avec **un coin cassé** —
 - **Structure :** photo réelle (16:9, bordure basse noire 3 px) + corps (case ✓, titre, description) + verdict.
 - **Carte de spécificité :** coins 18 px avec coin cassé 5 px, bordure noire 3 px, ombre dure 3 px, curseur pointer, appui scale(.99).
 - **Case cochée :** fond olive, texte barré (line-through 2 px, opacité .75) — la satisfaction du critère vérifié.
-- **Compteur :** pastille ambre « n/5 » à droite de l'en-tête de section.
+- **Compteur :** pastille noire « n/5 » sur crème, à droite de l'en-tête de section (aria-live="polite").
 - **Verdicts :** carte pleine largeur, bordure noire 3 px, coin cassé — ✅ vert (tous les critères) / ⚠️ ambre (critères manquants, « En cas de doute : on ne mange pas »).
 
 ### Étapes progressives (feuille variété)
