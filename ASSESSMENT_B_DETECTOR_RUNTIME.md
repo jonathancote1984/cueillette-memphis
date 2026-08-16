@@ -1,122 +1,96 @@
-# ASSESSMENT B — Détecteur impeccable + preuves navigateur (16 août 2026, run 12:33)
+# Assessment B — Détecteur impeccable + preuves navigateur (25e passe)
 
-Cible : `C:/Users/Jo/projets/cueillette-memphis/index.html` (PWA mono-fichier, édition Memphis).
-Méthode : `detect.mjs --json` sur le fichier, triage contre DESIGN.md / PRODUCT.md / `.impeccable/config.json`, puis sondes runtime sur serveur statique local (port 8642, éteint en fin de session). **Code re-scanné après l'édition de 12:01 (cache bump v50→v51, correction du texte de verdict).**
+**Date** : 2026-08-16 · **Cible** : `index.html` (PWA mono-fichier, commit `ff0cfb2`, SW `cqm-v52`)
+**Serveur** : `python -m http.server 8142` (port libéré et vérifié après les sondes)
+**Verdict global** : runtime 100 % vert sur tous les points de sécurité · **1 nouveau défaut réel P2 + 1 cosmétique P3 trouvés** (voir §4) · 0 défaut bloquant au détecteur (101 findings, tous des faux positifs documentés ou advisories connus)
 
 ---
 
-## 1. Findings CLI (detect.mjs)
+## 1. Findings CLI (detect.mjs --json)
 
-**Résultat : EXIT=2 (findings présents — pas une erreur, stderr vide). 101 findings.**
+**101 findings** — exit code 2 (findings, pas une erreur), stderr vide.
 
-| Règle | Count | Sévérité | Catégorie |
+| Compte | Antipattern | Sévérité | Détail |
 |---|---|---|---|
-| design-system-radius | 55 | advisory | quality |
-| design-system-font-size | 34 | advisory | quality |
-| design-system-color | 5 | advisory | quality |
-| bounce-easing | 4 | warning | slop |
-| side-tab | 1 | warning | slop |
-| broken-image | 1 | warning | slop |
-| em-dash-overuse | 1 | warning (flag advisory) | quality |
+| 4 | bounce-easing | warning | l.111 `cubic-bezier(.2,1.6,.4,1)` · l.241 `(.2,1.5,.4,1)` · l.244 `(.2,1.5,.4,1)` · l.281 `(.2,1.3,.4,1)` |
+| 1 | side-tab | warning | l.135 `border-right:3px solid var(--noir)` |
+| 1 | broken-image | warning | l.1970 — commentaire JS `// CORS OK en <img>` |
+| 1 | em-dash-overuse | warning (advisory) | l.0 — 8 tirets cadratins / 5 336 car. corps = **0,75 / 500** |
+| 55 | design-system-radius | advisory | tokens : `999px`×12 · `4px`×9 · `5px`×9 · `16px`×8 · `14px`×7 · `3px`×3 · `6px`×2 · `9px`×2 · `10px`×2 |
+| 34 | design-system-font-size | advisory | `14px`×9 · `14.5px`×5 · `11.5px`×4 · `12px`×4 · `22px`×2 · `15px`×2 · `30/32/36px`×3 |
+| 5 | design-system-color | advisory | 4× `rgba(0,0,0,.1)` l.137/189/255/347 (contours photos du polish) + 1× `rgba(20,14,8,.92)` l.2365 (overlay lightbox) |
 
-**Totaux : 7 warnings + 94 advisory ; 6 slop + 95 quality.**
-
-### Liste complète (règle | ligne | extrait)
-
-```
-side-tab                L  135 | border-right:3px solid var(--noir)
-bounce-easing           L  111 | cubic-bezier(.2, 1.6, .4, 1)
-bounce-easing           L  241 | cubic-bezier(.2, 1.5, .4, 1)
-bounce-easing           L  244 | cubic-bezier(.2, 1.5, .4, 1)
-bounce-easing           L  281 | cubic-bezier(.2, 1.3, .4, 1)
-broken-image            L 1967 | <img>  (commentaire source uniquement)
-em-dash-overuse         L    0 | 8 em-dashes in body text (densité 1,09 / 500 chars)
-design-system-color     L 137,189,255,347 | rgba(0,0,0,.1)  (outline photos, 4×)
-design-system-color     L 2362 | rgba(20,14,8,.92)  (voile lightbox)
-design-system-radius    55 findings (voir triage ci-dessous)
-design-system-font-size 34 findings (voir triage ci-dessous)
-```
-
-Détail radius (55) : pilules `999px` ×12 (L53,99,145,164,195,257,274,289,300,305,334,357) · coins cassés `4/5/6 px` ×20 (L58,116,122,126,175,185,206,223,239,247,252,267,294,313,342,344,347,1652,1851,2261,2684) · rayons principaux `14/16/20 px` ×16 (L58,116,185,206,223,239,267,347,1851,2261,2363,2406,2416,2439,2448,2684) · micro-valeurs `3/9/10 px` ×7 (L256,259,325,344,1853).
-Détail font-size (34) : `11.5px` ×4, `22px` ×2, `32px` ×1, `18px` ×1 (documentés) ; `14px` ×9, `14.5px` ×5, `15px` ×2, `12px` ×4, `17px`, `24px`, `30px`, `36px`, `48px`, `10.5px` (micro-variantes).
+**Totaux par sévérité** : 7 warning · 94 advisory. **Par catégorie** : 6 slop · 95 quality.
 
 ---
 
-## 2. Triage / faux positifs (verdicts)
+## 2. Triage — faux positifs identifiés (101/101 expliqués)
 
-**Faux positifs documentés (le détecteur a techniquement raison, le contexte le disculpe) :**
+| Finding | Verdict | Raisonnement |
+|---|---|---|
+| side-tab l.135 | **FP en contexte** | Bordure noire 3 px = engagement de marque documenté : DESIGN.md l.116 « bordures noires épaisses (3 px) », l.119 « Bordures noires 3 px partout », l.147 « Règle du Trait Noir ». Le trait EST l'accent, pas un reliquat IA. |
+| bounce-easing ×4 | **FP en contexte** | Élasticité délibérée documentée : DESIGN.md l.124 « Élasticité délibérée : cubic-bezier(.2, 1.3-1.6, .4, 1) » + l.173 (feuilles 0,3 s). Les 4 courbes sont dans la plage 1.3–1.6. |
+| broken-image l.1970 | **FP** | Le moteur regex scanne le source brut : le `<img>` flaggé est dans le commentaire `// … CORS OK en <img>` (l.1970). `grep -o '<img[^>]*>' | grep -v 'src='` → seule occurrence = ce commentaire. Aucun vrai `<img>` sans `src`. |
+| em-dash-overuse | **Partiel (advisory)** | 8 tirets / 5 336 car. de corps (script/style/tags retirés) = 0,75/500, sous le seuil de 1/500 — typographie française standard. Advisory, non compté dans le exit code. |
+| design-system-radius ×55 | **FP en contexte** | Le détecteur applique l'échelle frontmatter (`rounded: 8/12/18/24 px`), mais la signature « coin cassé » (4–6 px sur un coin) et les pilules 999 px sont documentées dans DESIGN.md l.180 (« le coin inférieur droit est presque droit (4-6 px)… Boutons et pastilles : pilules (999 px) ») ET dans les composants frontmatter (rounded 999px, l.61-91). Valeurs dominantes : paires coin-cassé + pilules. |
+| design-system-font-size ×34 | **Partiel (cohérent)** | Ramp frontmatter 21/20/16/13. Les écarts dominants sont documentés/cohérents : `14.5px` ×5 (le composant `.ds-btn` du design.json l'utilise lui-même), `14px` ×9 (labels/tailles de composants compactes), `11.5/12px` micro-textes (opacité corrigée en passe 11e). Aucun hors-plage aberrant. |
+| design-system-color ×5 | **FP en contexte** | 4× `rgba(0,0,0,.1)` = contours de photos (ombres/outlines, pas des couleurs de marque — même famille que les ombres déjà ignorées) ; `rgba(20,14,8,.92)` = overlay lightbox, dérivé du noir de marque, fonctionnel. Les ignoreValues config (`rgba(31,26,23,.08)` / `.5`) produisent **zéro résiduel** cette passe. |
 
-- **side-tab (L135)** — `border-right:3px solid var(--noir)` : c'est La Règle du Trait Noir (DESIGN.md L147 : « Toute surface colorée porte une bordure noire de 3 px » ; PRODUCT.md Brand Commitments « bordures noires épaisses (3 px) »). Le token de marque EST l'accent. → **faux positif**.
-- **bounce-easing ×4** — DESIGN.md L124 : « Élasticité délibérée : cubic-bezier(.2, 1.3-1.6, .4, 1) pour les apparitions » ; L116/L237 : « les rebonds élastiques des feuilles et des confirmations font partie du plaisir, pas un défaut ». → **faux positif** (trait identitaire documenté).
-- **broken-image (L1967)** — le seul `<img>` sans src est dans le commentaire `// …(hors-ligne, CORS OK en <img>)`. `grep '<img[^>]*>' | grep -v 'src='` ne retourne que ce commentaire. → **faux positif**.
-- **design-system-color ×5** — `rgba(0,0,0,.1)` ×4 : `outline:1px solid` filet fonctionnel autour des vignettes/zone photo/spec-photo/detail-img (pas une couleur de surface). `rgba(20,14,8,.92)` : voile du lightbox zoom. Ombre/filet/voile ≠ couleur de marque. → **faux positif** (à ajouter aux ignoreValues du config si on veut zéro bruit).
-- **radius ≈48/55** — pilules 999px (composants documentés), coins cassés 4-6px (signature « coin cassé », DESIGN.md L180 : « coin inférieur droit presque droit (4-6 px) »), rayons principaux 14/16/20px conformes à la prose Shapes « coins arrondis généreux (12-24 px) », 18/5 cartes, 16/5 alertes, 12/4 champs — tous documentés. → **faux positif**.
-- **font-size ≈8/34** — 11.5px (libellés nav, DESIGN.md L207), 22px (icônes nav), 32px (icône zone photo, L204), 18px (titre de feuille) : documentés. → **faux positif**.
-
-**Partials (cohérents mais non documentés) :**
-
-- **radius ≈7/55** — `9px 9px 9px 3px` (badge spec-num ×2), `10px` (×2), `3px` (×1) : micro-variantes de petits éléments hors échelle 8/12/18/24 mais fidèles à la signature coin cassé. → **partial**.
-- **font-size ≈26/34** — 14/14.5/15/17/12/10.5/24/30/36/48px : hiérarchie cohérente (Fredoka, poids 400-700), tailles d'emoji/titres/meta non répertoriées dans la rampe 21/20/16/13 ; la `.ds-btn` du design.json embarque elle-même 14.5px. → **partial**.
-- **em-dash-overuse** — densité mesurée 8 tirets / 3 682 caractères de corps = 1,09 par 500 (seuil 8). Typographie française standard. → **partial**.
-
-**Drift réel : 0.** Aucune couleur hors palette, aucun motif AI résiduel, aucun radius/font aberrant.
+**Aucune dérive réelle de couleur** : les 5 couleurs flaggées sont des overlays/ombres ; la palette marque n'est jamais hors design system.
 
 ---
 
 ## 3. Findings console navigateur
 
-- **Erreurs JS : 0** (`window.__errs` vide via injection `Page.addScriptToEvaluateOnNewDocument`, relevé au chargement, après chaque bloc de sondes, et en fin de session).
-- **Ressources 4xx : 0** (`performance.getEntriesByType('resource')` filtré ≥400, vide en fin de session).
-- SW : reset complet (unregister 1 registration + `caches.delete` de `cqm-v50`) → rechargement → **re-enregistrement vérifié (1 registration, cache `cqm-v51` recréé, controller actif)** : le runtime est testé sur code frais, pas sur cache périmé.
+- **Erreurs JS : 0** (`window.__errs` via CDP `Page.addScriptToEvaluateOnNewDocument` + reload complet → `[]`).
+- **Ressources ≥ 400 : 0** (performance entries — 0× 404).
+- Service worker : reset caches → re-registré `cqm-v52`, contrôle la page, cache recréé (runtime vérifié sur code frais, pas un cache périmé).
 
 ---
 
-## 4. Sondes runtime (verdicts dynamiques, synonymes, analyse IA, import/export)
+## 4. Défauts réels découverts (nouveaux, cette passe)
 
-**Verdicts dynamiques (checklist terrain) — TOUT PASSÉ :**
-- Bolet bai (comestible) : 0/5 → `#spec-verdict-att` visible ⚠️ « Rien n'est encore vérifié » (fond ambre `rgb(217,164,65)`), `#spec-verdict-ok` caché ; 5/5 → carte ✅ visible (fond olive `rgb(111,143,62)`) « Tous les critères correspondent », compteur 5/5, 5 cartes `.fait` ; décochage → retour ⚠️ + compteur 0/5.
-- **Persistance IndexedDB : 5/5 survit à un reload complet** (compteur, classes, verdicts restaurés après réouverture de la fiche).
-- Espèce mortelle (Gyromitre) : à 5/5 la carte visible est la variante danger — fond `rgb(179,38,30)` = `--rouge` calculé, texte « est MORTELLE — ne pas consommer », **aucune carte verte jamais rendue** ; centre antipoison **1-800-463-5060** présent dans la fiche.
-- **Correction vérifiée (le défaut mineur du run 11:59 est FIXÉ)** : `basculerSpec` (L1490-1492) met désormais à jour le texte de la carte danger — à 5/5 la carte affiche « ☠️ **5/5 critères vérifiés** », à 0/5 « ☠️ 0/5 critères vérifiés ». Le compteur et le libellé ne se contredisent plus. Note cosmétique résiduelle : le libellé de la carte ⚠️ reste figé au rendu (affiche « Critères manquants » même à 0/5 après décoche) — sémantiquement correct, direction sûre, non un défaut.
+### B-1 (P2) — Le titre dynamique du verdict « att » force le crâne ☠️ sur les fiches COMESTIBLES
+`basculerSpec` (l.1497, fix P3-2 de la 24e) met à jour le titre du verdict « att » avec un emoji **codé en dur** :
+```js
+if (txtAtt) txtAtt.textContent = '☠️ ' + (nb === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants');
+```
+Les deux paires de verdicts partagent l'id `spec-verdict-att` : sur une fiche **mortelle** la carte `verdict-danger-att` doit avoir ☠️ (correct), mais sur une fiche **comestible** la carte ambre `verdict-att` porte ⚠️ au rendu initial… puis ☠️ dès la première bascule.
 
-**Synonymes — TOUT PASSÉ :**
-- `infoEspece('fausse morille')` → `{id:'gyromitre', statut:'mortel', synonyme:true, nomComplet:'Gyromitre (fausse morille)'}`.
-- `infoEspece('ange destructeur')` → `{id:'vireuse', statut:'mortel', synonyme:true}`.
-- `infoEspece('fausse chanterelle')` → synonyme:false (nom exact d'espèce). Typo `'morile'` → « Morille » (Levenshtein ≤2). Inconnu → `{id:null}`.
-- Flux sécurité : « fausse morille » dans une cueillette → `confirmer` capturé : « ⚠️ « fausse morille » correspond à « Gyromitre (fausse morille) » — MORTELLE : ne pas consommer. Enregistrer quand même ? », titre « ☠️ Sécurité » ; Annuler → **0 écriture** (Etat.cueillettes 0 avant ET après). Boîte de suggestions : exactement « Gyromitre (fausse morille) ».
+**Preuve runtime (chanterelle, comestible)** :
+- Rendu initial (0 bascule) : `verdict-att` titre « ⚠️ Critères manquants », codepoint **26a0** (⚠️) — correct.
+- Après décochage → 0/5 : `verdict-att ouv`, titre « **☠️** Rien n'est encore vérifié », codepoint **2620** (crâne), fond ambre `rgb(217,164,65)` — **crâne sur carte d'avertissement ambre d'une espèce comestible**.
+- Les octets du template l.1444 sont bien `e2 9a a0` (⚠️) — le défaut est exclusivement dans la mise à jour dynamique l.1497.
+- Contrôle gyromitre (mortel) : danger-att « ☠️ Rien n'est encore vérifié » — correct.
 
-**Analyse IA (photo) — TOUT PASSÉ (stub `identifierPhotoIA` à payload programmable, aucune clé Gemini consommée) :**
-- `analyserPhoto(dataUrl)` transmet bien la photo (`data:image/png;base64,…`) ET le `AbortSignal` au stub (4/4 captures, `hasSignal:true`).
-- États vérifiés : chargement 🔍 « Analyse en cours… (10-20 s) » + bouton ✋ Annuler + image affichée + feuille ouverte (observé sur stub à résolution différée ET sur stub jamais résolu) ; succès (Bolet bai 92 %) → badge Comestible, Confiance 92 %, description, confusions, boutons « 📖 Voir la fiche du guide » / « ➕ Ajouter comme variété » / Fermer ; confiance 45 % → 😕 + alerte rouge « En cas de doute, on ne mange pas… » + 📷 Réessayer / Fermer ; `espece:'inconnu'` → 😕 + Fermer seul ; annulation → « ✋ Analyse annulée. » + 🖼️ Choisir une photo / Fermer. Fonctions d'origine restaurées après chaque bloc.
+**Pourquoi P2** : le couple ⚠️/☠️ est un canal de sécurité chargé de sens (avertissement vs danger mortel). Un crâne sur la carte de vérification d'une chanterelle dégrade la crédibilité du signal rouge (effet « loup qui crie »), même si l'erreur penche vers la prudence (pas un faux signal de sécurité). **Fix suggéré** (non appliqué, périmètre Assessment B) : `const nonComestible = …` dans `basculerSpec` et `txtAtt.textContent = (nonComestible ? '☠️ ' : '⚠️ ') + (nb === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants');` + bump SW.
 
-**Import/export JSON — TOUT PASSÉ :**
-- v5 valide (1 spot, 1 cueillette) → modale résumé « Le fichier contient 1 cueillette, 1 spot » (comptes exacts) ; Annuler → **0 écriture** (spots/cueillettes 0/0 avant ET après).
-- v6 → « version PLUS RÉCENTE (v6)… import risqué » ; v4 → « version ANTÉRIEURE (v4) : la checklist terrain (vos vérifications ⚠️/✅) sera perdue ».
-- JSON invalide → toast « ⚠️ Fichier invalide — import annulé », **0 écriture**, aucun confirmer supplémentaire.
-- Export → toast « Export téléchargé 📤 ». (L'alerte « Jamais exporté » était déjà masquée — `cqm_exporte` posé par une session antérieure ; le toast prouve l'exécution du handler.)
+### B-2 (P3, cosmétique) — Le corps de la carte ⚠️ ne suit pas le compteur
+Le rendu initial du corps dépend de `nbFaits === 0` (« Cochez chaque critère… » vs « Ne consommez pas tant que tout n'est pas vérifié… »), mais `basculerSpec` ne re-rend que le **titre** — après un cycle cocher/décocher, le corps reste la variante du premier rendu (observé : corps « Ne consommez pas… » à 0/5). Les deux textes interdisent la consommation → **erre côté prudence**, cosmétique. À corriger avec B-1 (re-rendre titre + corps ensemble).
 
 ---
 
-## 5. Étapes navigateur réussies / échouées
+## 5. Étapes navigateur réussies (toutes ✅)
 
-| Étape | Résultat |
-|---|---|
-| Serveur statique local (8642) + chargement | ✅ 200, titre « 🐴 Cueillette Québec — édition Memphis » |
-| Reset SW + caches → re-registration | ✅ 1 SW, cache cqm-v51 recréé, controller actif |
-| Capture erreurs console (injection new-document) | ✅ 0 erreur en début, milieu et fin ; 0 404 |
-| Verdicts dynamiques (comestible + mortel + persistance) | ✅ (correction du texte ☠️ vérifiée, voir §4) |
-| Synonymes + garde sécurité cueillette | ✅ |
-| Analyse IA (4 branches + en-vol + annulation + args) | ✅ |
-| Import (v5/v6/v4/invalide) + export | ✅ |
-| Arrêt serveur + port vérifié libre | ✅ (curl 000, aucun listener sur 8642) |
-| Échecs | Aucun côté application |
+| # | Étape | Résultat observé |
+|---|---|---|
+| 1 | Chargement + état | `index.html` servi, globals app OK, SW `cqm-v52` contrôlant après reset caches |
+| 2 | Filtres (selects) | tous=**21** · mortels=**5** (phalloïde, vireuse, galerine, gyromitre, lépiote brunâtre) · hiver=**1** (pleurote) · prudence=**2** (morille, amanite rougissante) · comestibles=**8** — ancres exactes |
+| 3 | Verdict dynamique comestible (chanterelle) | 0/5 → `verdict-att` ⚠️ ambre · 5/5 → `verdict-ok` ✅ olive `rgb(111,143,62)` · retour 0/5 → ⚠️ (fix 5e passe tient) — **sauf emoji ☠️ du défaut B-1 après bascule** |
+| 4 | Verdict dynamique mortel (gyromitre) | 0/5 → `verdict-danger-att` rouge `rgb(179,38,30)` · 5/5 → `verdict-danger` « **☠️ 5/5 critères vérifiés** » (**texte dynamique — fix 23e vérifié**, plus de « 0/5 » figé) · retour 0/5 → danger-att. Valence jamais verte sur mortel |
+| 5 | ARIA checklist | `aria-pressed` true/false suit les bascules · compteur `aria-live="polite"` |
+| 6 | Synonymes mortels (`infoEspece`) | « fausse morille » → gyromitre **mortel** (synonyme:true) · « amanite phaloide » → phalloïde **mortel** (Levenshtein) · « ange destructeur » → vireuse **mortel** (inclusion) · « pied-de-mouton » → comestible (fix 17e) · inconnu → null |
+| 7 | Croisement IA × guide (P1-1 24e) | IA simulée « comestible 95 % » sur phalloïde → carte rendue « **🍄 amanite phalloïde MORTEL ☠️** » + « ☠️ MORTEL — ne jamais consommer » + antipoison 1-800-463-5060 — **jamais de badge vert**, le guide a le dernier mot |
+| 8 | Fail-safe IA sans clé | « 🔑 Clé Gemini manquante — ajoutez-la dans ⚙️ Paramètres » (jamais silencieux) |
+| 9 | Analyse annulable | « Analyse en cours… » + bouton **✋ Annuler** observable (stub never-resolving) → `annulerAnalyse()` → « ✋ Analyse annulée. » + [🖼️ Choisir une photo, Fermer] |
+| 10 | Import versionné | v4 → modale « version ANTÉRIEURE (v4) : la checklist terrain sera perdue » · v6 → « version PLUS RÉCENTE (v6)… import risqué » — les deux capturées via `confirmer` |
+| 11 | Lightbox a11y | `role="dialog"` + `aria-modal="true"` + `aria-label="Photo agrandie"` · focus à l'intérieur · **Escape ferme** (nœud retiré du DOM) · **focus restauré** au déclencheur |
+| 12 | Console | **0 erreur JS**, **0 ressource ≥ 400** après reload complet |
 
-**Limitations d'automatisation (pas des défauts de l'app) :** la résolution immédiate des stubs IA rendait l'état « Analyse en cours… » inobservable sur les branches résolues — contourné par un stub à résolution différée (2 s) et un stub jamais résolu ; l'alerte d'export « jamais exporté » était déjà consommée par une session antérieure (localStorage persistant du daemon), donc non re-démontrée ce run.
+**Étape échouée** : aucune.
 
----
+## 6. Notes de méthode
 
-## 6. Synthèse
-
-- **Détecteur : 101 findings, 0 drift réel.** ~63 faux positifs documentés (signature Memphis : bordures 3px, coins cassés 4-6px/12-24px, pilules 999px, rebonds élastiques, filets/voiles photos), ~38 partials cohérents (micro-tailles de police et micro-rayons non répertoriés, em-dash typographique). Suggestion : ajouter `rgba(0,0,0,.1)` et `rgba(20,14,8,.92)` aux ignoreValues pour un scan 100 % silencieux.
-- **Runtime : 0 erreur JS, 0 ressource 404, toutes les sondes dynamiques passent** (verdicts ✅/⚠️/☠️ + persistance IndexedDB, synonymes + garde mortel avec 0 écriture, pipeline IA complet sans clé consommée, import/export avec gardes de version et 0 écriture sur annulation).
-- **1 défaut mineur du run précédent CORRIGÉ et vérifié** : le texte de la carte ☠️ suit désormais le compteur (plus de « 0/5 » figé à 5/5). Seule rémanence cosmétique : le libellé de la carte ⚠️ est figé au rendu — direction sûre, sans risque.
+- Sondes navigateur menées par lots courts (< 3 s d'attente par appel `js()`) : le harness `browser_exec` de cet hôte **timeout l'IPC** sur les IIFE async à nombreux `await` (~15 timers) — les sondes trop longues ont continué de s'exécuter en arrière-plan (état checklist pollué puis remis à 0/5 en fin de passe). Limitation du harness, pas de l'app.
+- Détecteur lancé depuis la racine projet (config `.impeccable/config.json` + DESIGN.md résolus) ; JSON dans `C:/Users/Jo/AppData/Local/Temp/detect_b25.json` (nettoyé après rapport).
+- Aucune modification de code ni du répertoire de la skill impeccable ; serveur 8142 arrêté et port vérifié libre (`curl` → 000, `netstat` → aucun LISTEN).
