@@ -82,19 +82,19 @@ Le socle défensif est **bon** : aucune clé Gemini dans le bundle/SW/export, `e
 ### Phase 2 — Court terme (2-3 semaines)
 | Action | Effort | Gain | Statut |
 |---|---|---|---|
-| M3 : badge vert hors-guide + mention « absente du guide » + anti-prompt-injection | 1 h | Risque résiduel d'intoxication réduit | ⬜ OUVERT |
-| M5 : wrapper écritures + toast stockage plein + `unhandledrejection` | 2 h | Plus de perte silencieuse | ⬜ OUVERT |
-| M7 : filet `recharger()` + JSON.parse protégé | 1-2 h | App jamais blanche | ⬜ OUVERT |
-| M8+M9 : SW durci (install résiliente, fallback navigate-only, purge `cqm-`) | 2 h | Offline robuste + origine GitHub Pages propre | ⬜ OUVERT |
+| M3 : badge vert hors-guide + mention « absente du guide » + anti-prompt-injection | 1 h | Risque résiduel d'intoxication réduit | ✅ **CORRIGÉ** (`69122e8`) |
+| M5 : wrapper écritures + toast stockage plein + `unhandledrejection` | 2 h | Plus de perte silencieuse | ✅ **CORRIGÉ** (`69122e8`) |
+| M7 : filet `recharger()` + JSON.parse protégé | 1-2 h | App jamais blanche | ✅ **CORRIGÉ** (`69122e8`) |
+| M8+M9 : SW durci (install résiliente, fallback navigate-only, purge `cqm-`) | 2 h | Offline robuste + origine GitHub Pages propre | ✅ **CORRIGÉ** (`69122e8`) |
 | M11 : recompression des 105 specs (~10-12 Mo) | 1-2 h script | Installation 40 % plus légère | ✅ **CORRIGÉ** (`71dfbc5`, 22,9 → 18,6 Mo = −18,9 %) |
 
 ### Phase 3 — Moyen terme
 | Action | Effort | Gain | Statut |
 |---|---|---|---|
-| M10 : extraire `alerteStatut()`/`gabaritVerdict()` (source unique antipoison) | 2-3 h | Sécurité critique mono-source | ⬜ OUVERT |
-| M12 : self-host Fredoka woff2 | 1 h | Identité visuelle hors-ligne | ⬜ OUVERT |
-| CSP meta (connect-src whitelist) + `x-goog-api-key` | 1 h | Défense en profondeur | ⬜ OUVERT |
-| Debounce autocomplétion MyCoQuébec + recherche guide | 1 h | Fluidité mobile | ⬜ OUVERT |
+| M10 : extraire `alerteStatut()`/`gabaritVerdict()` (source unique antipoison) | 2-3 h | Sécurité critique mono-source | ✅ **CORRIGÉ** (`69122e8`) |
+| M12 : self-host Fredoka woff2 | 1 h | Identité visuelle hors-ligne | ✅ **CORRIGÉ** (`69122e8`, fonts/fredoka.woff2 variable) |
+| CSP meta (connect-src whitelist) + `x-goog-api-key` | 1 h | Défense en profondeur | ✅ **CORRIGÉ** (`69122e8`) |
+| Debounce autocomplétion MyCoQuébec + recherche guide | 1 h | Fluidité mobile | ✅ **CORRIGÉ** (`69122e8`) |
 
 ---
 *Constats critiques à confirmer dynamiquement (navigateur) avant correction — l'audit est statique. Chantiers de correction proposés séparément avec accord explicite.*
