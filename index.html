@@ -1448,9 +1448,14 @@ function rendreGuide() {
   $('liste-guide').innerHTML = list.map(e => {
     const perso = !!e.perso;
     const img = e.img || e.photo;
+    // AUDIT M4 (2026-08) : le plus grave gagne aussi dans la liste (variété perso homonyme d'une espèce plus grave)
+    const croise = perso ? infoEspeceArchive(e.nom) : null;
+    const GRAVl = { inconnu: 0, comestible: 1, immangeable: 2, toxique: 3, mortel: 4 };
+    const statutAffiche = (croise && croise.id && (GRAVl[croise.statut] || 0) > (GRAVl[e.statut] || 0)) ? croise.statut : e.statut;
+    const prudenceAffiche = (croise && croise.id && (GRAVl[croise.statut] || 0) > (GRAVl[e.statut] || 0)) ? croise.prudence : !!e.prudence;
     return '<div class="item" style="cursor:pointer" role="button" tabindex="0" onclick="ouvrirDetail(\'' + e.id + '\',' + perso + ')">' +
       '<div class="vig">' + (img ? '<img src="' + img + '" alt="' + esc(e.nom) + '" loading="lazy">' : '🍄') + '</div>' +
-      '<div class="corps"><div class="nom">' + esc(e.nom) + ' ' + badgeStatut(e.statut, e.prudence) +
+      '<div class="corps"><div class="nom">' + esc(e.nom) + ' ' + badgeStatut(statutAffiche, prudenceAffiche) +
       (perso ? ' <span class="pastille-statut st-immangeable" style="background:var(--noir);color:var(--creme)">⭐ perso</span>' : '') + '</div>' +
       '<div class="ligne-latin">' + esc(e.latin || '') + '</div>' +
       '<div class="meta">🗓️ ' + esc(e.saison || '—') + '<br>🌲 ' + esc(e.habitat || '—') + '</div>' +
@@ -1465,13 +1470,19 @@ function ouvrirDetail(id, perso) {
   positionGuide = window.scrollY;
   const e = (perso ? Etat.especesCustom : ESPECES).find(x => x.id === id); if (!e) return;
   Etat.detailId = id;
-  const mortel = e.statut === 'mortel';
-  const toxique = e.statut === 'toxique' || e.statut === 'immangeable';
+  // AUDIT M4 (2026-08) : « le plus grave gagne à l'affichage » — une variété perso homonyme d'une
+  // espèce plus grave du guide (ou tombe) affiche le statut le plus grave, jamais un badge vert trompeur
+  const croise = infoEspeceArchive(e.nom);
+  const GRAVd = { inconnu: 0, comestible: 1, immangeable: 2, toxique: 3, mortel: 4 };
+  const statutAffiche = (croise.id && (GRAVd[croise.statut] || 0) > (GRAVd[e.statut] || 0)) ? croise.statut : e.statut;
+  const prudenceAffiche = (croise.id && (GRAVd[croise.statut] || 0) > (GRAVd[e.statut] || 0)) ? croise.prudence : !!e.prudence;
+  const mortel = statutAffiche === 'mortel';
+  const toxique = statutAffiche === 'toxique' || statutAffiche === 'immangeable';
   const avis = mortel
     ? '<div class="alerte alerte-rouge">☠️ <b>MORTEL — ne jamais consommer.</b> Contient des toxines potentiellement fatales. En cas d\'ingestion : centre antipoison <b>1-800-463-5060</b> (Québec).</div>'
     : toxique
       ? '<div class="alerte alerte-orange">⚠️ <b>Ne pas consommer.</b> Peut provoquer des intoxications sérieuses.</div>'
-      : e.prudence
+      : prudenceAffiche
         ? '<div class="alerte alerte-orange">⚠️ <b>Prudence requise :</b> cuisson obligatoire et/ou réservé aux cueilleurs expérimentés. En cas de doute, faites vérifier votre récolte.</div>'
         : '';
   const img = e.img || e.photo;
@@ -1483,22 +1494,22 @@ function ouvrirDetail(id, perso) {
   const illu = Etat.illustrations[e.id] || { items: [] };
   const faits = Etat.checklist[e.id] || { id: e.id, faits: [] };
   const nbFaits = illu.items.filter((_, i) => faits.faits[i]).length;
-  const nonComestible = e.statut !== 'comestible' && e.statut !== 'prudence';
+  const nonComestible = statutAffiche !== 'comestible' && statutAffiche !== 'prudence';
   const galerie = illu.items.length ? (
     '<span class="guide-sujet">🖼️ Spécificités à repérer</span>' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 10px"><span style="font-size:12.5px;opacity:.85">Vérifiez chaque critère sur le champignon</span><span class="spec-compteur" id="spec-compteur" aria-live="polite">' + nbFaits + '/' + illu.items.length + '</span></div>' +
     illu.items.map((it, i) =>
       '<div class="spec-carte' + (faits.faits[i] ? ' fait' : '') + (nonComestible ? ' dangereux' : '') + '" id="spec-carte-' + i + '" role="button" tabindex="0" aria-pressed="' + (faits.faits[i] ? 'true' : 'false') + '" onclick="basculerSpec(' + i + ')">' +
-      (it.img ? '<div class="spec-photo"><img src="' + it.img + '" alt="' + esc(it.spec) + '" onclick="event.stopPropagation();ouvrirLightbox(this.src)"><span class="spec-num">' + (i + 1) + '</span><span class="spec-zoom" role="button" tabindex="0" onclick="event.stopPropagation();ouvrirLightbox(\'' + it.img + '\')">🔍 Agrandir</span></div>' : '') +
+      (it.img ? '<div class="spec-photo"><img src="' + it.img + '" alt="' + esc(it.spec) + '" onclick="event.stopPropagation();ouvrirLightbox(this.src)"><span class="spec-num">' + (i + 1) + '</span><span class="spec-zoom" role="button" tabindex="0" data-src="' + esc(it.img) + '" onclick="event.stopPropagation();ouvrirLightbox(this.dataset.src)">🔍 Agrandir</span></div>' : '') +
       '<div class="spec-corps"><div class="spec-carre">✓</div><div class="spec-texte"><div class="spec-titre">' + esc(it.spec) + '</div>' + (it.desc ? '<div class="spec-desc">' + esc(it.desc) + '</div>' : '') + '</div></div>' +
       '</div>'
     ).join('') +
-    (e.statut === 'comestible' || e.statut === 'prudence'
-      ? '<div class="verdict-carte verdict-ok' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">✅ Tous les critères correspondent</div>' + esc(e.nom) + ' confirmé' + (e.statut === 'comestible' ? ' — récolte possible.' : ' — restez prudent (cuisson obligatoire).') + '</div>'
-      : '<div class="verdict-carte verdict-danger' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">☠️ ' + nbFaits + '/' + illu.items.length + ' critères vérifiés</div>' + esc(e.nom) + ' est ' + (e.statut === 'mortel' ? 'MORTELLE' : 'non comestible') + ' — ne pas consommer.</div>') +
-    (e.statut === 'comestible' || e.statut === 'prudence'
+    (statutAffiche === 'comestible' || statutAffiche === 'prudence'
+      ? '<div class="verdict-carte verdict-ok' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">✅ Tous les critères correspondent</div>' + esc(e.nom) + ' confirmé' + (statutAffiche === 'comestible' ? ' — récolte possible.' : ' — restez prudent (cuisson obligatoire).') + '</div>'
+      : '<div class="verdict-carte verdict-danger' + (nbFaits === illu.items.length ? ' ouv' : '') + '" id="spec-verdict-ok"><div class="t">☠️ ' + nbFaits + '/' + illu.items.length + ' critères vérifiés</div>' + esc(e.nom) + ' est ' + (statutAffiche === 'mortel' ? 'MORTELLE' : 'non comestible') + ' — ne pas consommer.</div>') +
+    (statutAffiche === 'comestible' || statutAffiche === 'prudence'
       ? '<div class="verdict-carte verdict-att' + (nbFaits < illu.items.length ? ' ouv' : '') + '" id="spec-verdict-att"><div class="t">⚠️ ' + (nbFaits === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants') + '</div><span class="corps-att">' + (nbFaits === 0 ? 'Cochez chaque critère sur le champignon avant de consommer. En cas de doute : on ne mange pas.' : 'Ne consommez pas tant que tout n\'est pas vérifié. En cas de doute : on ne mange pas.') + '</span></div>'
-      : '<div class="verdict-carte verdict-danger-att' + (nbFaits < illu.items.length ? ' ouv' : '') + '" id="spec-verdict-att"><div class="t">☠️ ' + (nbFaits === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants') + '</div>' + (e.statut === 'mortel' ? 'Espèce MORTELLE — ne jamais consommer, même si tous les critères semblent correspondre.' : 'Espèce non comestible — ne pas consommer, même si tous les critères semblent correspondre.') + '</div>')
+      : '<div class="verdict-carte verdict-danger-att' + (nbFaits < illu.items.length ? ' ouv' : '') + '" id="spec-verdict-att"><div class="t">☠️ ' + (nbFaits === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants') + '</div>' + (statutAffiche === 'mortel' ? 'Espèce MORTELLE — ne jamais consommer, même si tous les critères semblent correspondre.' : 'Espèce non comestible — ne pas consommer, même si tous les critères semblent correspondre.') + '</div>')
   ) : '';
   const boutons = '<button class="btn btn-jaune" onclick="ouvrirSheetIllu(\'' + e.id + '\')">🎨 Illustrations IA</button>' +
     (perso
@@ -1507,11 +1518,11 @@ function ouvrirDetail(id, perso) {
         '<button class="btn btn-gris" onclick="fermerDetail()">← Retour</button>'
       : '<button class="btn btn-gris" onclick="ouvrirChoixEspece(\'' + e.id + '\',false)">🙈 Masquer</button>' +
         '<button class="btn btn-gris" onclick="fermerDetail()">← Retour</button>') +
-    (e.latin ? '<button class="btn btn-bleu" onclick="ouvrirMyco(\'' + esc(e.latin) + '\')">🍄 Fiche MycoQuébec</button>' : '');
+    (e.latin ? '<button class="btn btn-bleu" data-latin="' + esc(e.latin) + '" onclick="ouvrirMyco(this.dataset.latin)">🍄 Fiche MycoQuébec</button>' : '');
   $('detail-contenu').innerHTML =
     '<div class="carte">' +
     (img ? '<img class="detail-img" src="' + img + '" alt="' + esc(e.nom) + '" role="button" tabindex="0" aria-label="Agrandir la photo" onclick="ouvrirLightbox(this.src)" style="cursor:zoom-in">' : '') +
-    '<h2 class="nom" style="margin:0;font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">🍄 ' + esc(e.nom) + ' ' + badgeStatut(e.statut, e.prudence) +
+    '<h2 class="nom" style="margin:0;font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">🍄 ' + esc(e.nom) + ' ' + badgeStatut(statutAffiche, prudenceAffiche) +
     (perso ? ' <span class="pastille-statut st-immangeable" style="background:var(--noir);color:var(--creme)">⭐ perso</span>' : '') + '</h2>' +
     '<div class="ligne-latin">' + esc(e.latin || '') + '</div>' +
     avis +
@@ -1569,11 +1580,19 @@ function rendreCueillettes() {
     return;
   }
   cont.innerHTML = [...Etat.cueillettes].sort((a, b) => b.date.localeCompare(a.date)).map(c => {
-    // P1-1 (29e) : résolution par especeId D'ABORD (l'identité exacte gagne), puis par nom en fallback
+    // P1-1 (29e) + AUDIT M2 (2026-08) : résolution par especeId, MAIS le plus grave gagne toujours —
+    // un especeId incohérent avec le nom (fichier altéré/importé) ne peut pas badger vert un nom mortel
     const infoById = (c.especeId ? BASE_COMPLETE().find(x => x.id === c.especeId) : null) || null;
-    const info = infoById
-      ? { id: infoById.id, statut: infoById.statut, prudence: !!infoById.prudence, perso: !!infoById.perso, photo: infoById.img || infoById.photo, synonyme: false, nomComplet: infoById.nom, archivee: !toutesEspeces().some(v => v.id === infoById.id) }
-      : infoEspeceArchive(c.espece);
+    const parNom = infoEspeceArchive(c.espece);
+    const GRAVx = { inconnu: 0, comestible: 1, immangeable: 2, toxique: 3, mortel: 4 };
+    let info;
+    if (infoById && parNom.id && infoById.id !== parNom.id && (GRAVx[parNom.statut] || 0) > (GRAVx[infoById.statut] || 0)) {
+      info = parNom; // conflit nom↔id : le plus grave gagne (règle fail-safe)
+    } else if (infoById) {
+      info = { id: infoById.id, statut: infoById.statut, prudence: !!infoById.prudence, perso: !!infoById.perso, photo: infoById.img || infoById.photo, synonyme: false, nomComplet: infoById.nom, archivee: !toutesEspeces().some(v => v.id === infoById.id) };
+    } else {
+      info = parNom;
+    }
     const infoArchivee = (!info.id && c.especeId) ? ESPECES.find(x => x.id === c.especeId) || null : null;
     const statutEff = info.statut || (infoArchivee ? infoArchivee.statut : null);
     const prudenceEff = info.prudence || (infoArchivee ? !!infoArchivee.prudence : false);
@@ -1601,7 +1620,7 @@ function remplirDatalist() {
     .slice(0, 6);
   zone.innerHTML = matches.length
     ? matches.map(e =>
-        '<button type="button" class="puce" style="margin:3px 6px 3px 0;display:inline-flex" onclick="choisirEspeceCueillette(\'' + esc(e.nom) + '\')">' + esc(e.nom) + '</button>'
+        '<button type="button" class="puce" data-nom="' + esc(e.nom) + '" style="margin:3px 6px 3px 0;display:inline-flex" onclick="choisirEspeceCueillette(this.dataset.nom)">' + esc(e.nom) + '</button>'
       ).join('')
     : '<p class="note" style="margin:2px 0 0">Aucune correspondance — vous pouvez saisir un nom libre.</p>';
 }
@@ -1720,7 +1739,7 @@ function remplirSuggestionsMyco() {
       .slice(0, 6);
     zone.innerHTML = matches.length
       ? matches.map(x =>
-          '<button type="button" class="puce" style="margin:3px 6px 3px 0;display:inline-flex;align-items:center;gap:6px" onclick="choisirNomMyco(\'' + esc(x.nomFr || x.latin) + '\',\'' + esc(x.latin) + '\')">' +
+          '<button type="button" class="puce" data-nom="' + esc(x.nomFr || x.latin) + '" data-latin="' + esc(x.latin) + '" style="margin:3px 6px 3px 0;display:inline-flex;align-items:center;gap:6px" onclick="choisirNomMyco(this.dataset.nom, this.dataset.latin)">' +
           (x.img && x.img.startsWith('img/')
             ? '<img src="' + x.img + '" alt="" style="width:26px;height:26px;border:2px solid var(--noir);border-radius:6px;object-fit:cover">'
             : '<span style="width:26px;height:26px;border:2px solid var(--noir);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;background:repeating-linear-gradient(45deg, rgba(217,164,65,.3), rgba(217,164,65,.3) 4px, transparent 4px, transparent 8px);flex-shrink:0">🍄</span>') +
@@ -2666,6 +2685,7 @@ $('st-import-fichier').addEventListener('change', async e => {
     if (!Array.isArray(data.illustrations)) data.illustrations = [];
     if (!Array.isArray(data.cachees)) data.cachees = [];
     if (!Array.isArray(data.supprimees)) data.supprimees = [];
+    if (!Array.isArray(data.tombes)) data.tombes = [];
     if (!Array.isArray(data.checklist)) data.checklist = [];
     // P2-2 : vérification de la version du fichier (perte silencieuse de la checklist)
     const version = typeof data.version === 'number' ? data.version : (data.version ? 0 : null);
@@ -2677,21 +2697,93 @@ $('st-import-fichier').addEventListener('change', async e => {
     const nCue = data.cueillettes.length, nSpots = data.spots.length, nEsp = data.especes.length;
     const resume = 'Remplacer TOUTES les données actuelles ? Le fichier contient ' + nCue + ' cueillette' + (nCue > 1 ? 's' : '') + ', ' + nSpots + ' spot' + (nSpots > 1 ? 's' : '') + (nEsp ? ' et ' + nEsp + ' variété' + (nEsp > 1 ? 's' : '') : '') + '. Exportez d\'abord si nécessaire.';
     if (!await confirmer(resume, '📥 Import')) return;
-    await Stockage.vider('spots'); await Stockage.vider('cueillettes'); await Stockage.vider('especes'); await Stockage.vider('illustrations'); await Stockage.vider('caches'); await Stockage.vider('supprimees'); await Stockage.vider('checklist');
-    for (const s of data.spots) await Stockage.ecrire('spots', s);
-    for (const c of data.cueillettes) await Stockage.ecrire('cueillettes', c);
-    for (const e2 of data.especes) await Stockage.ecrire('especes', e2);
-    for (const i of data.illustrations) await Stockage.ecrire('illustrations', i);
-    for (const id of data.cachees) await Stockage.ecrire('caches', { id });
-    for (const x of (Array.isArray(data.supprimees) ? data.supprimees : [])) {
-      const id = (x && typeof x === 'object') ? x.id : x; // P3-3 (29e) : normaliser (objets hérités ou ids nus)
-      if (id) await Stockage.ecrire('supprimees', { id });
+    // ===== AUDIT 2026-08 : import sécurisé + transactionnel (C1/C2/C3/M1) =====
+    // C1 : ids validés (regex sûre) — un id invalide est régénéré et les références re-pointées
+    const idValide = id => typeof id === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(id);
+    const mapIds = new Map();
+    const assainirId = id => {
+      if (idValide(id)) return id;
+      if (!mapIds.has(id)) mapIds.set(id, uid());
+      return mapIds.get(id);
+    };
+    // M1 : whitelist des statuts — toute valeur invalide → inconnu (jamais comestible)
+    const STATUTS_OK = ['comestible', 'immangeable', 'toxique', 'mortel', 'inconnu'];
+    const statutSain = s => STATUTS_OK.includes(s) ? s : 'inconnu';
+    // C2 : URLs d'images validées — data:image, img/ local ou https:// (jamais javascript:)
+    const imgSaine = u => {
+      if (typeof u !== 'string' || !u) return null;
+      if (/^data:image\/(jpeg|png|webp);base64,/.test(u)) return u;
+      if (/^img\/[A-Za-z0-9._/-]+$/.test(u)) return u;
+      if (/^https:\/\//.test(u)) return u;
+      return null;
+    };
+    const spots = data.spots.map(s => ({ ...s, id: assainirId(s.id), nom: String(s.nom || ''), photo: imgSaine(s.photo) }));
+    const cueillettes = data.cueillettes.map(c => ({
+      ...c,
+      id: assainirId(c.id),
+      spotId: c.spotId ? assainirId(c.spotId) : null,
+      especeId: c.especeId ? assainirId(c.especeId) : null,
+      espece: String(c.espece || ''),
+      note: String(c.note || ''),
+      photo: imgSaine(c.photo),
+      poids: typeof c.poids === 'number' && isFinite(c.poids) ? c.poids : 0,
+      date: typeof c.date === 'string' && c.date ? c.date : ''
+    }));
+    const especes = data.especes.map(x => ({
+      ...x,
+      id: assainirId(x.id),
+      nom: String(x.nom || ''),
+      latin: String(x.latin || ''),
+      statut: statutSain(x.statut),
+      prudence: !!x.prudence,
+      img: imgSaine(x.img),
+      photo: imgSaine(x.photo)
+    }));
+    const illustrations = data.illustrations.map(x => ({
+      ...x,
+      id: assainirId(x.id),
+      items: Array.isArray(x.items) ? x.items.map(it => ({ ...it, img: imgSaine(it.img) })) : []
+    }));
+    const cachees = data.cachees.map(x => ({ id: assainirId((x && typeof x === 'object') ? x.id : x) })).filter(x => x.id);
+    const supprimees = data.supprimees.map(x => {
+      const id = assainirId((x && typeof x === 'object') ? x.id : x);
+      return id ? { id } : null;
+    }).filter(Boolean);
+    const tombes = data.tombes.map(t => t && t.id ? {
+      id: assainirId(t.id), nom: String(t.nom || ''), latin: String(t.latin || ''),
+      statut: statutSain(t.statut), prudence: !!t.prudence
+    } : null).filter(Boolean);
+    const checklist = data.checklist.map(x => ({
+      ...x,
+      id: assainirId(x.id),
+      faits: Array.isArray(x.faits) ? x.faits.map(f => !!f) : []
+    }));
+    // C3 : sauvegarde de l'état actuel → tentative → restauration complète sur échec (jamais de perte)
+    const ancien = {
+      spots: Etat.spots, cueillettes: Etat.cueillettes, especes: Etat.especesCustom,
+      illustrations: Object.values(Etat.illustrations), cachees: Etat.cachees,
+      supprimees: Etat.supprimees, tombes: Object.values(Etat.tombes), checklist: Object.values(Etat.checklist)
+    };
+    const ecrireTout = (d) => Promise.all([
+      Stockage.vider('spots'), Stockage.vider('cueillettes'), Stockage.vider('especes'), Stockage.vider('illustrations'), Stockage.vider('caches'), Stockage.vider('supprimees'), Stockage.vider('checklist')
+    ].concat(
+      d.spots.map(s => Stockage.ecrire('spots', s)),
+      d.cueillettes.map(c => Stockage.ecrire('cueillettes', c)),
+      d.especes.map(x => Stockage.ecrire('especes', x)),
+      d.illustrations.map(x => Stockage.ecrire('illustrations', x)),
+      d.cachees.map(id => Stockage.ecrire('caches', { id })),
+      d.supprimees.map(id => Stockage.ecrire('supprimees', { id })),
+      d.tombes.map(t => Stockage.ecrire('supprimees', { id: t.id, nom: t.nom, latin: t.latin, statut: t.statut, prudence: t.prudence })),
+      d.checklist.map(x => Stockage.ecrire('checklist', x))
+    ));
+    try {
+      await ecrireTout({ spots, cueillettes, especes, illustrations, cachees, supprimees, tombes, checklist });
+    } catch (err) {
+      // restauration intégrale de l'état précédent
+      await ecrireTout(ancien);
+      toast('⚠️ Import échoué (stockage plein ?) — vos données ont été restaurées');
+      return;
     }
-    // P2-1 (28e) : les tombes voyagent avec l'export — le filet de sécurité survit sur le téléphone du proche
-    for (const t of (Array.isArray(data.tombes) ? data.tombes : [])) {
-      if (t && t.id) await Stockage.ecrire('supprimees', { id: t.id, nom: t.nom || null, latin: t.latin || null, statut: t.statut || null, prudence: !!t.prudence });
-    }
-    for (const cl of data.checklist) await Stockage.ecrire('checklist', cl);
     toast('Import réussi ✅');
     await recharger();
   } catch (err) {
