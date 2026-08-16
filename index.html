@@ -760,6 +760,8 @@ const alerteStatut = (statut, prudence) => {
   return '';
 };
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+// Demande utilisateur (2026-08) : les descriptions génériques par défaut sont « vides » d'information
+const descGenerique = d => !d || /^(forme, couleur, taille\.|dessous du chapeau : lames, tubes ou aiguillons\.|forme, couleur, anneau, volve\.|couleur, fermeté, odeur\.|où il pousse, saison\.)$/i.test(d.trim());
 const aujourdhui = () => {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -972,7 +974,12 @@ const Etat = {
   spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], tombes: {}, illustrations: {}, checklist: {},
   vue: 'spots', filtre: 'tous', filtreSaison: 'toutes', recherche: '', detailId: null,
   unite: localStorage.getItem('cqm_unite') === 'lb' ? 'lb' : 'kg',
-  ordreImages: localStorage.getItem('cqm_ordre_images') || 'wikimedia,myco,ia',
+  // Demande utilisateur (2026-08) : ordre par défaut IA → MycoQuébec → Wikimedia (+ migration de l'ancien défaut)
+  ordreImages: (() => {
+    const v = localStorage.getItem('cqm_ordre_images');
+    if (v === 'wikimedia,myco,ia') { localStorage.setItem('cqm_ordre_images', 'ia,myco,wikimedia'); return 'ia,myco,wikimedia'; }
+    return v || 'ia,myco,wikimedia';
+  })(),
   spot: { edition: null, photo: null, especes: [] },
   cueillette: { edition: null, photo: null }
 };
@@ -1538,8 +1545,12 @@ function ouvrirDetail(id, perso) {
     galerie +
     '<div class="detail-kv"><b>🗓️ Saison :</b> ' + esc(e.saison || '—') + '<br><b>🌲 Habitat :</b> ' + esc(e.habitat || '—') + '</div>' +
     '<h3 class="guide-sujet">📖 Description</h3><p style="margin:4px 0 0;font-size:14.5px;line-height:1.65">' + esc(e.desc || '—') + '</p>' +
-    '<h3 class="guide-sujet">🔍 Caractéristiques clés</h3>' +
-    '<ul class="carac-list">' + (e.carac && e.carac.length ? e.carac.map(c => '<li>' + esc(c) + '</li>').join('') : '<li>—</li>') + '</ul>' +
+    // Demande utilisateur (2026-08) : les « Caractéristiques clés » ne s'affichent plus quand les
+    // 5 spécificités décrivent déjà tout (descriptions enrichies) — fin de la redondance
+    (illu.items.length && illu.items.every(x => !descGenerique(x.desc))
+      ? ''
+      : '<h3 class="guide-sujet">🔍 Caractéristiques clés</h3>' +
+        '<ul class="carac-list">' + (e.carac && e.carac.length ? e.carac.map(c => '<li>' + esc(c) + '</li>').join('') : '<li>—</li>') + '</ul>') +
     '<div class="grille2" style="margin-top:14px">' + boutons + '</div>' +
     '</div>';
   naviguer('detail');
@@ -1900,7 +1911,6 @@ function transfererCaracVersItems(esp) {
     { re: /chair|odeur|saveur|goût|gout|fermeté|fermete/, spec: /chair/ },
     { re: /habitat|saison|forêt|foret|bois|sol/, spec: /habitat/ }
   ];
-  const estGenerique = d => !d || /^(forme, couleur, taille\.|dessous du chapeau : lames, tubes ou aiguillons\.|forme, couleur, anneau, volve\.|couleur, fermeté, odeur\.|où il pousse, saison\.)$/i.test(d.trim());
   let modifie = false;
   esp.carac.forEach(ligne => {
     const iSep = ligne.indexOf(' : ');
@@ -1912,7 +1922,7 @@ function transfererCaracVersItems(esp) {
     const item = g
       ? ent.items.find(x => g.spec.test((x.spec || '').toLowerCase()))
       : ent.items.find(x => (x.spec || '').toLowerCase().includes(intitule));
-    if (item && estGenerique(item.desc)) {
+    if (item && descGenerique(item.desc)) {
       item.desc = desc;
       modifie = true;
     }
@@ -1949,6 +1959,14 @@ $('e-save').addEventListener('click', async () => {
   toast('Variété enregistrée ✅');
   fermerFeuilles();
   await recharger();
+  // Demande utilisateur (2026-08) : nouvelle variété AVEC photo → proposer de générer les illustrations manquantes
+  if (photoEspece && !editEspeceId) {
+    const ent = Etat.illustrations[esp.id] || { id: esp.id, items: specsDefautPour(esp.id) };
+    if (ent.items.some(x => !x.img) && await confirmer('🎨 Générer les illustrations des ' + ent.items.filter(x => !x.img).length + ' spécificités manquantes ? (IA → MycoQuébec → Wikimedia)', '🎨 Illustrations')) {
+      ouvrirSheetIllu(esp.id);
+      $('illu-toutes').click();
+    }
+  }
 });
 
 /* --- Restauration sélective --- */
@@ -2070,7 +2088,7 @@ async function chercherPhotoSpec(terme, limit) {
 async function illustrerSpec(e, it) {
   const base = (e.latin || '').trim() || (e.nom || '').trim();
   const mots = motsWikiPour(it.spec);
-  const ordre = (Etat.ordreImages || 'wikimedia,myco,ia').split(',');
+  const ordre = (Etat.ordreImages || 'ia,myco,wikimedia').split(',');
   // 1. MycoQuébec : miniature depuis la base embarquée (hors-ligne, CORS OK en <img>)
   const myco = async () => {
     const b = await chargerBaseMyco();
