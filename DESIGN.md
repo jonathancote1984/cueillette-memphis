@@ -185,7 +185,7 @@ Forme de base : coins arrondis généreux (12-24 px) avec **un coin cassé** —
 - **Forme :** pilule (999 px), bordure noire 3 px, ombre dure 3 px.
 - **Primaire :** fond coloré selon l'action — jaune (défaut), vert (identification photo), rouge (destruction), bleu (modification), rose (FAB).
 - **Appui :** translate(3px, 3px), ombre réduite à 0 — effet enfoncé.
-- **Variantes :** btn-plein (largeur 100 %, padding 13 px, 15.5 px), btn-petit (padding 7 px 12 px, 13 px, ombre 2 px).
+- **Variantes :** btn-plein (largeur 100 %, padding 13 px, 15.5 px), btn-petit (padding 10 px 14 px, 13 px, ombre 2 px, min-height 44 px).
 
 ### Pastilles de statut (chips)
 - **Style :** pilule (999 px), bordure 2.5 px noire, inclinée de -1,5°.
@@ -214,7 +214,7 @@ Forme de base : coins arrondis généreux (12-24 px) avec **un coin cassé** —
 
 ### Fiche hybride (checklist terrain)
 - **Structure :** photo réelle (16:9, bordure basse noire 3 px) + corps (case ✓, titre, description) + verdict.
-- **Carte de spécificité :** coins 18 px avec coin cassé 5 px, bordure noire 3 px, ombre dure 3 px, curseur pointer, appui scale(.99).
+- **Carte de spécificité :** coins 18 px avec coin cassé 5 px, bordure noire 3 px, ombre dure 3 px, curseur pointer, appui scale(.96).
 - **Case cochée :** fond olive, texte barré (line-through 2 px, opacité .75) — la satisfaction du critère vérifié.
 - **Compteur :** pastille noire « n/5 » sur crème, à droite de l'en-tête de section (aria-live="polite").
 - **Verdicts :** carte pleine largeur, bordure noire 3 px, coin cassé — ✅ vert (tous les critères) / ⚠️ ambre (critères manquants, « En cas de doute : on ne mange pas »).

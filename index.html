@@ -168,6 +168,7 @@ h2.titre-vue .ico{font-size:20px;}
 }
 .puce:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--noir);}
 .puce.actif{transform:rotate(-2deg);}
+.puce.retiree{opacity:.55; border-style:dashed;}
 /* ===== Saisie ===== */
 .champ{display:block; margin-bottom:14px; font-size:13px; font-weight:700;}
 .champ input, .champ select, .champ textarea, .saisie{
@@ -1088,6 +1089,8 @@ function feuilleSaisieSale() {
   return false;
 }
 function fermerFeuilleAvecGardeFou() {
+  // P3-5 (29e) : fermer la feuille idphoto pendant une analyse = annuler l'analyse (plus de réouverture surprise)
+  if (document.getElementById('sheet-idphoto').classList.contains('ouverte') && analyseAbort) annulerAnalyse();
   if (document.getElementById('sheet-espece').classList.contains('ouverte')) { fermerFeuilleVariete(); return; }
   if (feuilleSaisieSale()) {
     confirmer('Quitter sans enregistrer ? Les champs remplis seront perdus.', '⚠️ Feuille non enregistrée').then(ok => { if (ok) fermerFeuilles(); });
@@ -1199,6 +1202,7 @@ $('choix-supprimer').addEventListener('click', async () => {
     await Stockage.ecrire('supprimees', { id, nom: esp ? esp.nom : null, latin: esp ? esp.latin : null, statut: esp ? esp.statut : null, prudence: !!(esp && esp.prudence) });
     await Stockage.effacer('especes', id);
     await Stockage.effacer('illustrations', id);
+    await Stockage.effacer('checklist', id); // P3-1 (29e) : la confirmation promet la perte de la checklist — exécutée
     toast('Variété supprimée définitivement 🗑️');
     await recharger();
     return;
@@ -1331,8 +1335,8 @@ function remplirSelectEspecesSpot() {
   const visibles = toutesEspeces();
   const visiblesIds = new Set(visibles.map(v => v.id));
   const selectionneesMasquees = BASE_COMPLETE().filter(e => selection.has(e.nom) && !visiblesIds.has(e.id));
-  zone.innerHTML = [...visibles, ...selectionneesMasquees].map(e =>
-    '<span class="puce' + (selection.has(e.nom) ? ' actif' : '') + '" data-nom="' + esc(e.nom) + '" role="button" tabindex="0" onclick="basculerEspeceSpot(this)">' + esc(e.nom) + '</span>'
+  zone.innerHTML = [...visibles.map(e => ({ e, retiree: false })), ...selectionneesMasquees.map(e => ({ e, retiree: true }))].map(({ e, retiree }) =>
+    '<span class="puce' + (selection.has(e.nom) ? ' actif' : '') + (retiree ? ' retiree' : '') + '" data-nom="' + esc(e.nom) + '" role="button" tabindex="0" title="' + (retiree ? 'Espèce masquée — touchez pour la retirer du spot' : '') + '" onclick="basculerEspeceSpot(this)">' + esc(e.nom) + '</span>'
   ).join('');
 }
 function basculerEspeceSpot(el) {
@@ -1565,8 +1569,11 @@ function rendreCueillettes() {
     return;
   }
   cont.innerHTML = [...Etat.cueillettes].sort((a, b) => b.date.localeCompare(a.date)).map(c => {
-    // P1-2 + P3-2 (27e) : infoEspeceArchive — badge de sécurité même si l'espèce est masquée, supprimée ou une variété perso effacée (tombe)
-    const info = infoEspeceArchive(c.espece);
+    // P1-1 (29e) : résolution par especeId D'ABORD (l'identité exacte gagne), puis par nom en fallback
+    const infoById = (c.especeId ? BASE_COMPLETE().find(x => x.id === c.especeId) : null) || null;
+    const info = infoById
+      ? { id: infoById.id, statut: infoById.statut, prudence: !!infoById.prudence, perso: !!infoById.perso, photo: infoById.img || infoById.photo, synonyme: false, nomComplet: infoById.nom, archivee: !toutesEspeces().some(v => v.id === infoById.id) }
+      : infoEspeceArchive(c.espece);
     const infoArchivee = (!info.id && c.especeId) ? ESPECES.find(x => x.id === c.especeId) || null : null;
     const statutEff = info.statut || (infoArchivee ? infoArchivee.statut : null);
     const prudenceEff = info.prudence || (infoArchivee ? !!infoArchivee.prudence : false);
@@ -1888,6 +1895,10 @@ function transfererCaracVersItems(esp) {
 $('e-save').addEventListener('click', async () => {
   const nom = $('e-nom').value.trim();
   if (!nom) { toast('Donnez un nom à la variété'); $('e-nom').focus(); return; }
+  // P1-1 (29e) : contrôle de collision — une variété homonyme d'une espèce connue hérite de son badge sur les cueillettes
+  const norm = normNom(nom);
+  const collision = toutesEspeces().find(x => x.id !== (editEspeceId || null) && normNom(x.nom) === norm);
+  if (collision && !await confirmer('« ' + esc(nom) + ' » porte le nom d\u2019une espèce existante (« ' + esc(collision.nom) + ' »). Les cueillettes afficheront le badge de cette espèce. Enregistrer quand même ?', '⚠️ Nom déjà utilisé')) return;
   const esp = {
     id: editEspeceId || uid(),
     nom,
@@ -2672,7 +2683,10 @@ $('st-import-fichier').addEventListener('change', async e => {
     for (const e2 of data.especes) await Stockage.ecrire('especes', e2);
     for (const i of data.illustrations) await Stockage.ecrire('illustrations', i);
     for (const id of data.cachees) await Stockage.ecrire('caches', { id });
-    for (const id of data.supprimees) await Stockage.ecrire('supprimees', { id });
+    for (const x of (Array.isArray(data.supprimees) ? data.supprimees : [])) {
+      const id = (x && typeof x === 'object') ? x.id : x; // P3-3 (29e) : normaliser (objets hérités ou ids nus)
+      if (id) await Stockage.ecrire('supprimees', { id });
+    }
     // P2-1 (28e) : les tombes voyagent avec l'export — le filet de sécurité survit sur le téléphone du proche
     for (const t of (Array.isArray(data.tombes) ? data.tombes : [])) {
       if (t && t.id) await Stockage.ecrire('supprimees', { id: t.id, nom: t.nom || null, latin: t.latin || null, statut: t.statut || null, prudence: !!t.prudence });
