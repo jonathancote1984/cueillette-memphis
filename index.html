@@ -1081,7 +1081,9 @@ function feuilleSaisieSale() {
       || !!(Etat.cueillette && Etat.cueillette.photo)
       || String($('c-spot').value || '') !== ''
       // P2-1 (27e) : c-meteo a TOUJOURS une valeur (défaut 🌞 Ensoleillé) — comparer à la valeur initiale
-      || String($('c-meteo').value || '') !== String(Etat.cueillette && Etat.cueillette.meteoInitial ? Etat.cueillette.meteoInitial : '🌞 Ensoleillé');
+      || String($('c-meteo').value || '') !== String(Etat.cueillette && Etat.cueillette.meteoInitial ? Etat.cueillette.meteoInitial : '🌞 Ensoleillé')
+      // P3-3 (28e) : c-date a TOUJOURS une valeur (défaut aujourd'hui) — comparer à la valeur initiale
+      || String($('c-date').value || '') !== String(Etat.cueillette && Etat.cueillette.dateInitiale ? Etat.cueillette.dateInitiale : aujourdhui());
   }
   return false;
 }
@@ -1189,8 +1191,11 @@ $('choix-supprimer').addEventListener('click', async () => {
   if (!choixEspeceId) return;
   const id = choixEspeceId; fermerChoix();
   if (choixEspecePerso) {
-    // variété perso : suppression + TOMBE (P2-2 27e) — le filet de sécurité et les badges survivent à l'effacement
+    // variété perso : confirmation + TOMBE (P2-2 27e/28e) — le filet de sécurité et les badges survivent à l'effacement
     const esp = Etat.especesCustom.find(x => x.id === id);
+    if (!await confirmer('Supprimer « ' + (esp ? esc(esp.nom) : 'cette variété') + ' » ? La fiche, ses illustrations IA et sa checklist seront perdues définitivement.', '🗑️ Supprimer la variété')) return;
+    // P3-1 (28e) : fermer la fiche fantôme si le détail montre l'espèce supprimée
+    if (Etat.detailId === id) { fermerDetail(); }
     await Stockage.ecrire('supprimees', { id, nom: esp ? esp.nom : null, latin: esp ? esp.latin : null, statut: esp ? esp.statut : null, prudence: !!(esp && esp.prudence) });
     await Stockage.effacer('especes', id);
     await Stockage.effacer('illustrations', id);
@@ -1322,7 +1327,11 @@ function ouvrirSheetSpot() {
 function remplirSelectEspecesSpot() {
   const zone = $('s-especes'); if (!zone) return;
   const selection = new Set(Etat.spot.especes || []);
-  zone.innerHTML = toutesEspeces().map(e =>
+  // P3-2 (28e) : les espèces MASQUÉES déjà sélectionnées restent affichées — désélectionnables
+  const visibles = toutesEspeces();
+  const visiblesIds = new Set(visibles.map(v => v.id));
+  const selectionneesMasquees = BASE_COMPLETE().filter(e => selection.has(e.nom) && !visiblesIds.has(e.id));
+  zone.innerHTML = [...visibles, ...selectionneesMasquees].map(e =>
     '<span class="puce' + (selection.has(e.nom) ? ' actif' : '') + '" data-nom="' + esc(e.nom) + '" role="button" tabindex="0" onclick="basculerEspeceSpot(this)">' + esc(e.nom) + '</span>'
   ).join('');
 }
@@ -1605,6 +1614,7 @@ function ouvrirSheetCueillette() {
   $('c-poids').value = ''; $('c-espece').value = ''; $('c-spot').value = '';
   $('c-meteo').value = '🌞 Ensoleillé'; $('c-note').value = '';
   Etat.cueillette.meteoInitial = '🌞 Ensoleillé';
+  Etat.cueillette.dateInitiale = $('c-date').value;
   afficherPhoto('c-photo-zone', null);
   ouvrirFeuille('sheet-cueillette');
 }
@@ -1620,6 +1630,7 @@ function editerCueillette(id) {
   $('c-spot').value = c.spotId || '';
   $('c-meteo').value = c.meteo || '🌞 Ensoleillé';
   Etat.cueillette.meteoInitial = c.meteo || '🌞 Ensoleillé';
+  Etat.cueillette.dateInitiale = c.date || aujourdhui();
   $('c-note').value = c.note || '';
   afficherPhoto('c-photo-zone', Etat.cueillette.photo);
   ouvrirFeuille('sheet-cueillette');
@@ -2623,7 +2634,7 @@ function rendreAlerteExport() {
       '</div>';
 }
 $('st-export').addEventListener('click', () => {
-  const donnees = { app: 'cueillette-quebec-memphis', version: 5, exporteLe: new Date().toISOString(), spots: Etat.spots, cueillettes: Etat.cueillettes, especes: Etat.especesCustom, illustrations: Object.values(Etat.illustrations), cachees: Etat.cachees, supprimees: Etat.supprimees, checklist: Object.values(Etat.checklist) };
+  const donnees = { app: 'cueillette-quebec-memphis', version: 5, exporteLe: new Date().toISOString(), spots: Etat.spots, cueillettes: Etat.cueillettes, especes: Etat.especesCustom, illustrations: Object.values(Etat.illustrations), cachees: Etat.cachees, supprimees: Etat.supprimees, tombes: Object.values(Etat.tombes), checklist: Object.values(Etat.checklist) };
   const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -2662,6 +2673,10 @@ $('st-import-fichier').addEventListener('change', async e => {
     for (const i of data.illustrations) await Stockage.ecrire('illustrations', i);
     for (const id of data.cachees) await Stockage.ecrire('caches', { id });
     for (const id of data.supprimees) await Stockage.ecrire('supprimees', { id });
+    // P2-1 (28e) : les tombes voyagent avec l'export — le filet de sécurité survit sur le téléphone du proche
+    for (const t of (Array.isArray(data.tombes) ? data.tombes : [])) {
+      if (t && t.id) await Stockage.ecrire('supprimees', { id: t.id, nom: t.nom || null, latin: t.latin || null, statut: t.statut || null, prudence: !!t.prudence });
+    }
     for (const cl of data.checklist) await Stockage.ecrire('checklist', cl);
     toast('Import réussi ✅');
     await recharger();
