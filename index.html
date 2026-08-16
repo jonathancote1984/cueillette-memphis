@@ -1004,7 +1004,16 @@ const infoEspece = nom => {
     if (parInclusion) { e = parInclusion.x; viaInclusion = parInclusion.x; }
   }
   const estSynonyme = !!viaInclusion && normNom(viaInclusion.nom) !== n;
-  return e ? { id: e.id, statut: e.statut, prudence: !!e.prudence, perso: !!e.perso, photo: e.img || e.photo, synonyme: estSynonyme, nomComplet: e.nom } : { id: null, statut: null, prudence: false, perso: false, photo: null, synonyme: false, nomComplet: null };
+  return e ? { id: e.id, statut: e.statut, prudence: !!e.prudence, perso: !!e.perso, photo: e.img || e.photo, synonyme: estSynonyme, nomComplet: e.nom, archivee: false } : { id: null, statut: null, prudence: false, perso: false, photo: null, synonyme: false, nomComplet: null, archivee: false };
+};
+/* P2-1 (25e) : la sécurité doit couvrir aussi les espèces MASQUÉES/SUPPRIMÉES — le filet ne saute jamais */
+const infoEspeceArchive = nom => {
+  const info = infoEspece(nom);
+  if (info.id) return info;
+  const n = normNom(nom);
+  const e = ESPECES.find(x => normNom(x.nom) === n || normNom(x.latin) === n);
+  if (e) return { id: e.id, statut: e.statut, prudence: !!e.prudence, perso: false, photo: e.img, synonyme: false, nomComplet: e.nom, archivee: true };
+  return info;
 };
 const nomSpot = id => { const s = Etat.spots.find(x => x.id === id); return s ? s.nom : null; };
 
@@ -1044,14 +1053,24 @@ function fermerFeuilles() {
   document.querySelectorAll('.feuille').forEach(f => f.classList.remove('ouverte'));
   $('voile').classList.remove('visible');
 }
-$('voile').addEventListener('click', () => {
-  if (document.getElementById('sheet-espece').classList.contains('ouverte')) fermerFeuilleVariete();
-  else fermerFeuilles();
-});
-document.querySelectorAll('.feuille .poignee').forEach(p => p.addEventListener('click', () => {
-  if (document.getElementById('sheet-espece').classList.contains('ouverte')) fermerFeuilleVariete();
-  else fermerFeuilles();
-}));
+/* P3-1 (25e) : garde-fou des feuilles spot/cueillette — des champs remplis ne se perdent pas sans confirmation */
+function feuilleSaisieSale() {
+  if (document.getElementById('sheet-spot').classList.contains('ouverte')) {
+    return ['s-nom', 's-desc', 's-lat', 's-lng'].some(i => ($(i).value || '').trim() !== '') || !!(Etat.spot && Etat.spot.photo);
+  }
+  if (document.getElementById('sheet-cueillette').classList.contains('ouverte')) {
+    return ['c-espece', 'c-poids', 'c-note'].some(i => String($(i).value || '').trim() !== '') || !!(Etat.cueillette && Etat.cueillette.photo);
+  }
+  return false;
+}
+function fermerFeuilleAvecGardeFou() {
+  if (document.getElementById('sheet-espece').classList.contains('ouverte')) { fermerFeuilleVariete(); return; }
+  if (feuilleSaisieSale()) {
+    confirmer('Quitter sans enregistrer ? Les champs remplis seront perdus.', '⚠️ Feuille non enregistrée').then(ok => { if (ok) fermerFeuilles(); });
+  } else fermerFeuilles();
+}
+$('voile').addEventListener('click', fermerFeuilleAvecGardeFou);
+document.querySelectorAll('.feuille .poignee').forEach(p => p.addEventListener('click', fermerFeuilleAvecGardeFou));
 /* Clavier : Enter/Espace déclenche les éléments role="button" (puces, cartes, items) */
 document.addEventListener('keydown', ev => {
   if ((ev.key === 'Enter' || ev.key === ' ') && ev.target && ev.target.getAttribute && ev.target.getAttribute('role') === 'button') {
@@ -1105,7 +1124,7 @@ document.addEventListener('keydown', ev => {
       return;
     }
     const feuilleOuverte = document.querySelector('.feuille.ouverte');
-    if (feuilleOuverte) { ev.preventDefault(); fermerFeuilles(); return; }
+    if (feuilleOuverte) { ev.preventDefault(); fermerFeuilleAvecGardeFou(); return; }
   }
   if (!boiteVisible()) return;
   if (ev.key === 'Tab') {
@@ -1492,8 +1511,11 @@ async function basculerSpec(i) {
   const txtDanger = ok && ok.querySelector('.t');
   if (txtDanger && txtDanger.textContent.indexOf('critères vérifiés') >= 0) txtDanger.textContent = '☠️ ' + nb + '/' + illu.items.length + ' critères vérifiés';
   // P3-2 (24e) : le titre du verdict « att » suit aussi (plus de « Rien n'est encore vérifié » à 1/5)
+  // P2-2 (25e) : glyphe selon le statut — ☠️ réservé aux non-comestibles, ⚠️ pour les comestibles
+  const esp = toutesEspeces().find(x => x.id === Etat.detailId);
+  const glypheAtt = esp && esp.statut !== 'comestible' && esp.statut !== 'prudence' ? '☠️' : '⚠️';
   const txtAtt = att && att.querySelector('.t');
-  if (txtAtt) txtAtt.textContent = '☠️ ' + (nb === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants');
+  if (txtAtt) txtAtt.textContent = glypheAtt + ' ' + (nb === 0 ? 'Rien n\'est encore vérifié' : 'Critères manquants');
   if (ok) ok.classList.toggle('ouv', nb === illu.items.length);
   if (att) att.classList.toggle('ouv', nb < illu.items.length);
 }
@@ -2424,11 +2446,14 @@ async function analyserPhoto(dataUrl) {
     dernierResultatId = r;
     r._dataUrl = dataUrl;
     // P1-5 : statut hors vocabulaire = inconnu côté sécurité (fail-safe : toute ambiguïté penche vers la prudence)
+    // P2-3 (25e) : vocabulaire insensible à la casse
+    r.statut = String(r.statut || '').trim().toLowerCase();
     const statutValide = ['comestible', 'immangeable', 'toxique', 'mortel'].includes(r.statut);
     if (!statutValide) { r.statut = 'inconnu'; toast('⚠️ Statut IA hors vocabulaire — confirmez la comestibilité'); }
     // P1-1 (24e) : le guide a le dernier mot — si l'IA contredit le guide sur la gravité, le guide gagne
     // (une espèce MORTELLE du guide ne peut JAMAIS recevoir un badge « ✅ Comestible » de l'IA)
-    const connue = infoEspece(r.espece);
+    // P2-1 (25e) : infoEspeceArchive couvre aussi les espèces masquées/supprimées
+    const connue = infoEspeceArchive(r.espece);
     const GRAV = { inconnu: 0, comestible: 1, immangeable: 2, toxique: 3, mortel: 4 };
     if (connue.id && (GRAV[connue.statut] || 0) > (GRAV[r.statut] || 0)) {
       r.statut = connue.statut;
@@ -2439,7 +2464,8 @@ async function analyserPhoto(dataUrl) {
     const toxique = r.statut === 'toxique' || r.statut === 'immangeable';
     const confiance = typeof r.confiance === 'number' ? r.confiance : null;
     const fiable = confiance !== null && confiance >= 90;
-    const aVerifier = (confiance !== null && confiance >= 60 && confiance < 90) || !statutValide;
+    // P2-3 (25e) : si le guide a résolu le statut, l'incertitude de vocabulaire ne déclenche plus « vérifiez »
+    const aVerifier = (confiance !== null && confiance >= 60 && confiance < 90) || (!statutValide && !connue.id);
     const inconnue = !r.espece || r.espece === 'inconnu' || (confiance !== null && confiance < 60);
     const prudente = (!!connue.id && !!connue.prudence) || (!!r.prudence && !connue.id);
     const afficheComestible = fiable && !prudente;
@@ -2470,7 +2496,7 @@ async function analyserPhoto(dataUrl) {
               : '') +
       (r.description ? '<span class="guide-sujet">📖 Description</span><p style="margin:4px 0 0;font-size:14px;line-height:1.6">' + esc(r.description) + '</p>' : '') +
       (r.confusions ? '<span class="guide-sujet">⚠️ Confusions possibles</span><p style="margin:4px 0 0;font-size:13.5px;line-height:1.6">' + esc(r.confusions) + '</p>' : '') +
-      (connue.id
+      (connue.id && !connue.archivee
         ? '<button class="btn btn-bleu btn-plein" style="margin-top:12px" onclick="fermerFeuilles();ouvrirDetail(\'' + connue.id + '\',' + !!connue.perso + ')">📖 Voir la fiche du guide</button>'
         : '') +
       '<button class="btn btn-jaune btn-plein" style="margin-top:8px" onclick="preparerVarieteDepuisResultat()">➕ Ajouter comme variété</button>' +
