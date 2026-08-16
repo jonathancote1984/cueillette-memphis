@@ -72,29 +72,29 @@ Le socle défensif est **bon** : aucune clé Gemini dans le bundle/SW/export, `e
 ## Plan d'action en 3 phases
 
 ### Phase 1 — Urgent (sécurité : le seul point d'entrée)
-| Action | Effort | Gain |
-|---|---|---|
-| C1+C2 : bannir l'interpolation `onclick` (data-* + délégation) sur spots/cueillettes/détail/illu | 3-4 h | Élimine XSS import + corrige les 103 apostrophes (M6) |
-| C3 : import transactionnel (stores temporaires → bascule, restauration sur échec) | 2 h | Plus aucune perte de données possible à l'import |
-| M1 : whitelist statuts à l'import + validation ids `^[A-Za-z0-9_-]{1,64}$` | 1 h | Le filet tient même sur fichier altéré |
-| M2+M4 : « le plus grave gagne » à l'affichage partout + re-vérif nom↔id | 1-2 h | Plus jamais de vert sur un nom mortel |
+| Action | Effort | Gain | Statut |
+|---|---|---|---|
+| C1+C2 : bannir l'interpolation `onclick` (data-* + délégation) sur spots/cueillettes/détail/illu | 3-4 h | Élimine XSS import + corrige les 103 apostrophes (M6) | ✅ **CORRIGÉ** (`71dfbc5`) |
+| C3 : import transactionnel (stores temporaires → bascule, restauration sur échec) | 2 h | Plus aucune perte de données possible à l'import | ✅ **CORRIGÉ** (`71dfbc5`) |
+| M1 : whitelist statuts à l'import + validation ids `^[A-Za-z0-9_-]{1,64}$` | 1 h | Le filet tient même sur fichier altéré | ✅ **CORRIGÉ** (`71dfbc5`) |
+| M2+M4 : « le plus grave gagne » à l'affichage partout + re-vérif nom↔id | 1-2 h | Plus jamais de vert sur un nom mortel | ✅ **CORRIGÉ** (`71dfbc5`) |
 
 ### Phase 2 — Court terme (2-3 semaines)
-| Action | Effort | Gain |
-|---|---|---|
-| M3 : badge vert hors-guide + mention « absente du guide » + anti-prompt-injection | 1 h | Risque résiduel d'intoxication réduit |
-| M5 : wrapper écritures + toast stockage plein + `unhandledrejection` | 2 h | Plus de perte silencieuse |
-| M7 : filet `recharger()` + JSON.parse protégé | 1-2 h | App jamais blanche |
-| M8+M9 : SW durci (install résiliente, fallback navigate-only, purge `cqm-`) | 2 h | Offline robuste + origine GitHub Pages propre |
-| M11 : recompression des 105 specs (~10-12 Mo) | 1-2 h script | Installation 40 % plus légère |
+| Action | Effort | Gain | Statut |
+|---|---|---|---|
+| M3 : badge vert hors-guide + mention « absente du guide » + anti-prompt-injection | 1 h | Risque résiduel d'intoxication réduit | ⬜ OUVERT |
+| M5 : wrapper écritures + toast stockage plein + `unhandledrejection` | 2 h | Plus de perte silencieuse | ⬜ OUVERT |
+| M7 : filet `recharger()` + JSON.parse protégé | 1-2 h | App jamais blanche | ⬜ OUVERT |
+| M8+M9 : SW durci (install résiliente, fallback navigate-only, purge `cqm-`) | 2 h | Offline robuste + origine GitHub Pages propre | ⬜ OUVERT |
+| M11 : recompression des 105 specs (~10-12 Mo) | 1-2 h script | Installation 40 % plus légère | ✅ **CORRIGÉ** (`71dfbc5`, 22,9 → 18,6 Mo = −18,9 %) |
 
 ### Phase 3 — Moyen terme
-| Action | Effort | Gain |
-|---|---|---|
-| M10 : extraire `alerteStatut()`/`gabaritVerdict()` (source unique antipoison) | 2-3 h | Sécurité critique mono-source |
-| M12 : self-host Fredoka woff2 | 1 h | Identité visuelle hors-ligne |
-| CSP meta (connect-src whitelist) + `x-goog-api-key` | 1 h | Défense en profondeur |
-| Debounce autocomplétion MyCoQuébec + recherche guide | 1 h | Fluidité mobile |
+| Action | Effort | Gain | Statut |
+|---|---|---|---|
+| M10 : extraire `alerteStatut()`/`gabaritVerdict()` (source unique antipoison) | 2-3 h | Sécurité critique mono-source | ⬜ OUVERT |
+| M12 : self-host Fredoka woff2 | 1 h | Identité visuelle hors-ligne | ⬜ OUVERT |
+| CSP meta (connect-src whitelist) + `x-goog-api-key` | 1 h | Défense en profondeur | ⬜ OUVERT |
+| Debounce autocomplétion MyCoQuébec + recherche guide | 1 h | Fluidité mobile | ⬜ OUVERT |
 
 ---
 *Constats critiques à confirmer dynamiquement (navigateur) avant correction — l'audit est statique. Chantiers de correction proposés séparément avec accord explicite.*
