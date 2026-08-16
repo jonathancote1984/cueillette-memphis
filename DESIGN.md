@@ -159,7 +159,7 @@ Palette AUTOMNE/TERRE — la forêt québécoise en septembre. Cinq accents vifs
 - **Titre de feuille** (700, 18 px, 1.2) : en pastille ambre, inclinée de -1°.
 - **Corps** (400, 16 px, 1.65) : texte courant, descriptions, fiches.
 - **Label de champ** (700, 13 px, 1.4) : libellés de formulaires.
-- **Meta** (600, 12.5 px, 1.5) : secondaires (dates, habitats) avec opacité 0.75.
+- **Meta** (400, 12.5 px, 1.5) : secondaires (dates, habitats) avec opacité 0.85 (correction AA — ne pas redescendre sous 0.8).
 
 ### Named Rules
 **La Règle de l'Inclinaison.** Un titre n'est jamais parfaitement droit : -1 à -2°, jamais plus. L'inclinaison est le sourire du carnet.
@@ -190,7 +190,7 @@ Forme de base : coins arrondis généreux (12-24 px) avec **un coin cassé** —
 ### Pastilles de statut (chips)
 - **Style :** pilule (999 px), bordure 2.5 px noire, inclinée de -1,5°.
 - **Couleurs sémantiques :** vert Comestible · jaune Prudence · gris Immangeable · orange Toxique · rouge MORTEL ☠️ (texte blanc).
-- **Filtres du guide :** puces blanches cerclées ; l'active se colore selon le filtre et s'incline de -2°.
+- **Filtres du guide :** deux `<select>` (Comestibilité + Saison) pleine largeur, style champ Memphis — remplacés les puces filtres (depuis v22).
 
 ### Cartes / Conteneurs
 - **Coins :** 18 px avec coin cassé 5 px.

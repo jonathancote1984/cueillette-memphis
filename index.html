@@ -644,6 +644,7 @@ h2.titre-vue .ico{font-size:20px;}
           <option value="immangeable">Immangeable</option>
           <option value="toxique">⚠️ Toxique</option>
           <option value="mortel">☠️ MORTEL</option>
+          <option value="inconnu">⚠️ Inconnu</option>
         </select>
       </label>
       <label class="champ">Saison
@@ -1012,7 +1013,11 @@ function naviguer(vue) {
   Etat.vue = vue;
   document.querySelectorAll('.vue').forEach(v => v.classList.remove('visible'));
   $('vue-' + vue).classList.add('visible');
-  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('actif', b.dataset.vue === vue || (vue === 'detail' && b.dataset.vue === 'guide')));
+  document.querySelectorAll('nav.tabs button').forEach(b => {
+    const actif = b.dataset.vue === vue || (vue === 'detail' && b.dataset.vue === 'guide');
+    b.classList.toggle('actif', actif);
+    if (actif) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
   const fab = $('fab');
   fab.classList.toggle('cache', vue === 'stats' || vue === 'detail' || vue === 'parametres');
   fab.textContent = vue === 'spots' ? '📍' : '＋';
@@ -1425,9 +1430,9 @@ function ouvrirDetail(id, perso) {
   const nonComestible = e.statut !== 'comestible' && e.statut !== 'prudence';
   const galerie = illu.items.length ? (
     '<span class="guide-sujet">🖼️ Spécificités à repérer</span>' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 10px"><span style="font-size:12.5px;opacity:.85">Vérifiez chaque critère sur le champignon</span><span class="spec-compteur" id="spec-compteur">' + nbFaits + '/' + illu.items.length + '</span></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 10px"><span style="font-size:12.5px;opacity:.85">Vérifiez chaque critère sur le champignon</span><span class="spec-compteur" id="spec-compteur" aria-live="polite">' + nbFaits + '/' + illu.items.length + '</span></div>' +
     illu.items.map((it, i) =>
-      '<div class="spec-carte' + (faits.faits[i] ? ' fait' : '') + (nonComestible ? ' dangereux' : '') + '" id="spec-carte-' + i + '" role="button" tabindex="0" onclick="basculerSpec(' + i + ')">' +
+      '<div class="spec-carte' + (faits.faits[i] ? ' fait' : '') + (nonComestible ? ' dangereux' : '') + '" id="spec-carte-' + i + '" role="button" tabindex="0" aria-pressed="' + (faits.faits[i] ? 'true' : 'false') + '" onclick="basculerSpec(' + i + ')">' +
       (it.img ? '<div class="spec-photo"><img src="' + it.img + '" alt="' + esc(it.spec) + '" onclick="event.stopPropagation();ouvrirLightbox(this.src)"><span class="spec-num">' + (i + 1) + '</span><span class="spec-zoom" role="button" tabindex="0" onclick="event.stopPropagation();ouvrirLightbox(\'' + it.img + '\')">🔍 Agrandir</span></div>' : '') +
       '<div class="spec-corps"><div class="spec-carre">✓</div><div class="spec-texte"><div class="spec-titre">' + esc(it.spec) + '</div>' + (it.desc ? '<div class="spec-desc">' + esc(it.desc) + '</div>' : '') + '</div></div>' +
       '</div>'
@@ -1479,9 +1484,12 @@ async function basculerSpec(i) {
   ent.faits[i] = !ent.faits[i];
   Etat.checklist[id] = ent;
   await Stockage.ecrire('checklist', ent);
-  const carte = $('spec-carte-' + i); if (carte) carte.classList.toggle('fait', !!ent.faits[i]);
+  const carte = $('spec-carte-' + i); if (carte) { carte.classList.toggle('fait', !!ent.faits[i]); carte.setAttribute('aria-pressed', ent.faits[i] ? 'true' : 'false'); }
   const nb = illu.items.filter((_, j) => ent.faits[j]).length;
   const cmp = $('spec-compteur'); if (cmp) cmp.textContent = nb + '/' + illu.items.length;
+  // Le texte du verdict suit le compteur (plus de « 0/5 » figé à 5/5)
+  const txtDanger = $('spec-verdict-ok') && $('spec-verdict-ok').querySelector('.t');
+  if (txtDanger && txtDanger.textContent.indexOf('critères vérifiés') >= 0) txtDanger.textContent = '☠️ ' + nb + '/' + illu.items.length + ' critères vérifiés';
   const ok = $('spec-verdict-ok'), att = $('spec-verdict-att');
   if (ok) ok.classList.toggle('ouv', nb === illu.items.length);
   if (att) att.classList.toggle('ouv', nb < illu.items.length);
@@ -1645,7 +1653,7 @@ function remplirSuggestionsMyco() {
             : '<span style="width:26px;height:26px;border:2px solid var(--noir);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;background:repeating-linear-gradient(45deg, rgba(217,164,65,.3), rgba(217,164,65,.3) 4px, transparent 4px, transparent 8px);flex-shrink:0">🍄</span>') +
           esc(x.nomFr || x.latin) + (x.nomFr ? ' <i style="opacity:.85">' + esc(x.latin) + '</i>' : '') + '</button>'
         ).join('')
-      : '<p class="note" style="margin:4px 0 0">Aucune correspondance dans les 3 938 espèces — vous pouvez saisir un nom libre.</p>';
+      : '<p class="note" style="margin:4px 0 0">Aucune correspondance dans les ' + base.length + ' espèces de la base — vous pouvez saisir un nom libre.</p>';
   });
 }
 function choisirNomMyco(nomFr, latin) {
@@ -2475,7 +2483,11 @@ function preparerVarieteDepuisResultat() {
   ouvrirSheetEspece();
   $('e-nom').value = r.espece || '';
   $('e-latin').value = r.latin || '';
-  if (['comestible', 'immangeable', 'toxique', 'mortel'].includes(r.statut)) $('e-statut').value = r.statut;
+  // P2-1 (23e) : transférer les signaux de sécurité — jamais de défaut permissif silencieux
+  const vocab = ['comestible', 'immangeable', 'toxique', 'mortel', 'inconnu'];
+  if (vocab.includes(r.statut)) $('e-statut').value = r.statut;
+  else { $('e-statut').value = 'inconnu'; toast('⚠️ Statut IA hors vocabulaire — confirmez la comestibilité'); }
+  $('e-prudence').checked = !!r.prudence;
   $('e-desc').value = r.description || '';
   $('e-carac').value = Array.isArray(r.caracteristiques) ? r.caracteristiques.map(c => (c && typeof c === 'object' && c.spec && c.desc) ? c.spec + ' : ' + c.desc : String(c || '')).join('\n') : '';
   $('e-confusions').value = r.confusions || '';
@@ -2498,7 +2510,7 @@ function topRangs(entries, max, couleur) {
   if (!entries.length) return '<div class="vide-etat" style="padding:8px">Aucune donnée.</div>';
   return entries.map((e, i) =>
     '<div class="rang"><span class="pos">' + (i + 1) + '</span><span class="nom-rang">' + esc(e[0]) + '</span><span class="valeur-rang">' + fmtKg(e[1]) + '</span></div>' +
-    '<div class="barre-fond" role="progressbar" aria-valuenow="' + Math.round(e[1] * 10) / 10 + '" aria-valuemax="' + Math.round(max * 10) / 10 + '" aria-label="' + esc(e[0]) + '"><div class="barre" style="width:' + Math.min(100, Math.max(e[1] / max * 100, e[1] > 0 ? 2 : 0)) + '%;' + (couleur ? 'background:' + couleur : '') + '"></div></div>'
+    '<div class="barre-fond" role="progressbar" aria-valuenow="' + Math.round(e[1] * 10) / 10 + '" aria-valuemax="' + Math.round(max * 10) / 10 + '" aria-label="' + esc(e[0]) + ' : ' + esc(fmtKg(e[1])) + '"><div class="barre" style="width:' + Math.min(100, Math.max(e[1] / max * 100, e[1] > 0 ? 2 : 0)) + '%;' + (couleur ? 'background:' + couleur : '') + '"></div></div>'
   ).join('');
 }
 function rendreStats() {
@@ -2529,7 +2541,7 @@ function rendreStats() {
   const maxM = Math.max(...mois, 1);
   $('st-mois').innerHTML = '<div class="mois-grille">' +
     ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'].map((lab, i) =>
-      '<div class="mois-col"><div class="tige" role="img" aria-label="' + lab + ' : ' + Math.round(mois[i] * 10) / 10 + ' kg" style="height:' + (mois[i] > 0 ? Math.min(100, Math.max(2, mois[i] / maxM * 100)) : 4) + '%;background:' + (mois[i] > 0 ? COULEURS_MOIS[i] : '#D8C9AC') + '"></div><span class="lab">' + lab + '</span></div>'
+      '<div class="mois-col"><div class="tige" role="img" aria-label="' + lab + ' : ' + esc(fmtKg(mois[i])) + '" style="height:' + (mois[i] > 0 ? Math.min(100, Math.max(2, mois[i] / maxM * 100)) : 4) + '%;background:' + (mois[i] > 0 ? COULEURS_MOIS[i] : '#D8C9AC') + '"></div><span class="lab">' + lab + '</span></div>'
     ).join('') + '</div>';
 }
 
