@@ -958,7 +958,7 @@ const STATUTS = {
 
 /* ================= État ================= */
 const Etat = {
-  spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], illustrations: {}, checklist: {},
+  spots: [], cueillettes: [], especesCustom: [], cachees: [], supprimees: [], tombes: {}, illustrations: {}, checklist: {},
   vue: 'spots', filtre: 'tous', filtreSaison: 'toutes', recherche: '', detailId: null,
   unite: localStorage.getItem('cqm_unite') === 'lb' ? 'lb' : 'kg',
   ordreImages: localStorage.getItem('cqm_ordre_images') || 'wikimedia,myco,ia',
@@ -972,7 +972,7 @@ const badgeStatut = (statut, prudence) => {
 };
 const toutesEspeces = () => [
   ...ESPECES.filter(e => !Etat.cachees.includes(e.id) && !Etat.supprimees.includes(e.id)),
-  ...Etat.especesCustom
+  ...Etat.especesCustom.filter(e => !Etat.cachees.includes(e.id) && !Etat.supprimees.includes(e.id))
 ];
 const normNom = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\s\u00A0\-–—_.]+/g, ' ').trim();
 const distLevenshtein = (a, b) => {
@@ -1007,8 +1007,8 @@ const infoEspece = nom => {
   return e ? { id: e.id, statut: e.statut, prudence: !!e.prudence, perso: !!e.perso, photo: e.img || e.photo, synonyme: estSynonyme, nomComplet: e.nom, archivee: false } : { id: null, statut: null, prudence: false, perso: false, photo: null, synonyme: false, nomComplet: null, archivee: false };
 };
 /* P2-1 (25e/26e) : la sécurité doit couvrir AUSSI les espèces MASQUÉES/SUPPRIMÉES et les variétés perso —
-   recherche exacte + floue + inclusion sur la base COMPLÈTE (guide + perso), sans filtre de visibilité */
-const BASE_COMPLETE = () => [...ESPECES, ...Etat.especesCustom];
+   recherche exacte + floue + inclusion sur la base COMPLÈTE (guide + perso + tombes), sans filtre de visibilité */
+const BASE_COMPLETE = () => [...ESPECES, ...Etat.especesCustom, ...Object.values(Etat.tombes || {})];
 const infoEspeceArchive = nom => {
   const info = infoEspece(nom);
   if (info.id) return info;
@@ -1080,7 +1080,8 @@ function feuilleSaisieSale() {
     return ['c-espece', 'c-poids', 'c-note'].some(i => String($(i).value || '').trim() !== '')
       || !!(Etat.cueillette && Etat.cueillette.photo)
       || String($('c-spot').value || '') !== ''
-      || String($('c-meteo').value || '') !== '';
+      // P2-1 (27e) : c-meteo a TOUJOURS une valeur (défaut 🌞 Ensoleillé) — comparer à la valeur initiale
+      || String($('c-meteo').value || '') !== String(Etat.cueillette && Etat.cueillette.meteoInitial ? Etat.cueillette.meteoInitial : '🌞 Ensoleillé');
   }
   return false;
 }
@@ -1188,7 +1189,9 @@ $('choix-supprimer').addEventListener('click', async () => {
   if (!choixEspeceId) return;
   const id = choixEspeceId; fermerChoix();
   if (choixEspecePerso) {
-    // variété perso : suppression directe
+    // variété perso : suppression + TOMBE (P2-2 27e) — le filet de sécurité et les badges survivent à l'effacement
+    const esp = Etat.especesCustom.find(x => x.id === id);
+    await Stockage.ecrire('supprimees', { id, nom: esp ? esp.nom : null, latin: esp ? esp.latin : null, statut: esp ? esp.statut : null, prudence: !!(esp && esp.prudence) });
     await Stockage.effacer('especes', id);
     await Stockage.effacer('illustrations', id);
     toast('Variété supprimée définitivement 🗑️');
@@ -1553,9 +1556,9 @@ function rendreCueillettes() {
     return;
   }
   cont.innerHTML = [...Etat.cueillettes].sort((a, b) => b.date.localeCompare(a.date)).map(c => {
-    const info = infoEspece(c.espece);
-    // P1-2 : badge de sécurité même si l'espèce a été supprimée ou masquée (especeId archivé)
-    const infoArchivee = c.especeId ? ESPECES.find(x => x.id === c.especeId) || null : null;
+    // P1-2 + P3-2 (27e) : infoEspeceArchive — badge de sécurité même si l'espèce est masquée, supprimée ou une variété perso effacée (tombe)
+    const info = infoEspeceArchive(c.espece);
+    const infoArchivee = (!info.id && c.especeId) ? ESPECES.find(x => x.id === c.especeId) || null : null;
     const statutEff = info.statut || (infoArchivee ? infoArchivee.statut : null);
     const prudenceEff = info.prudence || (infoArchivee ? !!infoArchivee.prudence : false);
     let vig = c.photo ? '<img src="' + c.photo + '" alt="">' : (info.photo ? '<img src="' + info.photo + '" alt="' + esc(c.espece) + '">' : (info.id && !info.perso ? '<img src="img/especes/' + info.id + '.jpg" alt="' + esc(c.espece) + '">' : '🍄'));
@@ -1601,6 +1604,7 @@ function ouvrirSheetCueillette() {
   $('c-date').value = aujourdhui();
   $('c-poids').value = ''; $('c-espece').value = ''; $('c-spot').value = '';
   $('c-meteo').value = '🌞 Ensoleillé'; $('c-note').value = '';
+  Etat.cueillette.meteoInitial = '🌞 Ensoleillé';
   afficherPhoto('c-photo-zone', null);
   ouvrirFeuille('sheet-cueillette');
 }
@@ -1615,6 +1619,7 @@ function editerCueillette(id) {
   $('c-espece-suggestions').innerHTML = '';
   $('c-spot').value = c.spotId || '';
   $('c-meteo').value = c.meteo || '🌞 Ensoleillé';
+  Etat.cueillette.meteoInitial = c.meteo || '🌞 Ensoleillé';
   $('c-note').value = c.note || '';
   afficherPhoto('c-photo-zone', Etat.cueillette.photo);
   ouvrirFeuille('sheet-cueillette');
@@ -2764,13 +2769,15 @@ async function recharger() {
   ]);
   const ca = caBrut.map(x => x.id);
   const su = suBrut.map(x => x.id);
+  const tombes = {};
+  suBrut.forEach(x => { if (x.nom) tombes[x.id] = { id: x.id, nom: x.nom, latin: x.latin, statut: x.statut, prudence: !!x.prudence, perso: true }; });
   if (seq !== seqRecharger) return; // un rechargement plus récent est en cours
   const connus = new Set([...ESPECES, ...e].map(x => x.id));
   const orphelins = ca.filter(id => !connus.has(id));
   if (orphelins.length) {
     for (const id of orphelins) await Stockage.effacer('caches', id);
   }
-  Etat.spots = s; Etat.cueillettes = c; Etat.especesCustom = e; Etat.cachees = ca.filter(id => connus.has(id)); Etat.supprimees = su;
+  Etat.spots = s; Etat.cueillettes = c; Etat.especesCustom = e; Etat.cachees = ca.filter(id => connus.has(id)); Etat.supprimees = su; Etat.tombes = tombes;
   Etat.illustrations = {};
   il.forEach(x => { Etat.illustrations[x.id] = x; });
   Etat.checklist = {};
