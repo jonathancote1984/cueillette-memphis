@@ -1806,7 +1806,7 @@ async function appelGemini(cle, modele, prompt, opts) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': cle },
       body: JSON.stringify(body),
-      signal: o.signal || undefined
+      signal: o.signal || AbortSignal.timeout(60000)
     });
     if (!rep.ok) throw new Error('API ' + rep.status);
     const d = await rep.json();
@@ -1814,9 +1814,12 @@ async function appelGemini(cle, modele, prompt, opts) {
     return (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('') || '';
   };
   const retryable = e => /API (429|500|503)/.test(e.message || '');
+  const introuvable = e => /API 404/.test(e.message || '');
   try {
     return await essayer(modele);
   } catch (e1) {
+    // Modèle déprécié (404) : inutile de retenter le même — bascule directe sur flash-lite.
+    if (introuvable(e1) && !o.image) return await essayer('gemini-flash-lite-latest');
     if (!retryable(e1) || o.image) throw e1; // une requête image interrompue ne se relance pas (signal)
     await new Promise(r => setTimeout(r, 1500));
     try { return await essayer(modele); }
