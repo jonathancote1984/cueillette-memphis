@@ -1783,6 +1783,7 @@ function messageErreurIA(err) {
   if (!err) return 'Une erreur est survenue. Réessayez.';
   const m = String(err.message || err).toLowerCase();
   if (err.message === 'PAS_DE_CLE' || m.includes('p_de_cle')) return '🔑 Clé Gemini manquante — ajoutez-la dans ⚙️ Paramètres.';
+  if (m.includes('reponse_invalide')) return '⚠️ L\u2019IA n\u2019a pas renvoyé de réponse exploitable — réessayez.';
   if (m.includes('fetch') || m.includes('network') || m.includes('failed') || m.includes('internet')) return '⚠️ Connexion impossible — vérifiez votre réseau puis réessayez.';
   if (m.includes('400') || m.includes('invalid') || m.includes('api key') || m.includes('key')) return '⚠️ Clé Gemini invalide — vérifiez-la dans ⚙️ Paramètres.';
   if (m.includes('429') || m.includes('quota') || m.includes('rate') || m.includes('resource exhausted')) return '⚠️ Limite de requêtes atteinte — patientez quelques instants puis réessayez.';
@@ -1815,18 +1816,24 @@ async function appelGemini(cle, modele, prompt, opts) {
   };
   const retryable = e => /API (429|500|503)/.test(e.message || '');
   const introuvable = e => /API 404/.test(e.message || '');
+  const pause = essai => new Promise(r => setTimeout(r, 1500 * Math.pow(2, essai - 1)));
   try {
     return await essayer(modele);
   } catch (e1) {
     // Modèle déprécié (404) : inutile de retenter le même — bascule directe sur flash-lite.
     if (introuvable(e1) && !o.image) return await essayer('gemini-flash-lite-latest');
     if (!retryable(e1) || o.image) throw e1; // une requête image interrompue ne se relance pas (signal)
-    await new Promise(r => setTimeout(r, 1500));
+    // Retry du modèle principal avec backoff exponentiel (1500 puis 3000 ms).
+    await pause(1);
     try { return await essayer(modele); }
     catch (e2) {
       if (!retryable(e2)) throw e2;
-      await new Promise(r => setTimeout(r, 1500));
-      return await essayer('gemini-flash-lite-latest');
+      // Flash-lite : jusqu'à 2 essais avec le même backoff exponentiel.
+      for (let essai = 1; essai <= 2; essai++) {
+        await pause(essai);
+        try { return await essayer('gemini-flash-lite-latest'); }
+        catch (e3) { if (!retryable(e3) || essai === 2) throw e3; }
+      }
     }
   }
 }
@@ -1837,7 +1844,11 @@ function parserJSONIA(texte) {
   const i = t.indexOf('{');
   const j = t.lastIndexOf('}');
   if (i >= 0 && j > i) t = t.slice(i, j + 1);
-  return JSON.parse(t);
+  try {
+    return JSON.parse(t);
+  } catch (e) {
+    throw new Error('REPONSE_INVALIDE');
+  }
 }
 
 /* Navigation entre les 2 étapes progressives de la feuille variété */
@@ -2149,7 +2160,7 @@ $('e-photo-commons').addEventListener('click', async () => {
 });
 
 /* --- Photo : illustration IA (Gemini image, si la clé le permet) --- */
-const MODELES_IMAGE = ['gemini-2.5-flash-image', 'gemini-3.1-flash-image', 'nano-banana-pro-preview'];
+const MODELES_IMAGE = ['gemini-3.1-flash-image', 'nano-banana-pro-preview', 'gemini-2.5-flash-image'];
 async function genererImageIA(nom, latin, spec, desc) {
   const cle = cleIA();
   if (!cle) throw new Error('PAS_DE_CLE');
@@ -2862,7 +2873,12 @@ $('p-ordre-images').addEventListener('change', e => {
 });
 $('p-ordre-images').value = Etat.ordreImages;
 $('p-cle-save').addEventListener('click', () => {
-  localStorage.setItem('cqm_cle_ia', $('p-cle').value.trim());
+  const cle = $('p-cle').value.trim();
+  if (!/^AIza[0-9A-Za-z_-]{30,}$/.test(cle)) {
+    toast('⚠️ Format de clé invalide — une clé Gemini commence par « AIza ».');
+    return;
+  }
+  localStorage.setItem('cqm_cle_ia', cle);
   toast('Clé API enregistrée 🔑');
   rendreBandeauCle();
 });
