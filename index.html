@@ -6,10 +6,11 @@
 <meta name="theme-color" content="#D9A441">
 <meta name="description" content="Spots, identification et journal de cueillette de champignons du Québec — édition Memphis, 100 % hors-ligne.">
 <title>Cueillette Québec — édition Memphis</title>
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Cueillette">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://commons.wikimedia.org https://generativelanguage.googleapis.com; font-src 'self'; object-src 'none'; base-uri 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; worker-src 'self'; style-src 'unsafe-inline'; img-src 'self' data: https://upload.wikimedia.org https://mycoquebec.org; connect-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://generativelanguage.googleapis.com; font-src 'self'; object-src 'none'; base-uri 'self'">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -298,7 +299,7 @@ h2.titre-vue .ico{font-size:20px;}
   background:var(--jaune); border:3px solid var(--noir); border-radius:12px 12px 12px 4px;
   padding:4px 12px; transform:rotate(-1deg); box-shadow:3px 3px 0 var(--noir);}
 /* ===== Étapes progressives (feuille variété) ===== */
-.etapes-espece{display:flex; align-items:center; gap:8px; margin:2px 0 14px;}
+.etapes-espece{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:2px 0 14px;}
 .etape{
   display:inline-flex; align-items:center; gap:7px;
   background:var(--creme); border:2.5px solid var(--noir); border-radius:999px;
@@ -365,6 +366,12 @@ h2.titre-vue .ico{font-size:20px;}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important; transition:none !important; scroll-behavior:auto !important;}
 }
+/* Robustesse très petits écrans (≤380 px) : la nav 5 onglets et le libellé le plus long
+   ('Cueillettes') débordaient de leur colonne ; la barre d'étapes se comprimait. */
+@media (max-width: 380px){
+  nav.tabs button{font-size:10.5px; padding-left:1px; padding-right:1px;}
+  nav.tabs button .ico{font-size:20px;}
+}
 </style>
 </head>
 <body>
@@ -412,7 +419,7 @@ h2.titre-vue .ico{font-size:20px;}
       <button class="btn btn-vert btn-plein" onclick="identifierParPhoto(false)">🖼️ Une photo</button>
     </div>
     <div id="g-cle-bandeau"></div>
-    <input class="saisie" id="g-recherche" placeholder="🔎 Chercher un champignon…" style="margin-bottom:10px">
+    <input class="saisie" id="g-recherche" placeholder="🔎 Chercher un champignon…" aria-label="Chercher un champignon" style="margin-bottom:10px">
     <div id="g-filtres"></div>
     <div id="liste-guide"></div>
   </section>
@@ -461,7 +468,7 @@ h2.titre-vue .ico{font-size:20px;}
     </div>
     <div class="carte">
       <h3 style="margin:0 0 10px">🔑 Clé API Gemini</h3>
-      <input class="saisie" id="p-cle" type="password" placeholder="Collez votre clé API Gemini…" style="margin-bottom:8px">
+      <input class="saisie" id="p-cle" type="password" placeholder="Collez votre clé API Gemini…" aria-label="Clé API Gemini" style="margin-bottom:8px">
       <p class="note">Clé gratuite sur <b>aistudio.google.com/apikey</b>. Stockée uniquement sur votre téléphone, jamais envoyée ailleurs que chez Google. Nécessaire pour l'identification par photo et les fiches par IA.</p>
       <div class="grille2">
         <button class="btn btn-jaune" id="p-cle-save">💾 Enregistrer</button>
@@ -500,7 +507,7 @@ h2.titre-vue .ico{font-size:20px;}
 
 <button class="fab" id="fab" aria-label="Ajouter">＋</button>
 
-<nav class="tabs">
+<nav class="tabs" aria-label="Navigation principale">
   <button data-vue="spots" class="actif" aria-current="page"><span class="ico">📍</span>Spots</button>
   <button data-vue="guide"><span class="ico">🍄</span>Identifier</button>
   <button data-vue="cueillettes"><span class="ico">🧺</span>Cueillettes</button>
@@ -581,7 +588,7 @@ h2.titre-vue .ico{font-size:20px;}
       <input type="date" id="c-date">
     </label>
     <label class="champ">Poids (<span id="c-poids-label">kg</span>)
-      <input type="number" id="c-poids" min="0" step="0.1" placeholder="0.0">
+      <input type="text" inputmode="decimal" id="c-poids" placeholder="0,0">
     </label>
   </div>
   <label class="champ">Espèce
@@ -984,7 +991,9 @@ const Etat = {
   cueillette: { edition: null, photo: null }
 };
 const badgeStatut = (statut, prudence) => {
-  const cle = prudence ? 'prudence' : statut;
+  // La prudence ne modularise que le statut comestible (ex. morille, amanite-rougissante).
+  // Elle ne doit JAMAIS écraser un statut plus grave (mortel/toxique/immangeable).
+  const cle = (statut === 'comestible' && prudence) ? 'prudence' : statut;
   const info = STATUTS[cle] || STATUTS[statut] || { cls: 'st-inconnu', label: '⚠️ Inconnu' };
   return '<span class="pastille-statut ' + info.cls + '">' + info.label + '</span>';
 };
@@ -993,6 +1002,9 @@ const toutesEspeces = () => [
   ...Etat.especesCustom.filter(e => !Etat.cachees.includes(e.id) && !Etat.supprimees.includes(e.id))
 ];
 const normNom = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\s\u00A0\-–—_.]+/g, ' ').trim();
+// C-1 (audit 2026-08) : le nom de base SANS parenthèse — le Levenshtein doit comparer « gyromitre »
+// et non « gyromitre (fausse morille) », sinon une faute de frappe perd le badge MORTEL.
+const nomDeBase = s => String(s || '').replace(/\([^)]*\)/g, ' ').replace(/[()]/g, ' ');
 const distLevenshtein = (a, b) => {
   if (!a.length) return b.length; if (!b.length) return a.length;
   const m = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
@@ -1007,7 +1019,7 @@ const infoEspece = nom => {
   // Matche flou : une faute de frappe ne doit pas faire perdre le badge de sécurité
   if (!e && n.length >= 4) {
     const candidat = toutesEspeces()
-      .map(x => ({ x, d: Math.min(distLevenshtein(n, normNom(x.nom)), distLevenshtein(n, normNom(x.latin || ''))) }))
+      .map(x => ({ x, d: Math.min(distLevenshtein(n, normNom(x.nom)), distLevenshtein(n, normNom(x.latin || '')), distLevenshtein(n, normNom(nomDeBase(x.nom)))) }))
       .filter(c => c.d <= 2)
       .sort((a, b) => a.d - b.d)[0];
     if (candidat) e = candidat.x;
@@ -1034,7 +1046,7 @@ const infoEspeceArchive = nom => {
   let e = BASE_COMPLETE().find(x => normNom(x.nom) === n || normNom(x.latin) === n);
   if (!e && n.length >= 4) {
     const candidat = BASE_COMPLETE()
-      .map(x => ({ x, d: Math.min(distLevenshtein(n, normNom(x.nom)), distLevenshtein(n, normNom(x.latin || ''))) }))
+      .map(x => ({ x, d: Math.min(distLevenshtein(n, normNom(x.nom)), distLevenshtein(n, normNom(x.latin || '')), distLevenshtein(n, normNom(nomDeBase(x.nom)))) }))
       .filter(c => c.d <= 2)
       .sort((a, b) => a.d - b.d)[0];
     if (candidat) e = candidat.x;
@@ -2049,11 +2061,13 @@ $('e-generer').addEventListener('click', async () => {
 });
 
 /* --- Photo : recherche Wikimedia Commons --- */
+// M-4 (audit 2026-08) : un appel réseau qui pend ne doit plus bloquer le bouton indéfiniment
+const fetchAvecTimeout = (url, ms = 8000) => fetch(url, { signal: AbortSignal.timeout(ms) });
 async function chercherPhotoCommons(terme) {
   const url = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search' +
     '&gsrsearch=' + encodeURIComponent('filetype:bitmap ' + terme) + '&gsrnamespace=6&gsrlimit=6' +
     '&prop=imageinfo&iiprop=url|size&iiurlwidth=400';
-  const rep = await fetch(url);
+  const rep = await fetchAvecTimeout(url);
   const d = await rep.json();
   const pages = (d.query || {}).pages || {};
   const candidats = Object.values(pages)
@@ -2063,7 +2077,7 @@ async function chercherPhotoCommons(terme) {
   return candidats[0] || null;
 }
 async function imageEnBase64(url) {
-  const rep = await fetch(url);
+  const rep = await fetchAvecTimeout(url);
   const blob = await rep.blob();
   return new Promise(ok => {
     const rd = new FileReader();
@@ -2090,7 +2104,7 @@ async function chercherPhotoSpec(terme, limit) {
   const url = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search' +
     '&gsrsearch=' + encodeURIComponent(terme) + '&gsrnamespace=6&gsrlimit=' + (limit || 8) +
     '&prop=imageinfo&iiprop=url|size|mime&iiurlwidth=960';
-  const rep = await fetch(url);
+  const rep = await fetchAvecTimeout(url);
   const d = await rep.json();
   const pages = (d.query || {}).pages || {};
   return Object.values(pages)
@@ -2749,12 +2763,14 @@ $('st-import-fichier').addEventListener('change', async e => {
     // M1 : whitelist des statuts — toute valeur invalide → inconnu (jamais comestible)
     const STATUTS_OK = ['comestible', 'immangeable', 'toxique', 'mortel', 'inconnu'];
     const statutSain = s => STATUTS_OK.includes(s) ? s : 'inconnu';
-    // C2 : URLs d'images validées — data:image, img/ local ou https:// (jamais javascript:)
+    // C2 + S1 (audit 2026-08) : URLs d'images validées — data:image, img/ local ou https:// (jamais javascript:).
+    // S1 : les motifs https:// et data:image sont ancrés AUX DEUX EXTRÉMITÉS et excluent " ' < > et espaces,
+    // sinon une URL comme https://a/x.jpg" onerror="…  passait intacte et s'injectait dans <img src>.
     const imgSaine = u => {
       if (typeof u !== 'string' || !u) return null;
-      if (/^data:image\/(jpeg|png|webp);base64,/.test(u)) return u;
+      if (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(u)) return u;
       if (/^img\/[A-Za-z0-9._/-]+$/.test(u)) return u;
-      if (/^https:\/\//.test(u)) return u;
+      if (/^https:\/\/[^\s"'<>]+$/.test(u)) return u;
       return null;
     };
     const spots = data.spots.map(s => ({ ...s, id: assainirId(s.id), nom: String(s.nom || ''), photo: imgSaine(s.photo) }));
@@ -2811,8 +2827,8 @@ $('st-import-fichier').addEventListener('change', async e => {
       d.cueillettes.map(c => Stockage.ecrire('cueillettes', c)),
       d.especes.map(x => Stockage.ecrire('especes', x)),
       d.illustrations.map(x => Stockage.ecrire('illustrations', x)),
-      d.cachees.map(id => Stockage.ecrire('caches', { id })),
-      d.supprimees.map(id => Stockage.ecrire('supprimees', { id })),
+      d.cachees.map(x => Stockage.ecrire('caches', x)),
+      d.supprimees.map(x => Stockage.ecrire('supprimees', x)),
       d.tombes.map(t => Stockage.ecrire('supprimees', { id: t.id, nom: t.nom, latin: t.latin, statut: t.statut, prudence: t.prudence })),
       d.checklist.map(x => Stockage.ecrire('checklist', x))
     ));
@@ -2917,7 +2933,7 @@ function rendreCredits() {
       '<div style="border:3px solid var(--noir);border-radius:14px 14px 14px 4px;padding:10px;margin-bottom:8px;background:var(--blanc)">' +
       '<div style="font-weight:700;font-size:13.5px">' + esc(c.espece || c.fichier || '') + '</div>' +
       '<div style="font-size:12.5px;opacity:.85;margin-top:2px">📷 ' + esc(c.auteur || 'Auteur inconnu') + ' · ' + esc(c.licence || '') + '</div>' +
-      (c.page ? '<a href="' + esc(c.page) + '" target="_blank" rel="noopener" style="font-size:12px;color:var(--cuir);font-weight:700">Voir sur Commons ↗</a>' : '') +
+      ((c.page && /^https?:\/\//.test(c.page)) ? '<a href="' + esc(c.page) + '" target="_blank" rel="noopener" style="font-size:12px;color:var(--cuir);font-weight:700">Voir sur Commons ↗</a>' : '') +
       '</div>'
     ).join('');
   });
