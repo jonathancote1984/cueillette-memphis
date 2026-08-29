@@ -1,9 +1,8 @@
 /* Service worker — cache-first PWA (édition Memphis).
    ⚠️ RÈGLE : à CHAQUE mise à jour de l'app, AUGMENTEZ le numéro de CACHE.
    Le bump IS le mécanisme de mise à jour pour les utilisateurs. */
-const CACHE = 'cqm-v66';
+const CACHE = 'cqm-v67';
 const FICHIERS = [
-  './',
   './index.html',
   './manifest.json',
   './icons/icon-192.png',
@@ -50,11 +49,6 @@ const FICHIERS = [
   './img/specs/cepe-3.jpg',
   './img/specs/cepe-4.jpg',
   './img/specs/cepe-5.jpg',
-  './img/specs/chanterelle-1.jpg',
-  './img/specs/chanterelle-2.jpg',
-  './img/specs/chanterelle-3.jpg',
-  './img/specs/chanterelle-4.jpg',
-  './img/specs/chanterelle-5.jpg',
   './img/specs/chanterelle-tube-1.jpg',
   './img/specs/chanterelle-tube-2.jpg',
   './img/specs/chanterelle-tube-3.jpg',

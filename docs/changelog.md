@@ -25,6 +25,32 @@ résume les grandes itérations ; `git log` reste la référence exacte.
 - **`— SW bump cqm-vN`** en fin de message de commit : la livraison a changé un fichier servi,
   donc le cache a été incrémenté.
 
+## Août 2026 — QA navigateur complète (v62 à v66)
+
+Audit fonctionnel/visuel/qualité/sécurité exécuté dans un vrai navigateur, au-delà de l'audit
+statique. Correctifs appliqués :
+
+- **CSP `worker-src 'self'`** : le service worker ne se ré-enregistrait plus sur les nouvelles
+  installations (le hors-ligne de la PWA était cassé).
+- **Import JSON** : `ecrireTout` enveloppait `cachees`/`supprimees` en objet de clé IDB → tout
+  import contenant des espèces masquées/supprimées échouait. Corrigé.
+- **XSS stocké (S1)** : `imgSaine` n'ancrait que le début d'URL → une photo importée
+  `https://…" onerror="…` exécutait du code et lisait la clé Gemini. `imgSaine` durci (ancré
+  des 2 côtés, rejet de `" ' < >` et espaces).
+- **CSP `connect-src`** : `upload.wikimedia.org` ajouté (les photos Wikimedia étaient stockées
+  en URL distante, hors-ligne cassé + fuite IP) ; `img-src` restreint aux hôtes réels.
+- **Fail-safe alimentaire** : `badgeStatut` — `prudence` n'écrase plus un statut
+  `mortel`/`toxique`/`immangeable` (une variété MORTELLE ne s'affiche plus « comestible — prudence »).
+- **Filet de noms (C-1)** : le Levenshtein compare désormais aussi le nom **sans parenthèse** —
+  une faute de frappe (« gyromitte ») ne fait plus perdre le badge MORTEL à `gyromitre (fausse morille)`.
+- **Saisie du poids** : champ en `inputmode="decimal"` — `1,5` vaut bien `1,5` kg (et non 15 kg).
+- **Robustesse** : media query ≤380px (nav 5 onglets), `flex-wrap` des étapes, timeout sur les
+  fetch Wikimedia, `aria-label` (recherche, clé, navigation), alias sémantiques de palette
+  (`--rouille`, `--terracotta`).
+- **Photos** : les 5 `specs/chanterelle-1..5.jpg` (crédits Wikimedia absents) ont été **retirées**
+  pour rester conforme aux licences ; les 100 photos restantes recompressées/réduites à 720 px
+  (≈ 14 Mo, −35 %).
+
 ## Août 2026 — fondations (cqm-v1 à v10)
 
 - Première version : PWA de cueillette refaite de zéro, spots avec GPS, guide de 21 espèces

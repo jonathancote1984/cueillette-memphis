@@ -22,11 +22,8 @@
 }
 :root{
   --creme:#F3E8D5; --noir:#241A0F; --blanc:#FDF6E7;
-  --rouge:#B3261E; --jaune:#D9A441; --bleu:#8A5A2B; --rose:#B94527;
-  --vert:#6F8F3E; --orange:#B45309; --gris:#A89882;
+  --rouge:#B3261E; --gris:#A89882;
   --ambre:#D9A441; --olive:#6F8F3E; --cuir:#8A5A2B;
-  /* WF-11 (audit design) : alias sémantiques manquants — le code utilisait encore
-     --orange/#B45309 (rouille) et --rose/#B94527 (terracotta), noms issus de l'ancienne palette. */
   --rouille:#B45309; --terracotta:#B94527;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -52,7 +49,7 @@ header .titre-ligne{display:flex; align-items:center; gap:12px; padding-bottom:1
 header h1{
   margin:0; font-size:21px; font-weight:700; letter-spacing:.2px; line-height:1.1;
   transform:rotate(-1.5deg); display:inline-block;
-  text-shadow:2px 2px 0 var(--rose); text-wrap:balance;
+  text-shadow:2px 2px 0 var(--terracotta); text-wrap:balance;
 }
 header .sous{margin:2px 0 0; font-size:12.5px; font-weight:700; color:var(--noir); opacity:1;}
 header .pastille{
@@ -94,7 +91,7 @@ nav.tabs button.actif{transform:translateY(-4px);}
 nav.tabs button.actif::before{
   content:''; position:absolute; top:-3px; left:50%; transform:translateX(-50%) rotate(2deg);
   width:44px; height:6px; border:3px solid var(--noir); border-bottom:0; border-radius:8px 8px 0 0;
-  background:var(--jaune);
+  background:var(--ambre);
 }
 nav.tabs button:nth-child(1).actif{color:#0B6E96;}
 nav.tabs button:nth-child(2).actif{color:#B3540B;}
@@ -104,7 +101,7 @@ nav.tabs button:nth-child(5).actif{color:#7A5C2E;}
 .fab{
   position:fixed; right:18px; bottom:calc(84px + env(safe-area-inset-bottom)); z-index:55;
   width:60px; height:60px; border-radius:999px;
-  background:var(--rose); color:var(--blanc); border:3px solid var(--noir);
+  background:var(--terracotta); color:var(--blanc); border:3px solid var(--noir);
   font-size:30px; font-weight:700; line-height:1;
   box-shadow:4px 4px 0 var(--noir); cursor:pointer;
   display:flex; align-items:center; justify-content:center;
@@ -138,7 +135,7 @@ h2.titre-vue .ico{font-size:20px;}
 .item .vig{
   width:88px; min-height:92px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center; font-size:36px;
-  background:repeating-linear-gradient(45deg, var(--jaune), var(--jaune) 8px, var(--blanc) 8px, var(--blanc) 16px);
+  background:repeating-linear-gradient(45deg, var(--ambre), var(--ambre) 8px, var(--blanc) 8px, var(--blanc) 16px);
   border-right:3px solid var(--noir);
 }
 .item .vig img{width:100%; height:100%; object-fit:cover; outline:1px solid rgba(0,0,0,.1); outline-offset:-1px;}
@@ -158,10 +155,10 @@ h2.titre-vue .ico{font-size:20px;}
 .btn:disabled{opacity:.55; cursor:not-allowed; box-shadow:2px 2px 0 var(--noir);}
 .btn-plein{width:100%; padding:13px; font-size:15.5px;}
 .btn-rouge{background:var(--rouge); color:var(--blanc);}
-.btn-bleu{background:var(--bleu); color:var(--blanc);}
-.btn-vert{background:var(--vert); color:var(--noir);}
-.btn-jaune{background:var(--jaune); color:var(--noir);}
-.btn-rose{background:var(--rose); color:var(--blanc);}
+.btn-bleu{background:var(--cuir); color:var(--blanc);}
+.btn-vert{background:var(--olive); color:var(--noir);}
+.btn-jaune{background:var(--ambre); color:var(--noir);}
+.btn-rose{background:var(--terracotta); color:var(--blanc);}
 .btn-gris{background:var(--gris); color:var(--noir);}
 .btn-petit{padding:10px 14px; font-size:13px; box-shadow:2px 2px 0 var(--noir); min-height:44px; display:inline-flex; align-items:center; justify-content:center;}
 .btn.actif{outline:3px solid var(--noir); outline-offset:2px; transform:rotate(-1deg);}
@@ -184,8 +181,8 @@ h2.titre-vue .ico{font-size:20px;}
   background:var(--blanc); color:var(--noir); outline:none;
   box-shadow:inset 2px 2px 0 rgba(31,26,23,.08);
 }
-.champ input:focus, .champ select:focus, .champ textarea:focus, .saisie:focus{box-shadow:0 0 0 3px var(--jaune), inset 2px 2px 0 rgba(31,26,23,.08);}
-.btn:focus-visible, .puce:focus-visible, .item:focus-visible, .fab:focus-visible, nav.tabs button:focus-visible, .btn-retour:focus-visible, .etape:focus-visible{outline:3px solid var(--noir); outline-offset:2px; box-shadow:0 0 0 3px var(--jaune);}
+.champ input:focus, .champ select:focus, .champ textarea:focus, .saisie:focus{box-shadow:0 0 0 3px var(--ambre), inset 2px 2px 0 rgba(31,26,23,.08);}
+.btn:focus-visible, .puce:focus-visible, .item:focus-visible, .fab:focus-visible, nav.tabs button:focus-visible, .btn-retour:focus-visible, .etape:focus-visible{outline:3px solid var(--noir); outline-offset:2px; box-shadow:0 0 0 3px var(--ambre);}
 .champ textarea{resize:vertical; min-height:64px;}
 .grille2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
 /* ===== Photo ===== */
@@ -203,10 +200,10 @@ h2.titre-vue .ico{font-size:20px;}
   display:inline-block; padding:3px 11px; border-radius:999px; font-size:11.5px; font-weight:700;
   border:2.5px solid var(--noir); white-space:nowrap; transform:rotate(-1.5deg);
 }
-.st-comestible{background:var(--vert);}
-.st-prudence{background:var(--jaune);}
+.st-comestible{background:var(--olive);}
+.st-prudence{background:var(--ambre);}
 .st-immangeable{background:var(--gris);}
-.st-toxique{background:var(--orange); color:var(--blanc);}
+.st-toxique{background:var(--rouille); color:var(--blanc);}
 .st-mortel{background:var(--rouge); color:var(--blanc);}
 .st-inconnu{background:var(--gris);}
 /* ===== Alertes ===== */
@@ -224,7 +221,7 @@ h2.titre-vue .ico{font-size:20px;}
 .alerte-orange{background:#F4E3C3;}
 .alerte-orange::after{
   content:''; position:absolute; right:-10px; bottom:-10px; width:34px; height:34px;
-  background:var(--orange); border:3px solid var(--noir); transform:rotate(14deg);
+  background:var(--rouille); border:3px solid var(--noir); transform:rotate(14deg);
 }
 /* Encart d'aide (neutre, sans le losange « Prudence » réservé aux alertes) */
 .encart-aide{
@@ -252,7 +249,7 @@ h2.titre-vue .ico{font-size:20px;}
 .boite-confirm.visible{transform:translate(-50%,-50%) scale(1); opacity:1; pointer-events:auto; visibility:visible; transition:transform .22s cubic-bezier(.2,1.5,.4,1), opacity .2s, visibility 0s;}
 .boite-confirm h3{
   margin:0 0 8px; font-size:16.5px; font-weight:700; display:inline-block;
-  background:var(--jaune); border:3px solid var(--noir); border-radius:12px 12px 12px 4px;
+  background:var(--ambre); border:3px solid var(--noir); border-radius:12px 12px 12px 4px;
   padding:4px 14px; transform:rotate(-1.5deg); box-shadow:3px 3px 0 var(--noir);
 }
 .boite-confirm p{margin:12px 0 18px; font-size:14.5px; font-weight:500; line-height:1.55;}
@@ -299,7 +296,7 @@ h2.titre-vue .ico{font-size:20px;}
 }
 .feuille .poignee::after{content:''; position:absolute; inset:-14px 0;}
 .feuille h3{margin:0 0 14px; font-size:18px; font-weight:700; display:inline-block;
-  background:var(--jaune); border:3px solid var(--noir); border-radius:12px 12px 12px 4px;
+  background:var(--ambre); border:3px solid var(--noir); border-radius:12px 12px 12px 4px;
   padding:4px 12px; transform:rotate(-1deg); box-shadow:3px 3px 0 var(--noir);}
 /* ===== Étapes progressives (feuille variété) ===== */
 .etapes-espece{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:2px 0 14px;}
@@ -312,44 +309,44 @@ h2.titre-vue .ico{font-size:20px;}
 .etape:active{transform:translate(2px,2px); box-shadow:0 0 0 var(--noir);}
 .etape .num{background:var(--noir); color:var(--creme); border-radius:999px; width:21px; height:21px;
   display:inline-flex; align-items:center; justify-content:center; font-size:11.5px; flex-shrink:0;}
-.etape.actif{background:var(--jaune); transform:rotate(-1.5deg);}
+.etape.actif{background:var(--ambre); transform:rotate(-1.5deg);}
 .etape.actif .num{background:var(--rouge); color:var(--blanc);}
 .etape-fleche{font-weight:700; font-size:15px; opacity:.6;}
 /* ===== Stats ===== */
 .stat-grille{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;}
 .stat-carte{
   border:3px solid var(--noir); border-radius:18px 18px 18px 5px; padding:14px 10px; text-align:center;
-  box-shadow:5px 5px 0 var(--noir); background:var(--jaune);
+  box-shadow:5px 5px 0 var(--noir); background:var(--ambre);
 }
-.stat-carte:nth-child(2){background:var(--bleu); color:var(--blanc);}
-.stat-carte:nth-child(3){background:var(--vert);}
-.stat-carte:nth-child(4){background:var(--rose); color:var(--blanc);}
+.stat-carte:nth-child(2){background:var(--cuir); color:var(--blanc);}
+.stat-carte:nth-child(3){background:var(--olive);}
+.stat-carte:nth-child(4){background:var(--terracotta); color:var(--blanc);}
 .stat-carte .valeur{font-size:24px; font-weight:700; margin-top:3px; line-height:1.1; font-variant-numeric:tabular-nums;}
 .stat-carte .libelle{font-size:12px; font-weight:700; opacity:1;}
 .stat-carte:nth-child(2) .libelle, .stat-carte:nth-child(3) .libelle, .stat-carte:nth-child(4) .libelle{opacity:1;}
 .rang{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:3px dashed var(--noir); font-size:14px; font-weight:600;}
 .rang:last-child{border-bottom:0;}
 .rang .pos{
-  width:26px; height:26px; border-radius:10px; background:var(--jaune); border:2.5px solid var(--noir);
+  width:26px; height:26px; border-radius:10px; background:var(--ambre); border:2.5px solid var(--noir);
   font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
   box-shadow:2px 2px 0 var(--noir);
 }
-.rang:nth-child(4n+2) .pos{background:var(--bleu); color:var(--blanc);}
-.rang:nth-child(4n+3) .pos{background:var(--vert);}
-.rang:nth-child(4n+4) .pos{background:var(--rose); color:var(--blanc);}
+.rang:nth-child(4n+2) .pos{background:var(--cuir); color:var(--blanc);}
+.rang:nth-child(4n+3) .pos{background:var(--olive);}
+.rang:nth-child(4n+4) .pos{background:var(--terracotta); color:var(--blanc);}
 .rang .nom-rang{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .rang .valeur-rang{font-weight:700; font-variant-numeric:tabular-nums;}
 .barre-fond{background:var(--creme); border:2.5px solid var(--noir); border-radius:999px; height:12px; margin-top:6px; overflow:hidden;}
-.barre-fond .barre{height:100%; border-radius:999px; background:var(--jaune); min-width:3px;}
+.barre-fond .barre{height:100%; border-radius:999px; background:var(--ambre); min-width:3px;}
 .mois-grille{display:flex; align-items:flex-end; gap:5px; height:140px; padding-top:8px;}
 .mois-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end;}
 .mois-col .tige{width:100%; border:2.5px solid var(--noir); border-bottom:0; border-radius:8px 8px 0 0; min-height:4px;}
 .mois-col .lab{font-size:10.5px; font-weight:700; opacity:1;}
 /* ===== Détail guide ===== */
 .detail-kv{font-size:14px; line-height:1.65; font-weight:500; text-wrap:pretty;}
-.detail-kv b{background:var(--jaune); padding:0 5px; border-radius:5px;}
+.detail-kv b{background:var(--ambre); padding:0 5px; border-radius:5px;}
 .guide-sujet{font-size:13px; font-weight:700; margin:14px 0 4px; display:inline-block;
-  background:var(--bleu); color:var(--blanc); border:2.5px solid var(--noir); border-radius:8px 8px 8px 3px; padding:2px 9px;}
+  background:var(--cuir); color:var(--blanc); border:2.5px solid var(--noir); border-radius:8px 8px 8px 3px; padding:2px 9px;}
 .carac-list{margin:4px 0 0; padding-left:22px; line-height:1.7; font-size:14.5px;}
 .ligne-latin{font-style:italic; opacity:.85; font-size:13px; margin:2px 0 10px;}
 .detail-img{width:100%; max-height:280px; object-fit:cover; border:3px solid var(--noir); border-radius:16px 16px 16px 5px; box-shadow:4px 4px 0 var(--noir); margin-bottom:14px; display:block; background:var(--creme); outline:1px solid rgba(0,0,0,.1); outline-offset:-1px;}
@@ -362,8 +359,8 @@ h2.titre-vue .ico{font-size:20px;}
   position:fixed; left:50%; bottom:calc(104px + env(safe-area-inset-bottom)); z-index:99;
   transform:translateX(-50%) translateY(20px); opacity:0; transition:transform .25s, opacity .25s;
   background:var(--noir); color:var(--creme); font-weight:700; font-size:14px;
-  border:3px solid var(--jaune); border-radius:999px; padding:11px 20px;
-  box-shadow:4px 4px 0 var(--rose); max-width:88%; text-align:center;
+  border:3px solid var(--ambre); border-radius:999px; padding:11px 20px;
+  box-shadow:4px 4px 0 var(--terracotta); max-width:88%; text-align:center;
 }
 #toast.visible{transform:translateX(-50%) translateY(0); opacity:1;}
 @media (prefers-reduced-motion: reduce){
@@ -541,7 +538,7 @@ h2.titre-vue .ico{font-size:20px;}
 </div>
 
 <!-- ===== FEUILLE SPOT ===== -->
-<section class="feuille" id="sheet-spot">
+<section class="feuille" id="sheet-spot" role="dialog" aria-modal="true" aria-label="Nouveau spot">
   <div class="poignee"></div>
   <h3 id="titre-spot">➕ Nouveau spot</h3>
   <label class="champ">Nom du spot
@@ -583,7 +580,7 @@ h2.titre-vue .ico{font-size:20px;}
 </section>
 
 <!-- ===== FEUILLE CUEILLETTE ===== -->
-<section class="feuille" id="sheet-cueillette">
+<section class="feuille" id="sheet-cueillette" role="dialog" aria-modal="true" aria-label="Nouvelle cueillette">
   <div class="poignee"></div>
   <h3 id="titre-cueillette">➕ Nouvelle cueillette</h3>
   <div class="grille2">
@@ -631,7 +628,7 @@ h2.titre-vue .ico{font-size:20px;}
 </section>
 
 <!-- ===== FEUILLE ESPÈCE (variétés perso + IA) — 2 étapes progressives ===== -->
-<section class="feuille" id="sheet-espece">
+<section class="feuille" id="sheet-espece" role="dialog" aria-modal="true" aria-label="Nouvelle variété">
   <div class="poignee"></div>
   <h3 id="titre-espece">➕ Nouvelle variété</h3>
   <div class="etapes-espece" role="tablist" aria-label="Étapes de la fiche" id="etapes-tablist">
@@ -711,7 +708,7 @@ h2.titre-vue .ico{font-size:20px;}
 </section>
 
 <!-- ===== FEUILLE RESTAURATION SÉLECTIVE ===== -->
-<section class="feuille" id="sheet-restaurer">
+<section class="feuille" id="sheet-restaurer" role="dialog" aria-modal="true" aria-label="Restaurer des espèces">
   <div class="poignee"></div>
   <h3>↩️ Restaurer des espèces</h3>
   <p class="note" style="margin:-4px 0 12px">Cochez les espèces à faire réapparaître dans le guide, puis confirmez.</p>
@@ -723,7 +720,7 @@ h2.titre-vue .ico{font-size:20px;}
 </section>
 
 <!-- ===== FEUILLE ILLUSTRATIONS IA PAR SPÉCIFICITÉ ===== -->
-<section class="feuille" id="sheet-illu">
+<section class="feuille" id="sheet-illu" role="dialog" aria-modal="true" aria-label="Illustrations IA">
   <div class="poignee"></div>
   <h3>🎨 Illustrations IA</h3>
   <p class="note" style="margin:-4px 0 12px">Pour <b id="illu-espece-nom"></b> — générez une image par spécificité à repérer (chapeau, lames, pied, section, habitat…).</p>
@@ -739,7 +736,7 @@ h2.titre-vue .ico{font-size:20px;}
 </section>
 
 <!-- ===== FEUILLE CRÉDITS PHOTOS ===== -->
-<section class="feuille" id="sheet-credits">
+<section class="feuille" id="sheet-credits" role="dialog" aria-modal="true" aria-label="Crédits photos">
   <div class="poignee"></div>
   <h3>📸 Crédits photos</h3>
   <p class="note" style="margin:-4px 0 12px">Photos de Wikimedia Commons (licences libres CC). Merci aux photographes !</p>
@@ -750,7 +747,7 @@ h2.titre-vue .ico{font-size:20px;}
 </section>
 
 <!-- ===== FEUILLE IDENTIFICATION PAR PHOTO ===== -->
-<section class="feuille" id="sheet-idphoto">
+<section class="feuille" id="sheet-idphoto" role="dialog" aria-modal="true" aria-label="Identification par photo">
   <div class="poignee"></div>
   <h3>🔍 Identification par photo</h3>
   <div id="idphoto-contenu"></div>
@@ -2003,8 +2000,8 @@ function ouvrirSheetRestaurer() {
   const masquees = [...ESPECES, ...Etat.especesCustom].filter(e => Etat.cachees.includes(e.id) && !Etat.supprimees.includes(e.id));
   $('restaurer-liste').innerHTML = masquees.length ? masquees.map(e =>
     '<label class="item-restaurer" style="display:flex;align-items:center;gap:10px;padding:9px;border:3px solid var(--noir);border-radius:14px 14px 14px 4px;margin-bottom:10px;background:var(--blanc);cursor:pointer">' +
-    '<input type="checkbox" class="chk-restaurer" value="' + e.id + '" checked style="width:22px;height:22px;flex-shrink:0;accent-color:var(--orange)">' +
-    '<span class="vig" style="width:50px;min-height:50px;font-size:22px;border-radius:10px;border:2.5px solid var(--noir);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;background:repeating-linear-gradient(45deg,var(--jaune),var(--jaune) 6px,var(--blanc) 6px,var(--blanc) 12px)">' +
+    '<input type="checkbox" class="chk-restaurer" value="' + e.id + '" checked style="width:22px;height:22px;flex-shrink:0;accent-color:var(--rouille)">' +
+    '<span class="vig" style="width:50px;min-height:50px;font-size:22px;border-radius:10px;border:2.5px solid var(--noir);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;background:repeating-linear-gradient(45deg,var(--ambre),var(--ambre) 6px,var(--blanc) 6px,var(--blanc) 12px)">' +
     (e.img ? '<img src="' + e.img + '" style="width:100%;height:100%;object-fit:cover" alt="">' : '🍄') + '</span>' +
     '<span style="font-weight:700;font-size:14px">' + esc(e.nom) + '</span>' +
     '</label>'
@@ -2224,11 +2221,11 @@ let illuEspeceId = null;
 // Chaque entrée : { spec: libellé court, desc: ce qu'il faut VÉRIFIER sur le champignon, img: photo réelle (optionnel) }
 const SPECS_DEFAUT = {
   chanterelle: [
-    { spec: 'Chapeau — entonnoir orangé', desc: 'Ondulé, 3–10 cm, jaune vif, marge enroulée quand jeune. Vérifiez la forme en entonnoir et la couleur.', img: 'img/specs/chanterelle-1.jpg' },
-    { spec: 'Dessous — VEINES, pas de lames', desc: 'Critère décisif : veines épaisses et ramifiées descendant sur le pied. Une vraie chanterelle n\'a JAMAIS de lames fines et serrées.', img: 'img/specs/chanterelle-2.jpg' },
-    { spec: 'Pied — plein, sans anneau', desc: 'Concolore au chapeau, plein (pas creux), sans anneau ni volve à la base.', img: 'img/specs/chanterelle-3.jpg' },
-    { spec: 'Odeur — d\'abricot', desc: 'Chair ferme, blanche à jaunâtre, odeur fruitée d\'abricot. Sentez le pied fraîchement coupé.', img: 'img/specs/chanterelle-4.jpg' },
-    { spec: 'Habitat — feuillus, mousse', desc: 'Sous érables et bouleaux, dans la mousse, souvent en groupes. Juillet à octobre.', img: 'img/specs/chanterelle-5.jpg' }
+    { spec: 'Chapeau — entonnoir orangé', desc: 'Ondulé, 3–10 cm, jaune vif, marge enroulée quand jeune. Vérifiez la forme en entonnoir et la couleur.' },
+    { spec: 'Dessous — VEINES, pas de lames', desc: 'Critère décisif : veines épaisses et ramifiées descendant sur le pied. Une vraie chanterelle n\'a JAMAIS de lames fines et serrées.' },
+    { spec: 'Pied — plein, sans anneau', desc: 'Concolore au chapeau, plein (pas creux), sans anneau ni volve à la base.' },
+    { spec: 'Odeur — d\'abricot', desc: 'Chair ferme, blanche à jaunâtre, odeur fruitée d\'abricot. Sentez le pied fraîchement coupé.' },
+    { spec: 'Habitat — feuillus, mousse', desc: 'Sous érables et bouleaux, dans la mousse, souvent en groupes. Juillet à octobre.' }
   ],
   'chanterelle-tube': [
     { spec: 'Chapeau (brun, creux)', desc: 'Petit chapeau brunâtre à centre creux, forme en entonnoir.', img: 'img/specs/chanterelle-tube-1.jpg' },
@@ -2617,7 +2614,7 @@ async function analyserPhoto(dataUrl) {
       '<div class="carte">' +
       '<div class="nom" style="font-weight:700;font-size:16.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">🍄 ' + esc(r.espece) + ' ' + (afficheComestible ? badgeStatut(r.statut, false) + (horsGuide ? ' <span class="pastille-statut st-inconnu">⚠️ hors guide</span>' : '') : (fiable && prudente ? badgeStatut('prudence', false) : '<span class="pastille-statut st-inconnu">⚠️ À vérifier</span>')) + '</div>' +
       (r.latin ? '<div class="ligne-latin">' + esc(r.latin) + '</div>' : '') +
-      (confiance !== null ? '<div class="meta" style="margin:2px 0 8px">Confiance : <b>' + Math.round(confiance) + ' %</b>' + (aVerifier || (fiable && prudente) ? ' — <b style="color:var(--orange)">vérifiez avec le guide</b>' : '') + '</div>' : '') +
+      (confiance !== null ? '<div class="meta" style="margin:2px 0 8px">Confiance : <b>' + Math.round(confiance) + ' %</b>' + (aVerifier || (fiable && prudente) ? ' — <b style="color:var(--rouille)">vérifiez avec le guide</b>' : '') + '</div>' : '') +
       alerteStatut(r.statut, prudente) +
       (aVerifier
         ? '<div class="alerte alerte-orange">⚠️ <b>Vérifiez avec le guide avant de consommer :</b> la confiance est insuffisante pour une identification formelle. En cas de doute, on ne mange pas.</div>'
@@ -2697,7 +2694,7 @@ function rendreStats() {
   Etat.cueillettes.forEach(c => { if (c.spotId) { const n = nomSpot(c.spotId) || 'Sans spot'; parSpot[n] = (parSpot[n] || 0) + (c.poids || 0); } });
   const topS = Object.entries(parSpot).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const maxS = topS.length ? topS[0][1] : 1;
-  $('st-spots').innerHTML = topRangs(topS, maxS, 'var(--rose)');
+  $('st-spots').innerHTML = topRangs(topS, maxS, 'var(--terracotta)');
   const mois = new Array(12).fill(0);
   Etat.cueillettes.forEach(c => {
     const m = parseInt((c.date || '').split('-')[1], 10);

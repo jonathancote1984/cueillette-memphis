@@ -29,7 +29,7 @@ Le carnet vit sur le téléphone, sans compte ni serveur : les données ne quitt
 
 - Spots : nom, description, GPS (précision affichée), photo, lien Google Maps.
 - Guide : 21 espèces avec photos Wikimedia embarquées, badges comestible / prudence / immangeable / toxique / MORTEL ☠️, saison, habitat, caractéristiques clés, confusions dangereuses.
-- Fiches hybrides : 5 spécificités d'identification par espèce (chapeau, hyménium, pied, chair, habitat) avec photo réelle embarquée (105 photos Wikimedia dans `img/specs/`), description de ce qu'il faut vérifier, checklist terrain interactive (cases à cocher, compteur, verdict ⚠️/✅) persistée localement.
+- Fiches hybrides : 5 spécificités d'identification par espèce (chapeau, hyménium, pied, chair, habitat) avec photo réelle embarquée (100 photos Wikimedia dans `img/specs/`), description de ce qu'il faut vérifier, checklist terrain interactive (cases à cocher, compteur, verdict ⚠️/✅) persistée localement.
 - Identification par photo : Gemini vision (appareil ou galerie), avec niveau de confiance et alertes de sécurité.
 - Variétés perso : ajout / modification / suppression, masquage / restauration sélective, fiche générée par IA (Gemini), photo Wikimedia Commons ou illustration IA (par spécificité : chapeau, lames, pied, section, habitat).
 - Cueillettes : date, espèce (suggestions + libre), poids kg (virgule acceptée), spot lié, météo, note, photo.
@@ -52,7 +52,7 @@ Le carnet vit sur le téléphone, sans compte ni serveur : les données ne quitt
 ## Evidence on Hand
 
 - Photos réelles des 21 espèces dans `img/especes/` avec crédits Wikimedia (`credits.json`).
-- 105 photos de spécificités dans `img/specs/` (21 espèces × 5 critères) avec crédits Wikimedia (`credits.json`).
+- 100 photos de spécificités dans `img/specs/` (21 espèces × 5 critères) avec crédits Wikimedia (`credits.json`).
 - Icônes PWA (`icons/`), scripts de génération (`generer_icones.py`, `scripts/telecharger_photos.py`).
 - README documenté. Aucun témoignage ni donnée utilisateur publique — les données sont privées et locales.
 

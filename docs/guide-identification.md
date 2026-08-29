@@ -28,7 +28,7 @@ qu'un cueilleur peut observer sur place, dans cet ordre :
 | 4 | **Chair et odeur** | couleur à la coupe, changement de couleur, odeur |
 | 5 | **Habitat** | sol ou bois, essences d'arbres autour, mousse, saison |
 
-Chaque critère est illustré par une photo réelle (105 photos embarquées : 21 espèces
+Chaque critère est illustré par une photo réelle (100 photos embarquées : 21 espèces
 × 5 critères) et accompagné de la description de ce qu'il faut vérifier. Les cases cochées
 sont conservées localement d'une session à l'autre.
 

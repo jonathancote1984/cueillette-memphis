@@ -66,7 +66,7 @@ fichiers ne sont pas mis en cache par le service worker.
 **Ce que le bump déclenche**
 
 1. `install` : le socle critique (page, manifeste, icônes, 21 photos d'espèces, JSON de
-   crédits, `img/mycoquebec.json`, police) est mis en cache avec `addAll` ; les 105 photos de
+   crédits, `img/mycoquebec.json`, police) est mis en cache avec `addAll` ; les 100 photos de
    spécificités sont ajoutées une à une, les échecs étant tolérés — une image manquante ne
    casse plus l'installation.
 2. `activate` : tous les caches nommés `cqm-*` autres que le courant sont supprimés, puis

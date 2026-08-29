@@ -45,7 +45,7 @@ Exemple d'entrée :
 
 ## Photos des spécificités
 
-- Emplacement : `img/specs/` — **105 photos** (21 espèces × 5 critères : chapeau, hyménium,
+- Emplacement : `img/specs/` — **100 photos** (21 espèces × 5 critères : chapeau, hyménium,
   pied, chair et odeur, habitat).
 - Source : Wikimedia Commons, récupérées par terme de recherche selon la partie visée.
 - Attribution : `img/specs/credits.json`, même structure que ci-dessus, avec l'identifiant
@@ -97,7 +97,7 @@ Vérification faite sur l'état actuel du dépôt :
 | Dossier | Fichiers | Entrées de crédit | État |
 |---|---|---|---|
 | `img/especes/` | 21 photos | 21 | complet |
-| `img/specs/` | 105 photos | 100 | **5 entrées manquantes** : `chanterelle-1` à `chanterelle-5` |
+| `img/specs/` | 100 photos | 100 | **0 manquante** (photos `chanterelle-1..5` retirées, crédits absents) |
 
 À faire : retrouver la provenance des cinq photos de spécificités de la chanterelle commune et
 compléter `img/specs/credits.json`, ou remplacer ces images par des fichiers dont

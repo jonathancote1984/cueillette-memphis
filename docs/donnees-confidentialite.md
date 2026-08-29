@@ -46,7 +46,7 @@ n'est pas disponible) :
 | `cqm_exporte` | date du dernier export, pour le rappel de sauvegarde |
 
 **Caches du service worker** — nommés `cqm-vN` : l'app, le manifeste, les icônes, la police
-et les 126 photos embarquées. Aucune donnée personnelle ne s'y trouve.
+et les 121 photos embarquées. Aucune donnée personnelle ne s'y trouve.
 
 ## Photos : ré-encodage local
 

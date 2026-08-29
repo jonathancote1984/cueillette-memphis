@@ -21,7 +21,7 @@ statiques. Il faut seulement :
 - un hébergement statique en **HTTPS** (GitHub Pages fait la job) ou `localhost` pour les
   tests — le service worker refuse de s'enregistrer sur `file://` et en HTTP non local ;
 - un navigateur moderne : Chrome/Edge (Android, bureau) ou Safari 16+ (iOS) ;
-- environ **25 Mo** d'espace de cache sur l'appareil : l'app embarque 126 photos.
+- environ **25 Mo** d'espace de cache sur l'appareil : l'app embarque 121 photos.
 
 Facultatif :
 
@@ -69,7 +69,7 @@ L'app s'ouvre alors en plein écran (`display: standalone`, orientation portrait
 statut ambre `#D9A441`), comme une app native.
 
 > **Important** : laisser la page ouverte quelques secondes à la première visite. Le service
-> worker télécharge et met en cache l'app, la police, les icônes et les 126 photos. Une fois
+> worker télécharge et met en cache l'app, la police, les icônes et les 121 photos. Une fois
 > l'installation du cache terminée, tout fonctionne sans réseau.
 
 ## Servir l'app en local
@@ -113,7 +113,7 @@ Ce qui se passe au bump :
 
 1. `install` — le nouveau service worker met en cache le socle critique (`./`,
    `index.html`, `manifest.json`, icônes, photos d'espèces, JSON de crédits,
-   `img/mycoquebec.json`, `fonts/fredoka.woff2`) avec `addAll`, puis les 105 photos de
+   `img/mycoquebec.json`, `fonts/fredoka.woff2`) avec `addAll`, puis les 100 photos de
    spécificités une par une en tolérant les échecs. Une image manquante ne casse plus
    l'installation.
 2. `activate` — tous les caches dont le nom commence par `cqm-` et qui ne sont pas le cache

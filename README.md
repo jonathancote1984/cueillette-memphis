@@ -33,7 +33,7 @@ Caractéristiques techniques principales :
 - PWA statique **mono-fichier** : toute l'app tient dans `index.html` (≈ 185 Ko), sans
   framework et sans étape de compilation.
 - Service worker `sw.js` en stratégie *cache-first* : l'app, les icônes, la police et les
-  126 photos embarquées sont disponibles hors-ligne dès la première visite.
+  121 photos embarquées sont disponibles hors-ligne dès la première visite.
 - Données locales seulement : IndexedDB `cqm_bd` (version 5) avec repli `localStorage`.
 - Fonctions d'IA **facultatives** (Google Gemini), activées uniquement si l'utilisateur
   colle sa propre clé API dans les paramètres.
@@ -144,7 +144,7 @@ données (clé API, photos, import/export).
 - **Code** : projet personnel, aucune licence explicite n'est déclarée dans le dépôt. Sans
   fichier `LICENSE`, tous droits réservés par défaut — ajouter une licence si le code doit
   être réutilisé.
-- **Photos** : les 21 photos d'espèces (`img/especes/`) et les 105 photos de spécificités
+- **Photos** : les 21 photos d'espèces (`img/especes/`) et les 100 photos de spécificités
   (`img/specs/`) proviennent de **Wikimedia Commons**, sous licences libres (CC0, CC BY,
   CC BY-SA). Auteur, licence et page source sont conservés dans
   `img/especes/credits.json` et `img/specs/credits.json`, et affichés dans l'app
@@ -166,7 +166,7 @@ Détail et état des crédits : [docs/licences-credits.md](docs/licences-credits
 | `icons/` | Icônes PWA 192/512 et maskable. |
 | `generer_icones.py` | Régénère les icônes (Pillow). |
 | `img/especes/` | 21 photos d'espèces + `credits.json`. |
-| `img/specs/` | 105 photos de spécificités (21 espèces × 5 critères) + `credits.json`. |
+| `img/specs/` | 100 photos de spécificités (21 espèces × 5 critères) + `credits.json`. |
 | `img/mycoquebec.json` | Base d'autocomplétion (3 938 entrées latin / nom français / miniature). |
 | `scripts/telecharger_photos.py` | Re-télécharge les photos depuis Wikimedia Commons. |
 | `DESIGN.md` | Système de design complet (source de vérité visuelle). |
