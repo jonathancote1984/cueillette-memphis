@@ -407,6 +407,11 @@ h2.titre-vue .ico{font-size:20px;}
   <!-- ===== SPOTS ===== -->
   <section class="vue visible" id="vue-spots">
     <h2 class="titre-vue"><span class="ico">📍</span> Mes spots</h2>
+    <div class="carte" style="margin-bottom:12px;background:var(--creme)">
+      <h3 style="margin:0 0 6px;font-size:16px">📘 Nouveau ici ?</h3>
+      <p class="note" style="margin:0 0 8px">Consultez le guide d'utilisation : spots, identification, journal, sauvegarde — expliqués simplement.</p>
+      <button class="btn btn-jaune btn-plein" id="btn-guide">📘 Ouvrir le guide</button>
+    </div>
     <div id="liste-spots"></div>
   </section>
 
@@ -2945,6 +2950,7 @@ function rendreCredits() {
 }
 $('p-credits').addEventListener('click', () => { rendreCredits(); ouvrirFeuille('sheet-credits'); });
 $('p-wiki').addEventListener('click', () => window.open('docs/', '_blank', 'noopener'));
+$('btn-guide').addEventListener('click', () => window.open('guide/', '_blank', 'noopener'));
 $('credits-fermer').addEventListener('click', fermerFeuilles);
 
 /* ================= Chargement ================= */
