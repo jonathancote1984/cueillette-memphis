@@ -38,4 +38,6 @@ Le verdict s'affiche en bas :
 L'app est un **outil d'aide**, pas un expert. Le guide ne couvre qu'une partie des champignons.
 **En cas de doute, on ne mange pas.** Faites vérifier votre récolte par un mycologue ou un pharmacien.
 
+> 🤖 Vous voulez utiliser l'identification par photo (IA) ? → [Obtenir une clé et l'utiliser](ia.md)
+
 [Noter une récolte →](cueillettes.md)

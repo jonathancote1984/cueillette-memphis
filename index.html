@@ -475,6 +475,7 @@ h2.titre-vue .ico{font-size:20px;}
       <h3 style="margin:0 0 10px">🔑 Clé API Gemini</h3>
       <input class="saisie" id="p-cle" type="password" placeholder="Collez votre clé API Gemini…" aria-label="Clé API Gemini" style="margin-bottom:8px">
       <p class="note">Clé gratuite sur <b>aistudio.google.com/apikey</b>. Stockée uniquement sur votre téléphone, jamais envoyée ailleurs que chez Google. Nécessaire pour l'identification par photo et les fiches par IA.</p>
+      <button class="btn btn-gris" id="p-cle-aide" style="margin-top:6px">❓ Comment obtenir et ajouter ma clé ?</button>
       <div class="grille2">
         <button class="btn btn-jaune" id="p-cle-save">💾 Enregistrer</button>
         <button class="btn btn-rouge" id="p-cle-effacer">🗑️ Effacer</button>
@@ -2951,6 +2952,7 @@ function rendreCredits() {
 $('p-credits').addEventListener('click', () => { rendreCredits(); ouvrirFeuille('sheet-credits'); });
 $('p-wiki').addEventListener('click', () => window.open('docs/', '_blank', 'noopener'));
 $('btn-guide').addEventListener('click', () => window.open('guide/', '_blank', 'noopener'));
+$('p-cle-aide').addEventListener('click', () => window.open('guide/#/ia', '_blank', 'noopener'));
 $('credits-fermer').addEventListener('click', fermerFeuilles);
 
 /* ================= Chargement ================= */
