@@ -2,17 +2,44 @@
    Wiki Cueillette Québec — édition Memphis
    Thème docsify : palette automne/terre, typo Fredoka (titres) + Inter,
    code JetBrains Mono. Aligné sur l'identité visuelle de l'app.
+
+   MOBILE-FIRST : l'app est une PWA de téléphone, le wiki suit.
+   Points de rupture calqués sur docsify-themeable :
+     - tiroir/sidebar  : max-width 47.99em (767.84px) — MÊME valeur que le thème
+     - très petit écran : max-width 26.25em (420px)
    ===================================================================== */
 :root{
   --noir:#241A0F; --creme:#F3E8D5; --blanc:#FDF6E7;
   --ambre:#D9A441; --rouille:#B45309; --terracotta:#B94527;
   --olive:#6F8F3E; --cuir:#8A5A2B; --rouge:#B3261E; --gris:#A89882;
+
+  /* --- Variables du thème (docsify-themeable) ---
+     IMPORTANT : le tiroir mobile s'ouvre via translateX(var(--sidebar-width))
+     alors que sa position fermée est relative à sa LARGEUR. Coder
+     `.sidebar{width:300px}` en dur sans régler --sidebar-width laissait
+     28px du tiroir hors écran (mobile ET desktop). On pilote la variable. */
+  --sidebar-width:300px;
+
+  /* Bouton tiroir : cible tactile ≥44px, style Memphis (voir .sidebar-toggle) */
+  --sidebar-toggle-width:44px;
+  --sidebar-toggle-height:44px;
+  --sidebar-toggle-offset-top:14px;
+  --sidebar-toggle-offset-left:0;
+  --sidebar-toggle-icon-width:20px;
+  --sidebar-toggle-icon-height:12px;
+  --sidebar-toggle-icon-stroke-width:2px;
+  --sidebar-toggle-icon-color:var(--noir);
+  --sidebar-toggle-border-width:0;
+
+  /* Blocs de code : le padding vit sur le <code> interne (évite le double
+     padding pre + code qui mangeait ~42px de large sur mobile). */
+  --code-block-padding:1.6em 1.3em 1.3em;
 }
 html{scroll-behavior:smooth}
 body{background:var(--blanc);color:var(--noir);font-family:'Inter',system-ui,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
 
 /* ---------- Sidebar ---------- */
-.sidebar{background:var(--creme);border-right:3px solid var(--noir);width:300px}
+.sidebar{background:var(--creme);border-right:3px solid var(--noir)}
 .sidebar .app-name{border-bottom:3px solid var(--noir);background:var(--ambre);padding:14px 12px}
 .sidebar .app-name-link{color:var(--noir)}
 .sidebar .brand{display:flex;align-items:center;gap:11px}
@@ -28,40 +55,181 @@ body{background:var(--blanc);color:var(--noir);font-family:'Inter',system-ui,san
 .sidebar ul li a:hover{color:var(--terracotta);border-left-color:var(--rouille);background:color-mix(in srgb,var(--ambre) 22%,transparent)}
 .sidebar ul li.active>a{color:var(--terracotta);border-left-color:var(--terracotta);font-weight:700;background:color-mix(in srgb,var(--ambre) 30%,transparent)}
 .sidebar ul li.active>a span{color:var(--terracotta) !important}
-.sidebar-toggle{background:var(--blanc);border:2px solid var(--noir);border-radius:0 10px 10px 0;color:var(--noir)}
+
+/* ---------- Bouton tiroir ----------
+   .sidebar-toggle est une bande cliquable (le thème l'étire top:0→bottom:0).
+   Elle doit rester TRANSPARENTE : c'est .sidebar-toggle-button qui est visible.
+   (Avant : la bande entière était peinte en crème → bandeau pleine hauteur sur
+   mobile et voile opaque masquant tout le contenu quand le tiroir s'ouvrait.) */
+.sidebar-toggle{background:transparent;border:0;padding:0}
+.sidebar-toggle .sidebar-toggle-button{
+  background:var(--ambre);color:var(--noir);
+  border:2px solid var(--noir);border-radius:0 12px 12px 0;
+  box-shadow:2px 2px 0 color-mix(in srgb,var(--noir) 22%,transparent);
+}
 
 /* ---------- Contenu ---------- */
-.markdown-section{padding:38px 30px;font-size:16px}
-.markdown-section h1{font-family:'Fredoka';font-size:2.05em;font-weight:600;color:var(--noir);border-bottom:3px solid var(--ambre);padding-bottom:12px;margin:0 0 20px;letter-spacing:.2px}
-.markdown-section h2{font-family:'Fredoka';font-weight:600;color:var(--terracotta);border-left:6px solid var(--ambre);padding-left:14px;margin:34px 0 14px;font-size:1.5em}
-.markdown-section h3{font-family:'Fredoka';font-weight:600;color:var(--noir);margin:26px 0 10px;font-size:1.22em}
+.markdown-section{padding:38px 30px;font-size:16px;overflow-wrap:break-word}
+.markdown-section h1{font-family:'Fredoka';font-size:2.05em;font-weight:600;color:var(--noir);border-bottom:3px solid var(--ambre);padding-bottom:12px;margin:0 0 20px;letter-spacing:.2px;overflow-wrap:break-word}
+.markdown-section h2{font-family:'Fredoka';font-weight:600;color:var(--terracotta);border-left:6px solid var(--ambre);padding-left:14px;margin:34px 0 14px;font-size:1.5em;overflow-wrap:break-word}
+.markdown-section h3{font-family:'Fredoka';font-weight:600;color:var(--noir);margin:26px 0 10px;font-size:1.22em;overflow-wrap:break-word}
 .markdown-section h4{font-family:'Fredoka';font-weight:600;color:var(--cuir);margin:20px 0 8px}
 .markdown-section p{margin:12px 0}
-.markdown-section a{color:var(--terracotta);font-weight:600;text-decoration:underline;text-decoration-color:var(--ambre);text-underline-offset:3px;transition:color .15s}
+/* URL nues : cassables partout, sinon elles sortent du cadre sur mobile */
+.markdown-section a{color:var(--terracotta);font-weight:600;text-decoration:underline;text-decoration-color:var(--ambre);text-underline-offset:3px;transition:color .15s;overflow-wrap:anywhere}
 .markdown-section a:hover{color:var(--rouille);text-decoration-color:var(--rouille)}
 
-/* ---------- Tableaux ---------- */
-.markdown-section table{border-collapse:separate;border-spacing:0;width:100%;margin:22px 0;border:2px solid var(--noir);border-radius:14px;overflow:hidden}
+/* ---------- Tableaux ----------
+   Le thème pose display:block + overflow:auto ; le `overflow:hidden` qu'on
+   utilisait pour arrondir les coins COUPAIT les colonnes larges sans aucun
+   moyen de les atteindre (jusqu'à 257px de contenu invisible à 320px).
+   → overflow-x:auto : coins toujours arrondis, mais le tableau défile. */
+.markdown-section table{
+  display:block;width:100%;margin:22px 0;
+  border-collapse:separate;border-spacing:0;
+  border:2px solid var(--noir);border-radius:14px;
+  overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+}
+.markdown-section table::-webkit-scrollbar{height:7px}
+.markdown-section table::-webkit-scrollbar-thumb{background:var(--rouille);border-radius:4px}
+.markdown-section table::-webkit-scrollbar-track{background:color-mix(in srgb,var(--ambre) 25%,transparent)}
 .markdown-section table th{background:var(--ambre);color:var(--noir);font-family:'Fredoka';font-weight:600;border:1px solid var(--noir);padding:10px 12px;text-align:left}
 .markdown-section table td{border:1px solid var(--noir);padding:9px 12px;background:var(--blanc)}
 .markdown-section table tr:nth-child(even) td{background:color-mix(in srgb,var(--creme) 50%,var(--blanc))}
 .markdown-section table tr:hover td{background:color-mix(in srgb,var(--ambre) 20%,var(--blanc))}
+/* Desktop : `display:block` (thème) crée une table anonyme en shrink-to-fit,
+   d'où un vide à droite de l'en-tête ambré (défaut préexistant). Au-dessus de
+   768px la place ne manque pas → vraie table qui remplit la colonne. */
+@media (min-width:48em){
+  .markdown-section table{display:table;table-layout:auto}
+}
 
 /* ---------- Code ---------- */
 .markdown-section code{background:var(--creme);color:var(--noir);border-radius:6px;padding:2px 6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.88em}
-.markdown-section pre{background:var(--noir);border:2px solid var(--noir);border-radius:12px;padding:14px 16px;box-shadow:4px 4px 0 color-mix(in srgb,var(--noir) 18%,transparent);overflow-x:auto}
-.markdown-section pre code{background:transparent;color:var(--creme);padding:0;border-radius:0;font-size:.88em}
+/* ATTENTION spécificité : docsify-themeable impose white-space:nowrap via
+   `code:not([class*=lang-]):not([class*=language-])` (0,3,1). Un simple
+   `.markdown-section code` (0,1,1) NE gagne PAS → le code inline long (URL,
+   extraits de sw.js dans les audits) sortait du cadre de 39 à 636px et se
+   faisait rogner par <main> (overflow:hidden). On reprend le même sélecteur. */
+.markdown-section code:not([class*=lang-]):not([class*=language-]){
+  white-space:normal;overflow-wrap:anywhere;word-break:break-word;
+}
+.markdown-section pre{background:var(--noir);border:2px solid var(--noir);border-radius:12px;box-shadow:4px 4px 0 color-mix(in srgb,var(--noir) 18%,transparent);overflow:hidden;padding:14px 16px}
+/* pre[data-lang] : padding délégué au <code> interne (qui, lui, défile) */
+.markdown-section pre[data-lang]{padding:0}
+.markdown-section pre code{background:transparent;color:var(--creme);border-radius:0;font-size:.88em;white-space:pre}
+.markdown-section pre[data-lang] code{padding:var(--code-block-padding)}
+/* Blocs sans langue (```) : le thème ne les rend pas défilables, on le fait. */
+.markdown-section pre:not([data-lang])>code{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 
 /* ---------- Encadrés (blockquote = callouts) ---------- */
-.markdown-section blockquote{border:0;border-left:6px solid var(--terracotta);background:var(--creme);border-radius:0 12px 12px 0;padding:14px 18px;margin:20px 0}
+.markdown-section blockquote{border:0;border-left:6px solid var(--terracotta);background:var(--creme);border-radius:0 12px 12px 0;padding:14px 18px;margin:20px 0;overflow-wrap:break-word}
 .markdown-section blockquote p{color:var(--noir);margin:0 0 4px}
 .markdown-section blockquote p:last-child{margin-bottom:0}
 
 /* ---------- Divers ---------- */
 .markdown-section hr{border:none;border-top:3px dashed var(--ambre);margin:32px 0}
-.markdown-section img{border:2px solid var(--noir);border-radius:12px;box-shadow:4px 4px 0 color-mix(in srgb,var(--noir) 20%,transparent)}
+.markdown-section img{max-width:100%;height:auto;border:2px solid var(--noir);border-radius:12px;box-shadow:4px 4px 0 color-mix(in srgb,var(--noir) 20%,transparent)}
 .markdown-section ul>li::marker,.markdown-section ol>li::marker{color:var(--rouille)}
 .markdown-section .emoji{filter:none}
+
+/* =====================================================================
+   MOBILE : tiroir, densité, cibles tactiles  (≤ 47.99em = 767.84px,
+   valeur exacte du point de rupture de docsify-themeable)
+   ===================================================================== */
+@media (max-width:47.99em){
+  :root{
+    /* Le tiroir ne prend jamais toute la largeur : 85vw max (272px à 320px) */
+    --sidebar-width:min(300px,85vw);
+    --sidebar-padding:0 20px;
+    /* marges négatives du thème alignées sur le nouveau padding */
+    --sidebar-nav-link-margin:0 -20px 0 0;
+    --sidebar-nav-strong-margin:2em -20px .75em 0;
+    --search-input-margin:0 -20px;
+    /* Cibles tactiles : 0.6em + line-height 1.8 → ≈48px de haut */
+    --sidebar-nav-link-padding:.6em 0;
+    --sidebar-nav-pagelink-padding:.6em 0 .6em 22px;
+    /* Champ de recherche : 16px évite le zoom automatique iOS */
+    --search-input-font-size:16px;
+    --search-input-padding:.85em 1em .85em 46px;
+    --search-input-background-position:16px center;
+    /* Bouton tiroir positionné par nos règles ci-dessous */
+    --sidebar-toggle-offset-top:5px;
+    --sidebar-toggle-offset-left:8px;
+    --code-block-padding:2em 1em 1em;
+  }
+  /* Les titres/ancres ne doivent pas atterrir sous la barre fixe */
+  html{scroll-padding-top:66px}
+
+  /* --- Tiroir --- */
+  .sidebar{width:var(--sidebar-width);max-width:85vw;box-shadow:6px 0 0 color-mix(in srgb,var(--noir) 12%,transparent)}
+  .sidebar .brand-title{font-size:18px}
+  .sidebar .search input{min-height:44px}
+  /* liens : garantie plancher de 44px même si la police tombe en fallback */
+  .sidebar ul li a{min-height:44px;padding-left:12px}
+
+  /* --- Bouton tiroir : vraie cible 48×48 quand fermé --- */
+  /* --- Barre d'en-tête d'app : .sidebar-toggle occupe toute la largeur.
+         Un simple bouton flottant 48×48 recouvrait le début du h1 et chaque
+         ligne défilant dessous (il est position:fixed). En barre OPAQUE, le
+         texte passe proprement dessous et la cible tactile devient énorme. --- */
+  .sidebar-toggle{
+    top:0;bottom:auto;left:0;width:100%;max-width:none;height:54px;
+    background:var(--creme);border-bottom:3px solid var(--noir);
+  }
+  /* --- Quand le tiroir est ouvert (body.close), docsify transforme ce bouton
+         en bande plein écran : on s'en sert comme VOILE semi-transparent
+         (tap n'importe où pour fermer) au lieu d'un panneau crème opaque. --- */
+  body.close .sidebar-toggle{top:0;bottom:0;height:auto;width:100%;max-width:none;background:color-mix(in srgb,var(--noir) 42%,transparent)}
+  body.close .sidebar-toggle .sidebar-toggle-button{border-radius:12px;box-shadow:2px 2px 0 color-mix(in srgb,var(--noir) 35%,transparent)}
+
+  /* --- Densité du contenu : on récupère 28px de largeur utile --- */
+  .markdown-section{padding:70px 16px 24px;font-size:15px;line-height:1.65}
+  /* Titres fluides : jamais écrasés à 320px, jamais démesurés à 767px.
+     320px → h1 21.8px / h2 18px ; 390px → h1 24.2px / h2 18px ; 767px → h1 27px. */
+  .markdown-section h1{font-size:clamp(1.45em,6.2vw,1.8em);padding-bottom:10px;margin:0 0 16px}
+  .markdown-section h2{font-size:clamp(1.2em,4.6vw,1.35em);margin:26px 0 12px;padding-left:11px;border-left-width:5px}
+  .markdown-section h3{font-size:1.12em;margin:20px 0 8px}
+  .markdown-section h4{margin:16px 0 6px}
+  .markdown-section p{margin:10px 0}
+  .markdown-section ul,.markdown-section ol{padding-left:1.15rem}
+  .markdown-section hr{margin:24px 0}
+
+  /* --- Tableaux : cellules assez larges pour rester lisibles, le tableau
+         défile latéralement au lieu d'être écrasé ou coupé. --- */
+  .markdown-section table{margin:16px 0}
+  .markdown-section table th{padding:8px 10px;min-width:6.5em}
+  .markdown-section table td{padding:8px 10px;min-width:6.5em}
+
+  /* --- Code : étiquette de langue masquée (place), bouton Copier toujours
+         visible car il n'y a pas de :hover au doigt. --- */
+  .markdown-section pre{margin:14px 0;box-shadow:3px 3px 0 color-mix(in srgb,var(--noir) 18%,transparent)}
+  .markdown-section pre:not([data-lang]){padding:12px 12px}
+  .markdown-section pre[data-lang]::after{display:none}
+  body .docsify-copy-code-button{opacity:1;font-size:12px;padding:4px 8px}
+
+  /* --- Callouts --- */
+  .markdown-section blockquote{padding:12px 14px;margin:16px 0;border-left-width:5px}
+
+  /* --- Pagination : cibles tactiles --- */
+  body .docsify-pagination-container{margin:24px 0 0}
+  body .pagination-item{min-height:44px}
+  body .pagination-item a{display:block;min-height:44px;padding:6px 0}
+  body .pagination-item-title{font-size:1em}
+}
+
+/* ---------- Très petits écrans (≤420px : iPhone SE, 320px) ---------- */
+@media (max-width:26.25em){
+  :root{--code-block-padding:1.9em .8em .9em}
+  .markdown-section{padding:68px 12px 20px}
+  .markdown-section h2{padding-left:9px}
+  .markdown-section h3{font-size:1.08em}
+  .markdown-section table th,.markdown-section table td{padding:7px 9px;min-width:5.75em}
+  .markdown-section blockquote{padding:10px 12px}
+  .sidebar .brand-title{font-size:17px}
+  .sidebar .brand-tag{font-size:9.5px}
+}
 
 /* ---------- Mode sombre ---------- */
 @media (prefers-color-scheme:dark){
@@ -77,6 +245,7 @@ body{background:var(--blanc);color:var(--noir);font-family:'Inter',system-ui,san
   .sidebar ul li a:hover{color:#F3E8D5;background:#33271a;border-left-color:#F3E8D5}
   .sidebar ul li.active>a{color:#F3E8D5;background:color-mix(in srgb,var(--ambre) 22%,transparent)}
   .sidebar ul li.active>a span{color:#F3E8D5 !important}
+  .sidebar-toggle .sidebar-toggle-button{background:#6b4a12;color:#F3E8D5;border-color:#F3E8D5}
   .markdown-section h1{color:#F3E8D5;border-bottom-color:var(--ambre)}
   .markdown-section h2{color:#F3E8D5}
   .markdown-section h3{color:#F3E8D5}
@@ -84,4 +253,17 @@ body{background:var(--blanc);color:var(--noir);font-family:'Inter',system-ui,san
   .markdown-section code{background:#33271a;color:#F3E8D5}
   .markdown-section pre{background:#0f0a06}
   .markdown-section blockquote{background:#33271a}
+  .markdown-section table td{background:#1a130c}
+  .markdown-section table th{background:#6b4a12;color:#F3E8D5}
+  .markdown-section table tr:nth-child(even) td{background:#241A0F}
+  .markdown-section table::-webkit-scrollbar-thumb{background:var(--ambre)}
+  @media (max-width:47.99em){
+    body.close .sidebar-toggle{background:rgba(0,0,0,.55)}
+  }
+}
+
+/* ---------- Accessibilité : mouvement réduit ---------- */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .sidebar,.sidebar-toggle,.content{transition:none !important}
 }
