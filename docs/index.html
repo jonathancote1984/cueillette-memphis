@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cueillette Québec — Wiki</title>
+  <meta name="description" content="Documentation du carnet de cueillette de champignons du Québec : installation, fonctionnalités, identification, sécurité, déploiement.">
+
+  <!-- Favicon : icône de l'app (fichier local, aucune dépendance externe) -->
+  <link rel="icon" type="image/png" href="../icons/icon-192.png">
+  <link rel="apple-touch-icon" href="../icons/icon-192.png">
+  <!-- Couleur d'interface alignée sur la palette ambre de l'app -->
+  <meta name="theme-color" content="#D9A441" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#241A0F" media="(prefers-color-scheme: dark)">
+
+  <!-- Perf : préconnexion vers le CDN unique + polices web -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+
+  <!-- Thème UNIQUE : docsify-themeable (variante "simple") -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-defaults.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
+
+  <!-- Finitions locales : typo, tableaux, code, sidebar, palette ambre, mode sombre -->
+  <link rel="stylesheet" href="assets/custom.css">
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    window.$docsify = {
+      // Marque de la sidebar (HTML accepté dans `name`)
+      name: '<span class="brand">'
+          + '<img class="brand-logo" src="../icons/icon-192.png" width="38" height="38" alt="">'
+          + '<span class="brand-text">'
+          + '<span class="brand-title">Cueillette Québec</span>'
+          + '<span class="brand-tag">carnet de champignons</span>'
+          + '</span></span>',
+      repo: '',
+      loadSidebar: true,        // _sidebar.md
+      coverpage: false,         // accueil = sommaire (convention du propriétaire)
+      subMaxLevel: 3,           // titres jusqu'au niveau 3 dans la sidebar
+      maxLevel: 4,
+      auto2top: true,
+      notFoundPage: true,       // page 404 intégrée (aucune dépendance)
+      themeColor: '#D9A441',    // accent ambre (aligné sur assets/custom.css)
+      nativeEmoji: true,        // emoji Unicode natifs : zéro requête vers le CDN twemoji
+      search: {
+        placeholder: 'Rechercher...',
+        paths: 'auto',
+        maxAge: 86400000,
+        depth: 6
+      },
+      copyCode: {
+        buttonText: 'Copier',
+        errorText: 'Erreur',
+        successText: 'Copié !'
+      },
+      pagination: {
+        previousText: 'PRÉCÉDENT',
+        nextText: 'SUIVANT',
+        crossChapter: true
+      }
+    };
+  </script>
+
+  <!-- Docsify core + plugins. defer : ordre d'exécution préservé (avant DOMContentLoaded). -->
+  <script defer src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-ini.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/emoji.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2/dist/docsify-copy-code.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/docsify-pagination@2/dist/docsify-pagination.min.js"></script>
+</body>
+</html>

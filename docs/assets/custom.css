@@ -1,0 +1,75 @@
+/* ===== Thème wiki Cueillette Québec — édition Memphis ===== */
+/* Palette de l'app (automne/terre) : ambre #D9A441, rouille #B45309,
+   terracotta #B94527, olive #6F8F3E, cuir #8A5A2B, crème #F3E8D5,
+   blanc chaud #FDF6E7, noir #241A0F. */
+
+:root {
+  --accent: #B94527;
+  --accent-2: #B45309;
+  --brand: #D9A441;
+  --noir: #241A0F;
+  --creme: #F3E8D5;
+  --blanc: #FDF6E7;
+  --olive: #6F8F3E;
+  --cuir: #8A5A2B;
+  --vraie: #B3261E;
+}
+
+/* ---------- Typographie ---------- */
+body { font-family: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif; }
+h1, h2, h3, h4, h5, h6,
+.sidebar .app-name, .sidebar .app-name a {
+  font-family: 'Fredoka', 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+code, pre, .markdown-section pre, .markdown-section code {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ---------- Couleur d'accent (afin de respecter le thème) ---------- */
+.theme-simple .sidebar { --sidebar-nav-link-color: var(--noir); }
+.theme-simple .sidebar li.active > a,
+.theme-simple .sidebar li.active > a span { color: var(--accent) !important; }
+.sidebar ul { line-height: 1.6; }
+.sidebar li a:hover { color: var(--accent-2); }
+.app-name-link { color: var(--noir); }
+.sidebar .brand-tag { font-size: 11.5px; opacity: .65; color: var(--noir); }
+.sidebar .brand-logo { border-radius: 8px; margin-right: 8px; vertical-align: -10px; }
+
+/* ---------- En-têtes ---------- */
+.markdown-section h1 { border-bottom: 3px solid var(--noir); padding-bottom: 6px; }
+.markdown-section h2 { color: var(--noir); border-left: 4px solid var(--brand); padding-left: 10px; }
+.markdown-section a { color: var(--accent); font-weight: 500; }
+.markdown-section a:hover { color: var(--accent-2); }
+
+/* ---------- Tableaux ---------- */
+.markdown-section table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+.markdown-section table th {
+  background: var(--creme); color: var(--noir);
+  border: 1px solid var(--noir); padding: 8px 12px; font-weight: 700;
+}
+.markdown-section table td { border: 1px solid var(--noir); padding: 8px 12px; }
+.markdown-section table tr:nth-child(even) td { background: color-mix(in srgb, var(--creme) 45%, white); }
+
+/* ---------- Code ---------- */
+.markdown-section pre { background: var(--noir); color: var(--blanc); border-radius: 8px; border: 2px solid var(--noir); }
+.markdown-section code { background: var(--creme); color: var(--noir); }
+.markdown-section pre code { color: var(--blanc); background: transparent; }
+
+/* ---------- Blocs d'alerte / citations ---------- */
+.markdown-section blockquote {
+  border-left: 4px solid var(--accent-2);
+  background: var(--creme); border-radius: 0 8px 8px 0; padding: 10px 14px;
+}
+.markdown-section .emoji { filter: none; }
+
+/* ---------- Mode sombre ---------- */
+@media (prefers-color-scheme: dark) {
+  :root { --noir: #F3E8D5; --creme: #241A0F; --blanc: #1a130c; }
+  .theme-simple .sidebar { background: #1a130c; }
+  .markdown-section h1, .markdown-section h2,
+  .sidebar .app-name-link, .markdown-section table th { color: #F3E8D5; }
+  .markdown-section table th { background: #2a2015; border-color: #F3E8D5; }
+  .markdown-section table td { border-color: #F3E8D5; }
+}
