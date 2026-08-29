@@ -30,6 +30,16 @@ C'est **entièrement optionnel** : l'app fonctionne très bien sans.
 > 🔒 **Votre clé reste sur votre téléphone.** Elle n'est envoyée qu'à Google (jamais ailleurs),
 > et elle **n'est pas incluse** dans les sauvegardes (export/import).
 
+### 🌐 Choisir son fournisseur
+
+Dans **⚙️ Paramètres → 🤖 Fournisseur d'IA**, vous pouvez choisir le service qui identifie et rédige :
+
+- **🇬 Google Gemini** *(par défaut)* — le meilleur rapport qualité/prix, tout-en-un, avec une clé gratuite.
+- **🌐 OpenRouter** — une seule clé pour **de nombreux modèles**, dont des **gratuits** (`:free`). Clé à créer sur **openrouter.ai**.
+
+> Les **illustrations par IA restent sur Gemini** (plus fiables sur les détails anatomiques).
+> Vous pouvez changer de fournisseur à tout moment, sans toucher à vos données.
+
 ## 🧭 Utiliser l'IA
 
 ### Identifier par photo
