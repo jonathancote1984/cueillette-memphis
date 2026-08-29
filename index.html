@@ -493,6 +493,11 @@ h2.titre-vue .ico{font-size:20px;}
       <button class="btn btn-bleu btn-plein" id="p-credits">📸 Voir les crédits</button>
     </div>
     <div class="carte">
+      <h3 style="margin:0 0 10px">📖 Documentation (wiki)</h3>
+      <p class="note" style="margin-bottom:8px">Mode d'emploi complet, guide d'identification, sécurité alimentaire et déploiement du carnet.</p>
+      <button class="btn btn-jaune btn-plein" id="p-wiki">📖 Ouvrir le wiki</button>
+    </div>
+    <div class="carte">
       <h3 style="margin:0 0 10px">🍄 Comment identifier</h3>
       <p class="note" style="margin-bottom:8px">Chaque fiche du guide propose une checklist de <b>spécificités à repérer</b> (chapeau, lames, pied, odeur, habitat). Cochez chaque critère sur le champignon réel avant de décider.</p>
       <div style="font-size:13.5px;line-height:1.7">
@@ -2939,6 +2944,7 @@ function rendreCredits() {
   });
 }
 $('p-credits').addEventListener('click', () => { rendreCredits(); ouvrirFeuille('sheet-credits'); });
+$('p-wiki').addEventListener('click', () => window.open('docs/', '_blank', 'noopener'));
 $('credits-fermer').addEventListener('click', fermerFeuilles);
 
 /* ================= Chargement ================= */
