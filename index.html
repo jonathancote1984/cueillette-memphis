@@ -2065,7 +2065,8 @@ $('e-save').addEventListener('click', async () => {
   // Demande utilisateur (2026-08) : nouvelle variété AVEC photo → proposer de générer les illustrations manquantes
   if (photoEspece && !editEspeceId) {
     const ent = Etat.illustrations[esp.id] || { id: esp.id, items: specsDefautPour(esp.id) };
-    if (ent.items.some(x => !x.img) && await confirmer('🎨 Générer les illustrations des ' + ent.items.filter(x => !x.img).length + ' spécificités manquantes ? (IA → MycoQuébec → Wikimedia)', '🎨 Illustrations')) {
+    const aGen = ent.items.filter(x => !x.img && !specSansPhoto(x.spec)).length;
+    if (aGen > 0 && await confirmer('🎨 Générer les illustrations des ' + aGen + ' spécificités manquantes ? (IA → MycoQuébec → Wikimedia)', '🎨 Illustrations')) {
       ouvrirSheetIllu(esp.id);
       $('illu-toutes').click();
     }
@@ -2189,7 +2190,13 @@ async function chercherPhotoSpec(terme, limit) {
       !/map|diagram|chart|stamp|coin|poster|flora|illust|drawing|painting|tab\.|pl\./i.test(ii.descriptionurl || ''))
     .sort((a, b) => b.width - a.width)[0] || null;
 }
+/* Critères qui ne se photographient pas (odeur/saveur/goût) : la génération d'image est désactivée
+   pour eux — on garde seulement la description. Modifiez ici pour en exclure d'autres. */
+function specSansPhoto(spec) {
+  return /odeur|saveur|goût|gout|parfum|flaveur/i.test(spec || '');
+}
 async function illustrerSpec(e, it) {
+  if (specSansPhoto(it.spec)) throw new Error('CRITERE_SANS_IMAGE');
   const base = (e.latin || '').trim() || (e.nom || '').trim();
   const mots = motsWikiPour(it.spec);
   const ordre = (Etat.ordreImages || 'ia,myco,wikimedia').split(',');
@@ -2491,7 +2498,9 @@ function rendreListeIllu() {
     '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;flex-wrap:wrap">' +
     '<span style="font-weight:700;font-size:13.5px;flex:1">' + esc(it.spec) + '</span>' +
     '<button class="btn btn-rouge btn-petit" onclick="retirerIllu(' + i + ')">✖️</button>' +
-    '<button class="btn btn-jaune btn-petit" onclick="genererIllu(' + i + ', this)">' + (it.img ? '🔄 Refaire' : '🎨 Générer') + '</button>' +
+    (specSansPhoto(it.spec)
+      ? '<span style="font-size:11.5px;opacity:.7;font-style:italic">(non illustrable — description seule)</span>'
+      : '<button class="btn btn-jaune btn-petit" onclick="genererIllu(' + i + ', this)">' + (it.img ? '🔄 Refaire' : '🎨 Générer') + '</button>') +
     '</div>' +
     (it.img ? '<img src="' + it.img + '" style="width:100%;display:block;border-top:3px solid var(--noir)" alt="' + esc(it.spec) + '">' : '') +
     (it.desc ? '<div style="padding:8px 10px;font-size:12.5px;opacity:.85;line-height:1.5">' + esc(it.desc) + '</div>' : '') +
@@ -2554,10 +2563,10 @@ $('illu-toutes').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = '⏳ Génération en cours…';
   const e = toutesEspeces().find(x => x.id === illuEspeceId); if (!e) { btn.disabled = false; btn.textContent = '✨ Générer les manquantes'; return; }
   const ent = Etat.illustrations[illuEspeceId] || { id: illuEspeceId, items: [] };
-  const manquantes = ent.items.filter(x => !x.img);
-  if (!manquantes.length) { btn.disabled = false; btn.textContent = '✨ Générer les manquantes'; toast('Toutes les spécificités ont déjà une image ✨'); return; }
+  const manquantes = ent.items.filter(x => !x.img && !specSansPhoto(x.spec));
+  if (!manquantes.length) { btn.disabled = false; btn.textContent = '✨ Générer les manquantes'; toast('Aucune spécificité photo à générer ✨'); return; }
   for (let i = 0; i < ent.items.length; i++) {
-    if (ent.items[i].img) continue;
+    if (ent.items[i].img || specSansPhoto(ent.items[i].spec)) continue;
     toast('🎨 Génération ' + (i + 1) + '/' + ent.items.length + ' : ' + ent.items[i].spec + '…');
     try {
       const res = await illustrerSpec(e, ent.items[i]);
